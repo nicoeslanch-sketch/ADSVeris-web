@@ -1327,18 +1327,18 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
 }
 
 /* ── HERO CAROUSEL ──────────────────────────────────── */
-.hero-carousel { padding: 60px 0 40px; }
-.hero-intro { padding-bottom: 48px; }
+.hero-carousel { padding: 60px 0 36px; }
+.hero-intro { padding-bottom: 40px; }
 .hero-carousel .hero-socials { margin-bottom: 20px; }
-.hero-carousel h1 { max-width: 720px; }
-.hero-carousel .hero-lead { max-width: 620px; }
-.hero-carousel .hero-summary { max-width: 620px; margin-bottom: 0; }
+.hero-carousel h1 { max-width: 700px; }
+.hero-carousel .hero-lead { max-width: 600px; }
+.hero-carousel .hero-summary { max-width: 600px; margin-bottom: 0; }
 
 /* Apila todos los slides en la misma celda de grid */
 .carousel-viewport {
   position: relative;
   display: grid;
-  overflow: hidden;
+  overflow: visible;
 }
 .carousel-slide {
   grid-area: 1 / 1;
@@ -1353,31 +1353,33 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   visibility: visible;
 }
 
-/* Layout interno de cada slide: texto izquierda | imagen derecha */
+/* Layout dos columnas: texto izquierda | imagen grande derecha */
 .carousel-layout {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 48px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 40px;
   align-items: center;
-  padding: 32px 0 56px;
-  min-height: 420px;
+  padding: 20px 0 52px;
+  min-height: clamp(580px, 68vh, 720px);
 }
+
+/* Columna de texto */
 .carousel-copy {
   display: flex;
   flex-direction: column;
 }
 .carousel-service { margin-bottom: 14px; }
 .carousel-heading {
-  font-size: clamp(1.5rem, 2.8vw, 2.3rem);
+  font-size: clamp(1.6rem, 2.8vw, 2.5rem);
   letter-spacing: -0.03em;
   line-height: 1.1;
   margin-bottom: 18px;
-  max-width: 580px;
+  max-width: 540px;
 }
 .carousel-desc {
   font-size: 1rem;
   color: var(--muted);
-  max-width: 500px;
+  max-width: 480px;
   line-height: 1.68;
   margin-bottom: 28px;
 }
@@ -1392,39 +1394,40 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   pointer-events: none;
 }
 
-/* Imagen del slide */
+/* Columna de imagen — protagonista grande */
 .carousel-visual {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
+  height: clamp(440px, 55vw, 580px);
 }
 .carousel-img-wrap {
   width: 100%;
-  max-width: 460px;
-  border-radius: 20px;
+  height: 100%;
+  border-radius: 24px;
   overflow: hidden;
   position: relative;
   box-shadow:
-    0 32px 72px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(199, 168, 106, 0.1);
-  background: var(--bg-deep);
+    0 40px 90px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(199, 168, 106, 0.14);
+  background: radial-gradient(ellipse at 60% 40%, rgba(30, 72, 110, 0.7), rgba(10, 22, 38, 0.9));
 }
 .carousel-img-wrap::after {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: 20px;
+  border-radius: 24px;
   background:
-    linear-gradient(180deg, transparent 52%, rgba(6, 18, 34, 0.6)),
-    linear-gradient(135deg, rgba(199, 168, 106, 0.06), transparent 52%);
+    linear-gradient(180deg, transparent 60%, rgba(6, 16, 32, 0.42)),
+    linear-gradient(90deg, rgba(6, 16, 32, 0.16), transparent 28%);
   pointer-events: none;
 }
 .carousel-img-wrap img {
   width: 100%;
-  height: 360px;
-  object-fit: cover;
+  height: 100%;
+  object-fit: contain;
   display: block;
-  filter: saturate(0.88) contrast(1.04);
+  filter: saturate(0.92) contrast(1.03);
 }
 
 /* Flechas de navegación */
@@ -1432,8 +1435,8 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(10, 22, 38, 0.75);
-  border: 1px solid rgba(199, 168, 106, 0.28);
+  background: rgba(10, 22, 38, 0.78);
+  border: 1px solid rgba(199, 168, 106, 0.3);
   color: var(--gold);
   width: 46px;
   height: 46px;
@@ -1446,11 +1449,11 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   justify-content: center;
   transition: background 0.2s, border-color 0.2s, transform 0.2s;
   z-index: 10;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
 }
 .carousel-arrow:hover {
-  background: rgba(199, 168, 106, 0.16);
-  border-color: rgba(199, 168, 106, 0.5);
+  background: rgba(199, 168, 106, 0.18);
+  border-color: rgba(199, 168, 106, 0.55);
   transform: translateY(calc(-50% - 2px));
 }
 .carousel-prev { left: 14px; }
@@ -1488,19 +1491,21 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   .carousel-layout {
     grid-template-columns: 1fr;
     gap: 28px;
-    padding: 28px 0 44px;
+    padding: 20px 0 44px;
     min-height: auto;
   }
-  .carousel-visual { justify-content: flex-start; }
-  .carousel-img-wrap { max-width: 100%; }
+  .carousel-visual {
+    justify-content: flex-start;
+    height: clamp(300px, 52vw, 420px);
+  }
 }
 @media (max-width: 760px) {
   .hero-carousel { padding: 40px 0 24px; }
   .hero-intro { padding-bottom: 28px; }
   .carousel-layout { padding: 16px 0 36px; gap: 18px; }
-  .carousel-img-wrap img { height: 240px; }
+  .carousel-visual { height: clamp(220px, 58vw, 320px); }
   .carousel-prev { left: 6px; }
   .carousel-next { right: 6px; }
   .carousel-arrow { width: 38px; height: 38px; font-size: 1.6rem; }
-  .carousel-heading { font-size: clamp(1.3rem, 5vw, 1.8rem); }
+  .carousel-heading { font-size: clamp(1.3rem, 5vw, 1.9rem); }
 }
