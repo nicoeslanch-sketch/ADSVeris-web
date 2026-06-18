@@ -1327,12 +1327,8 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
 }
 
 /* ── HERO CAROUSEL ──────────────────────────────────── */
-.hero-carousel { padding: 60px 0 36px; }
-.hero-intro { padding-bottom: 40px; }
-.hero-carousel .hero-socials { margin-bottom: 20px; }
-.hero-carousel h1 { max-width: 700px; }
-.hero-carousel .hero-lead { max-width: 600px; }
-.hero-carousel .hero-summary { max-width: 600px; margin-bottom: 0; }
+.hero-carousel { padding: 40px 0 36px; }
+.hero-carousel .hero-socials { margin-bottom: 24px; }
 
 /* Apila todos los slides en la misma celda de grid */
 .carousel-viewport {
