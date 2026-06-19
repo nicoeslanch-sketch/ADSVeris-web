@@ -2343,8 +2343,9 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   color: #edf3fb;
 }
 /* Visual column */
-.excel-visual { position: relative; }
+.excel-visual { position: relative; display: flex; justify-content: center; align-items: flex-start; }
 .excel-img-wrap {
+  display: inline-block;
   position: relative;
   border-radius: 28px;
   overflow: hidden;
@@ -2357,11 +2358,8 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   width: auto;
   height: auto;
   max-width: 100%;
-  max-height: clamp(340px, 44vw, 500px);
-  object-fit: contain;
-  object-position: center center;
+  max-height: clamp(380px, 48vw, 540px);
   display: block;
-  margin: 0 auto;
 }
 /* Excel spreadsheet icon badge */
 .excel-icon-badge {
@@ -2507,7 +2505,7 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   }
   .excel-copy { order: 1; }
   .excel-visual { order: 2; }
-  .excel-main-img { max-height: clamp(260px, 50vw, 400px); }
+  .excel-main-img { max-height: clamp(290px, 54vw, 440px); }
   .excel-tag-1 { bottom: 170px; }
   .excel-tag-2 { bottom: 133px; }
   .excel-tag-3 { bottom: 96px; }
@@ -2516,7 +2514,7 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
 @media (max-width: 520px) {
   .excel-templates-section { padding: 64px 0 68px; }
   .excel-benefits { gap: 8px; }
-  .excel-main-img { max-height: clamp(220px, 68vw, 340px); }
+  .excel-main-img { max-height: clamp(245px, 72vw, 375px); }
   .excel-card-dashboard { min-width: 138px; padding: 9px 11px; }
   .excel-card-label { font-size: 0.63rem; }
   .excel-card-row { font-size: 0.72rem; gap: 10px; }
@@ -2617,8 +2615,9 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   color: #edf3fb;
 }
 /* Visual column */
-.web-visual { position: relative; }
+.web-visual { position: relative; display: flex; justify-content: center; align-items: flex-start; }
 .web-img-wrap {
+  display: inline-block;
   position: relative;
   border-radius: 28px;
   overflow: hidden;
@@ -2632,10 +2631,7 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   height: auto;
   max-width: 100%;
   max-height: clamp(340px, 44vw, 500px);
-  object-fit: contain;
-  object-position: center center;
   display: block;
-  margin: 0 auto;
 }
 /* Browser mockup card */
 .web-browser-mock {
@@ -2821,8 +2817,9 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   border-color: rgba(157, 116, 255, 0.58);
   color: #edf3fb;
 }
-.proc-visual { position: relative; }
+.proc-visual { position: relative; display: flex; justify-content: center; align-items: flex-start; }
 .proc-img-wrap {
+  display: inline-block;
   position: relative;
   border-radius: 28px;
   overflow: hidden;
@@ -2837,10 +2834,7 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   height: auto;
   max-width: 100%;
   max-height: clamp(340px, 44vw, 500px);
-  object-fit: contain;
-  object-position: center center;
   display: block;
-  margin: 0 auto;
 }
 .proc-caption {
   display: flex;
