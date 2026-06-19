@@ -314,7 +314,7 @@ function initHeroCarousel() {
   function startAuto() {
     if (paused) return;
     clearInterval(autoTimer);
-    autoTimer = setInterval(next, 5000);
+    autoTimer = setInterval(next, 3000);
   }
 
   function stopAuto() {
