@@ -1579,8 +1579,8 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   border-color: rgba(247, 199, 95, 0.6);
   transform: translateY(calc(-50% - 2px));
 }
-.carousel-prev { left: max(8px, calc((100vw - 1212px) / 2)); }
-.carousel-next { right: max(8px, calc((100vw - 1212px) / 2)); }
+.carousel-prev { left: max(8px, calc((100vw - 1212px) / 2 - 50px)); }
+.carousel-next { right: max(8px, calc((100vw - 1212px) / 2 - 50px)); }
 
 /* Dots indicadores */
 .carousel-footer {
