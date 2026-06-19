@@ -1876,3 +1876,113 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
     width: 100%;
   }
 }
+
+/* ── WCU SECTION (rewrite simple) ───────────────────────────────────── */
+.wcu-section {
+  padding: 80px 0;
+  background:
+    linear-gradient(rgba(108, 141, 168, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108, 141, 168, 0.07) 1px, transparent 1px),
+    linear-gradient(180deg, #0e2438, #162e46);
+  background-size: 48px 48px, 48px 48px, auto;
+  border-bottom: 1px solid rgba(199, 168, 106, 0.12);
+}
+.wcu-grid {
+  display: flex;
+  gap: 56px;
+  align-items: flex-start;
+}
+.wcu-img-col {
+  flex: 0 0 420px;
+  max-width: 420px;
+}
+.wcu-img-frame {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(139, 214, 205, 0.22);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+  background: #0d1f30;
+}
+.wcu-img-frame img {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.wcu-text-col {
+  flex: 1;
+  min-width: 0;
+}
+.wcu-heading {
+  margin-top: 14px;
+  margin-bottom: 16px;
+  font-size: clamp(1.7rem, 2.8vw, 2.6rem);
+  color: #f4f7fb;
+  line-height: 1.12;
+}
+.wcu-heading .c-gold { color: #f7c75f; }
+.wcu-lead {
+  color: #b7c7d5;
+  margin-bottom: 28px;
+  max-width: 540px;
+  line-height: 1.7;
+}
+.wcu-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.wcu-card {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 18px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(139, 214, 205, 0.2);
+  background: rgba(12, 30, 48, 0.7);
+}
+.wcu-card h3 {
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  color: #eef7fb;
+}
+.wcu-card p {
+  font-size: 0.88rem;
+  color: #96afc4;
+  margin: 0;
+  line-height: 1.55;
+}
+.wcu-card-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(247, 199, 95, 0.3);
+  color: #f7c75f;
+  background: rgba(247, 199, 95, 0.08);
+}
+.wcu-card-icon.wcu-icon-teal {
+  border-color: rgba(139, 214, 205, 0.3);
+  color: #8bd6cd;
+  background: rgba(139, 214, 205, 0.08);
+}
+.wcu-card-icon svg { width: 15px; height: 15px; }
+.wcu-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+@media (max-width: 900px) {
+  .wcu-grid { flex-direction: column; gap: 32px; }
+  .wcu-img-col { flex: none; width: 100%; max-width: 100%; }
+  .wcu-img-frame img { height: 320px; }
+}
+@media (max-width: 540px) {
+  .wcu-cards { grid-template-columns: 1fr; }
+  .wcu-img-frame img { height: 240px; }
+  .wcu-actions .btn { width: 100%; }
+}
