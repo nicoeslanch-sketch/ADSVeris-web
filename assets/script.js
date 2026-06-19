@@ -11,6 +11,9 @@ function getProductBySlug(slug) {
 
 function renderChrome() {
   const page = document.body.dataset.page || "";
+  const inSubfolder = window.location.pathname.includes('/soluciones/');
+  const base = inSubfolder ? '../' : '';
+  const solActive = ['soluciones', 'paginas-web', 'procesos', 'tienda', 'producto'].includes(page);
   const headerHost = document.querySelector("[data-header]");
   const footerHost = document.querySelector("[data-footer]");
 
@@ -18,18 +21,18 @@ function renderChrome() {
     headerHost.innerHTML = `
       <header class="site-header">
         <div class="container header-inner">
-          <a class="brand" href="index.html" aria-label="Ir a inicio">
+          <a class="brand" href="${base}index.html" aria-label="Ir a inicio">
             <span class="brand-mark">
-              <img src="assets/images/logo-ads-veris.png" alt="Logo ADS Veris">
+              <img src="${base}assets/images/logo-ads-veris.png" alt="Logo ADS Veris">
             </span>
             <span class="brand-name">ADS <span>Veris</span></span>
           </a>
           <nav class="main-nav" aria-label="Principal">
-            <a href="index.html" class="${page === "home" ? "active" : ""}">Inicio</a>
-            <a href="tienda.html" class="${page === "tienda" || page === "producto" ? "active" : ""}">Soluciones</a>
-            <a href="plataforma.html" class="${page === "plataforma" ? "active" : ""}">Plataforma</a>
-            <a href="nosotros.html" class="${page === "nosotros" ? "active" : ""}">Nosotros</a>
-            <a href="ayuda.html" class="${page === "ayuda" ? "active" : ""}">Ayuda</a>
+            <a href="${base}index.html" class="${page === "home" ? "active" : ""}">Inicio</a>
+            <a href="${base}soluciones/index.html" class="${solActive ? "active" : ""}">Soluciones</a>
+            <a href="${base}plataforma.html" class="${page === "plataforma" ? "active" : ""}">Plataforma</a>
+            <a href="${base}nosotros.html" class="${page === "nosotros" ? "active" : ""}">Nosotros</a>
+            <a href="${base}ayuda.html" class="${page === "ayuda" ? "active" : ""}">Ayuda</a>
           </nav>
           <div class="header-actions">
             <a href="#" class="header-login">Iniciar sesión</a>
@@ -48,7 +51,7 @@ function renderChrome() {
             <div>
               <div class="brand">
                 <span class="brand-mark">
-                  <img src="assets/images/logo-ads-veris.png" alt="Logo ADS Veris">
+                  <img src="${base}assets/images/logo-ads-veris.png" alt="Logo ADS Veris">
                 </span>
                 <span class="brand-name">ADS <span>Veris</span></span>
               </div>
@@ -57,26 +60,26 @@ function renderChrome() {
             <div>
               <h3>Explorar</h3>
               <div class="footer-links">
-                <a href="index.html">Inicio</a>
-                <a href="tienda.html">Tienda</a>
-                <a href="nosotros.html">Nosotros</a>
-                <a href="ayuda.html">Ayuda</a>
+                <a href="${base}index.html">Inicio</a>
+                <a href="${base}soluciones/index.html">Soluciones</a>
+                <a href="${base}nosotros.html">Nosotros</a>
+                <a href="${base}ayuda.html">Ayuda</a>
               </div>
             </div>
             <div>
               <h3>Empresa</h3>
               <div class="footer-links">
-                <a href="contacto.html">Contacto</a>
-                <a href="plataforma.html">Plataforma de análisis</a>
-                <a href="producto.html?id=planilla-integral-gestion-pyme">Producto destacado</a>
+                <a href="${base}contacto.html">Contacto</a>
+                <a href="${base}plataforma.html">Plataforma de análisis</a>
+                <a href="${base}tienda.html">Tienda de plantillas</a>
               </div>
             </div>
             <div>
               <h3>Información</h3>
               <div class="footer-links">
-                <a href="legal.html">Términos y condiciones</a>
-                <a href="privacidad.html">Privacidad</a>
-                <a href="reembolsos.html">Reembolsos</a>
+                <a href="${base}legal.html">Términos y condiciones</a>
+                <a href="${base}privacidad.html">Privacidad</a>
+                <a href="${base}reembolsos.html">Reembolsos</a>
               </div>
             </div>
           </div>
