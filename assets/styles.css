@@ -1708,6 +1708,7 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   font-size: clamp(2rem, 3.5vw, 3.1rem);
   color: #f4f7fb;
 }
+.why-choose-us-copy h2 .c-gold { color: #f7c75f; }
 .why-choose-us-copy p {
   max-width: 560px;
   color: #b7c7d5;
@@ -1791,6 +1792,46 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
 .why-btn-outline:hover {
   border-color: rgba(139, 214, 205, 0.72);
   background: rgba(139, 214, 205, 0.1);
+}
+.wcu-badge {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px 9px 12px;
+  border-radius: 999px;
+  background: rgba(8, 20, 32, 0.82);
+  border: 1px solid rgba(139, 214, 205, 0.32);
+  color: #8bd6cd;
+  font-size: 0.82rem;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+  letter-spacing: 0.01em;
+}
+.wcu-badge svg { width: 14px; height: 14px; flex-shrink: 0; }
+.why-value-icon svg { width: 16px; height: 16px; }
+.wcu-icon-teal {
+  border-color: rgba(139, 214, 205, 0.36);
+  color: #8bd6cd;
+  background: rgba(139, 214, 205, 0.08);
+}
+.wcu-quote {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+.wcu-quote p { margin-bottom: 0; }
+.wcu-quote-mark {
+  flex-shrink: 0;
+  font-family: var(--ff-head);
+  font-size: 3.6rem;
+  line-height: 0.72;
+  color: #f7c75f;
+  opacity: 0.65;
 }
 
 @media (max-width: 1080px) {
