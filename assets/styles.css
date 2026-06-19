@@ -1650,6 +1650,10 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   gap: 48px;
   align-items: start;
 }
+.why-choose-us-left {
+  display: grid;
+  gap: 18px;
+}
 .why-choose-us-media {
   position: relative;
   height: clamp(460px, 48vw, 620px);
@@ -1674,21 +1678,13 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   border: 1px solid rgba(247, 199, 95, 0.16);
 }
 .why-choose-us-media::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(7, 18, 31, 0.04) 36%, rgba(7, 18, 31, 0.78) 100%),
-    linear-gradient(90deg, rgba(7, 18, 31, 0.44), transparent 42%),
-    radial-gradient(circle at 78% 18%, rgba(139, 214, 205, 0.18), transparent 28%);
+  content: none;
 }
 .why-choose-us-media img {
   width: 100%;
   height: 100%;
   min-height: 460px;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   filter: saturate(0.88) contrast(1.04);
 }
@@ -1755,12 +1751,8 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   line-height: 1.62;
 }
 .why-choose-us-bottom {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 24px;
-  align-items: center;
-  margin-top: 2px;
+  display: block;
+  margin-top: 0;
   padding: 24px 26px;
   border-radius: 24px;
   border: 1px solid rgba(247, 199, 95, 0.16);
@@ -1770,18 +1762,33 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   box-shadow: 0 22px 52px rgba(0, 0, 0, 0.18);
 }
 .why-choose-us-bottom p {
-  max-width: 780px;
+  position: relative;
+  max-width: none;
   margin-bottom: 0;
+  padding-left: 72px;
   color: #e7eef5;
   font-family: var(--ff-head);
   font-size: clamp(1.08rem, 1.8vw, 1.38rem);
   line-height: 1.45;
   letter-spacing: -0.02em;
 }
+.why-choose-us-bottom p::before {
+  content: "“";
+  position: absolute;
+  left: 0;
+  top: -10px;
+  color: #f7c75f;
+  font-family: Georgia, serif;
+  font-size: 4.8rem;
+  line-height: 1;
+}
+.why-choose-us-bottom strong {
+  color: #f7c75f;
+}
 .why-choose-us-actions {
   display: flex;
   gap: 12px;
-  justify-content: flex-end;
+  justify-content: flex-start;
   flex-wrap: wrap;
 }
 .why-btn-outline {
@@ -1812,11 +1819,34 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   letter-spacing: 0.01em;
 }
 .wcu-badge svg { width: 14px; height: 14px; flex-shrink: 0; }
-.why-value-icon svg { width: 16px; height: 16px; }
+.why-value-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .wcu-icon-teal {
   border-color: rgba(139, 214, 205, 0.36);
   color: #8bd6cd;
   background: rgba(139, 214, 205, 0.08);
+}
+.wcu-icon-cyan {
+  border-color: rgba(64, 218, 236, 0.36);
+  color: #40daec;
+  background: rgba(64, 218, 236, 0.08);
+}
+.wcu-icon-purple {
+  border-color: rgba(157, 116, 255, 0.36);
+  color: #9d74ff;
+  background: rgba(157, 116, 255, 0.08);
+}
+.wcu-icon-gold {
+  border-color: rgba(247, 199, 95, 0.36);
+  color: #f7c75f;
+  background: rgba(247, 199, 95, 0.08);
 }
 .wcu-quote {
   display: flex;
@@ -1844,7 +1874,7 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
     min-height: clamp(280px, 56vw, 400px);
   }
   .why-choose-us-bottom {
-    grid-template-columns: 1fr;
+    display: block;
   }
   .why-choose-us-actions {
     justify-content: flex-start;
@@ -1871,6 +1901,13 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   }
   .why-choose-us-bottom {
     padding: 22px 18px;
+  }
+  .why-choose-us-bottom p {
+    padding-left: 54px;
+  }
+  .why-choose-us-bottom p::before {
+    top: -6px;
+    font-size: 3.8rem;
   }
   .why-choose-us-actions .btn {
     width: 100%;
