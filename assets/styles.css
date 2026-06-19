@@ -1723,11 +1723,11 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   min-height: 190px;
   padding: 22px 20px;
   border-radius: 20px;
-  border: 1px solid rgba(139, 214, 205, 0.14);
+  border: 1px solid rgba(139, 214, 205, 0.28);
   background:
-    linear-gradient(180deg, rgba(10, 27, 43, 0.78), rgba(13, 35, 55, 0.72)),
-    linear-gradient(135deg, rgba(139, 214, 205, 0.06), transparent 48%);
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.16);
+    linear-gradient(180deg, rgba(14, 36, 58, 0.96), rgba(10, 28, 48, 0.92)),
+    linear-gradient(135deg, rgba(139, 214, 205, 0.1), transparent 48%);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
 }
 .why-value-icon {
   width: 38px;
