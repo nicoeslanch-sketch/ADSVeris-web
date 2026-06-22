@@ -1342,6 +1342,44 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   color: #fff;
 }
 
+/* ── HEADER: Avatar usuario autenticado ─────────────── */
+.header-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c19a54, #e0c589);
+  color: #09111f;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  letter-spacing: 0;
+}
+.header-avatar:hover { opacity: 0.85; transform: scale(1.07); }
+
+.header-logout {
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.header-logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
 /* ── HERO CAROUSEL ──────────────────────────────────── */
 .hero-carousel {
   padding: 36px 0 0;

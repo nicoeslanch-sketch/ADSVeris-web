@@ -1,6 +1,22 @@
 // TODO: reemplazar por link real de WhatsApp cuando esté disponible
 const WHATSAPP_URL = "#";
 
+function _getAuthUser() {
+  try {
+    const raw = localStorage.getItem('adsveris_user');
+    if (!raw) return null;
+    const hasSession = Object.keys(localStorage).some(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+    return hasSession ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+window._adsLogout = function() {
+  localStorage.removeItem('adsveris_user');
+  Object.keys(localStorage).filter(k => k.startsWith('sb-')).forEach(k => localStorage.removeItem(k));
+  const inSubfolder = window.location.pathname.includes('/soluciones/');
+  window.location.href = inSubfolder ? '../index.html' : 'index.html';
+};
+
 function getProducts() {
   return window.ADS_VERIS_PRODUCTS || [];
 }
@@ -35,8 +51,17 @@ function renderChrome() {
             <a href="${base}ayuda.html" class="${page === "ayuda" ? "active" : ""}">Ayuda</a>
           </nav>
           <div class="header-actions">
-            <a href="#" class="header-login">Iniciar sesión</a>
-            <a href="#" class="btn btn-primary btn-sm">Crear cuenta</a>
+            ${(function() {
+              const u = _getAuthUser();
+              if (u) return `
+                <button class="header-logout" onclick="_adsLogout()">Cerrar sesión</button>
+                <a href="/profile" class="header-avatar" title="${u.name}">${u.initial}</a>
+              `;
+              return `
+                <a href="/login" class="header-login">Iniciar sesión</a>
+                <a href="/register" class="btn btn-primary btn-sm">Crear cuenta</a>
+              `;
+            })()}
           </div>
         </div>
       </header>

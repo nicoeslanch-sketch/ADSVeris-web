@@ -57,9 +57,15 @@ export default function Login() {
     intentos.current += 1
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw error
-      window.location.href = '/dashboard'
+      const inicial = (data.user.email || '?')[0].toUpperCase()
+      localStorage.setItem('adsveris_user', JSON.stringify({
+        name: data.user.email,
+        email: data.user.email,
+        initial: inicial,
+      }))
+      window.location.href = '/'
     } catch (err) {
       setErrorGeneral(err.message || 'Email o contraseña incorrectos.')
     } finally {
