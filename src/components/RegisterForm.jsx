@@ -30,6 +30,7 @@ export default function RegisterForm() {
   const [form, setForm] = useState({
     email: '',
     password: '',
+    confirm: '',
     nombre: '',
     apellido: '',
     rut: '',
@@ -58,6 +59,8 @@ export default function RegisterForm() {
       e.email = 'Ingresa un email válido'
     if (!form.password || form.password.length < 8)
       e.password = 'La contraseña debe tener al menos 8 caracteres'
+    if (!form.confirm) e.confirm = 'Debes repetir la contraseña'
+    else if (form.confirm !== form.password) e.confirm = 'Las contraseñas no coinciden'
     if (!form.rut.trim() || !validarRut(form.rut))
       e.rut = 'RUT inválido (formato: XX.XXX.XXX-K)'
     if (!form.telefono.trim()) e.telefono = 'El teléfono es obligatorio'
@@ -150,15 +153,31 @@ export default function RegisterForm() {
             error={errores.email}
           />
 
-          <Campo
-            label="Contraseña"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={handleChange}
-            error={errores.password}
-            placeholder="Mínimo 8 caracteres"
-          />
+          {(() => {
+            const ok = form.password.length >= 8 && form.confirm.length > 0 && form.password === form.confirm
+            return (
+              <>
+                <CampoPassword
+                  label="Contraseña"
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  error={errores.password}
+                  placeholder="Mínimo 8 caracteres"
+                  ok={ok}
+                />
+                <CampoPassword
+                  label="Repetir contraseña"
+                  name="confirm"
+                  value={form.confirm}
+                  onChange={handleChange}
+                  error={errores.confirm}
+                  placeholder="Repite tu contraseña"
+                  ok={ok}
+                />
+              </>
+            )
+          })()}
 
           <Campo
             label="RUT"
@@ -178,7 +197,15 @@ export default function RegisterForm() {
             placeholder="+56912345678"
           />
 
-          <button type="submit" disabled={loading} style={styles.boton}>
+          <button
+            type="submit"
+            disabled={loading || form.confirm !== form.password || !form.confirm}
+            style={{
+              ...styles.boton,
+              opacity: (loading || form.confirm !== form.password || !form.confirm) ? 0.5 : 1,
+              cursor: (loading || form.confirm !== form.password || !form.confirm) ? 'not-allowed' : 'pointer',
+            }}
+          >
             {loading ? 'Registrando...' : 'Registrarse'}
           </button>
         </form>
@@ -206,6 +233,40 @@ function Campo({ label, name, type = 'text', value, onChange, error, placeholder
         placeholder={placeholder}
         style={{ ...styles.input, ...(error ? styles.inputError : {}) }}
       />
+      {error && <span style={styles.error}>{error}</span>}
+    </div>
+  )
+}
+
+function CampoPassword({ label, name, value, onChange, error, placeholder, ok }) {
+  const borderColor = ok ? '#16a34a' : error ? '#ef4444' : '#d1d5db'
+  return (
+    <div style={styles.campo}>
+      <label style={styles.label}>{label}</label>
+      <div style={{ position: 'relative' }}>
+        <input
+          type="password"
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          style={{
+            ...styles.input,
+            borderColor,
+            paddingRight: ok ? '38px' : '12px',
+            width: '100%',
+            boxSizing: 'border-box',
+          }}
+        />
+        {ok && (
+          <span style={styles.tick} aria-label="contraseñas coinciden">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="8" fill="#16a34a"/>
+              <polyline points="4.5,8.5 7,11 11.5,5.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </span>
+        )}
+      </div>
       {error && <span style={styles.error}>{error}</span>}
     </div>
   )
@@ -309,5 +370,14 @@ const styles = {
     color: '#2563eb',
     textDecoration: 'none',
     fontWeight: '500',
+  },
+  tick: {
+    position: 'absolute',
+    right: '10px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    display: 'flex',
+    alignItems: 'center',
+    pointerEvents: 'none',
   },
 }
