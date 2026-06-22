@@ -1,7 +1,5 @@
 import { useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-import logoImg from '../../assets/images/logo-ads-veris.png'
-import saludandoImg from '../../assets/images/saludando.png'
 
 const RATE_LIMIT_MAX = 5
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000
@@ -70,7 +68,7 @@ export default function Login() {
       {/* Header */}
       <header style={s.header}>
         <a href="/" style={s.logoWrap}>
-          <img src={logoImg} alt="ADS Veris" style={s.logoImg} />
+          <img src="/images/logo-ads-veris.png" alt="ADS Veris" style={s.logoImg} />
           <span style={s.logoText}>ADS <span style={s.logoGold}>Veris</span></span>
         </a>
         <a href="/register" style={s.headerLink}>¿No tienes cuenta? <span style={s.headerLinkGold}>Regístrate</span></a>
@@ -84,7 +82,7 @@ export default function Login() {
           <div style={s.imageWrap}>
             <div style={s.imageGlow} aria-hidden="true" />
             <img
-              src={saludandoImg}
+              src="/images/saludando.png"
               alt="Bienvenida a ADS Veris"
               style={s.heroImg}
             />
