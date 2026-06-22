@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import dibujoTabletImg from '../../assets/images/dibujo con tablet.png'
 import senalandoImg from '../../assets/images/señalando.png'
@@ -27,6 +27,7 @@ function formatearRut(value) {
 }
 
 export default function RegisterForm() {
+  const isMobile = useIsMobile()
   const [form, setForm] = useState({ email: '', password: '', confirm: '', nombre: '', apellido: '', rut: '', telefono: '' })
   const [errores, setErrores] = useState({})
   const [loading, setLoading] = useState(false)
@@ -85,16 +86,16 @@ export default function RegisterForm() {
 
   if (success) {
     return (
-      <div style={s.page}>
+      <div style={sx(s.page, isMobile && s.pageMobile)}>
         <div style={s.grid} aria-hidden="true" />
-        <header style={s.header}>
+        <header style={sx(s.header, isMobile && s.headerMobile)}>
           <a href="/" style={s.logoWrap}>
             <img src="/images/logo-ads-veris.png" alt="ADS Veris" style={s.logoImg} />
             <span style={s.logoText}>ADS <span style={s.logoGold}>Veris</span></span>
           </a>
         </header>
-        <div style={s.successWrap}>
-          <div style={s.successCard}>
+        <div style={sx(s.successWrap, isMobile && s.successWrapMobile)}>
+          <div style={sx(s.successCard, isMobile && s.successCardMobile)}>
             <span style={s.successIcon}>✅</span>
             <h2 style={s.successTitle}>¡Registro exitoso!</h2>
             <p style={s.successMsg}>Enviamos un correo de confirmación a <strong style={{ color: '#c9a84c' }}>{form.email}</strong>. Revisa tu bandeja y confirma tu cuenta para ingresar.</p>
@@ -106,32 +107,32 @@ export default function RegisterForm() {
   }
 
   return (
-    <div style={s.page}>
+    <div style={sx(s.page, isMobile && s.pageMobile)}>
       <div style={s.grid} aria-hidden="true" />
 
       {/* Header */}
-      <header style={s.header}>
+      <header style={sx(s.header, isMobile && s.headerMobile)}>
         <a href="/" style={s.logoWrap}>
           <img src="/images/logo-ads-veris.png" alt="ADS Veris" style={s.logoImg} />
           <span style={s.logoText}>ADS <span style={s.logoGold}>Veris</span></span>
         </a>
-        <a href="/login" style={s.headerLink}>¿Ya tienes cuenta? <span style={s.headerLinkGold}>Inicia sesión</span></a>
+        <a href="/login" style={sx(s.headerLink, isMobile && s.headerLinkMobile)}>¿Ya tienes cuenta? <span style={s.headerLinkGold}>Inicia sesión</span></a>
       </header>
 
       {/* Main split */}
-      <main style={s.main}>
+      <main style={sx(s.main, isMobile && s.mainMobile)}>
 
         {/* Imagen izquierda */}
-        <div style={s.sideCol}>
+        <div style={sx(s.sideCol, isMobile && s.sideColMobile, isMobile && s.leftVisualMobile)}>
           <img
             src={senalandoImg}
             alt="Señalando el formulario de registro"
-            style={s.imgSenalando}
+            style={sx(s.imgSenalando, isMobile && s.imgSenalandoMobile)}
           />
         </div>
         {/* Formulario derecho */}
-        <div style={s.formCol}>
-          <div style={s.card}>
+        <div style={sx(s.formCol, isMobile && s.formColMobile)}>
+          <div style={sx(s.card, isMobile && s.cardMobile)}>
             <div style={s.cardHeader}>
               <span style={s.eyebrow}>Empieza gratis</span>
               <h1 style={s.titulo}>Crear cuenta</h1>
@@ -141,7 +142,7 @@ export default function RegisterForm() {
             {errorGeneral && <div style={s.alertError}>{errorGeneral}</div>}
 
             <form onSubmit={handleSubmit} noValidate>
-              <div style={s.fila}>
+              <div style={sx(s.fila, isMobile && s.filaMobile)}>
                 <Campo label="Nombre" name="nombre" value={form.nombre} onChange={handleChange} error={errores.nombre} placeholder="Juan" />
                 <Campo label="Apellido" name="apellido" value={form.apellido} onChange={handleChange} error={errores.apellido} placeholder="Pérez" />
               </div>
@@ -151,7 +152,7 @@ export default function RegisterForm() {
               <CampoPassword label="Contraseña" name="password" value={form.password} onChange={handleChange} error={errores.password} placeholder="Mínimo 8 caracteres" ok={passwordsOk} />
               <CampoPassword label="Repetir contraseña" name="confirm" value={form.confirm} onChange={handleChange} error={errores.confirm} placeholder="Repite tu contraseña" ok={passwordsOk} />
 
-              <div style={s.fila}>
+              <div style={sx(s.fila, isMobile && s.filaMobile)}>
                 <Campo label="RUT" name="rut" value={form.rut} onChange={handleChange} error={errores.rut} placeholder="12.345.678-K" />
                 <Campo label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} error={errores.telefono} placeholder="+56912345678" />
               </div>
@@ -165,18 +166,18 @@ export default function RegisterForm() {
               </button>
             </form>
 
-            <div style={s.cardFooter}>
+            <div style={sx(s.cardFooter, isMobile && s.cardFooterMobile)}>
               <span style={s.footerMuted}>¿Ya tienes cuenta?</span>
               <a href="/login" style={s.linkGold}>Iniciar sesión →</a>
             </div>
           </div>
         </div>
 
-        <div style={s.sideCol}>
+        <div style={sx(s.sideCol, isMobile && s.sideColMobile, isMobile && s.rightVisualMobile)}>
           <img
             src={dibujoTabletImg}
             alt="Ilustración tablet"
-            style={s.imgTablet}
+            style={sx(s.imgTablet, isMobile && s.imgTabletMobile)}
           />
         </div>
 
@@ -230,6 +231,29 @@ function CampoPassword({ label, name, value, onChange, error, placeholder, ok })
   )
 }
 
+function useIsMobile(maxWidth = 780) {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.innerWidth <= maxWidth
+  })
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth <= maxWidth)
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [maxWidth])
+
+  return isMobile
+}
+
+function sx(...styles) {
+  return Object.assign({}, ...styles.filter(Boolean))
+}
+
 const s = {
   page: {
     minHeight: '100vh',
@@ -238,6 +262,10 @@ const s = {
     flexDirection: 'column',
     position: 'relative',
     overflow: 'hidden',
+  },
+  pageMobile: {
+    overflowX: 'hidden',
+    overflowY: 'auto',
   },
   grid: {
     position: 'fixed',
@@ -260,11 +288,16 @@ const s = {
     borderBottom: '1px solid rgba(247,199,95,0.1)',
     backdropFilter: 'blur(8px)',
   },
+  headerMobile: {
+    padding: '16px 18px',
+    gap: '16px',
+  },
   logoWrap: { display: 'flex', alignItems: 'center', gap: '10px' },
   logoImg: { height: '34px', width: 'auto' },
   logoText: { fontSize: '17px', fontWeight: '700', color: '#f5f9fe', fontFamily: "'Sora', sans-serif" },
   logoGold: { color: '#c9a84c' },
   headerLink: { fontSize: '14px', color: '#ccd8ea' },
+  headerLinkMobile: { fontSize: '13px', lineHeight: '1.3', textAlign: 'right' },
   headerLinkGold: { color: '#c9a84c', fontWeight: '600' },
 
   main: {
@@ -280,6 +313,15 @@ const s = {
     margin: '0 auto',
     width: '100%',
   },
+  mainMobile: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    padding: '24px 16px 36px',
+    gap: '18px',
+    maxWidth: '520px',
+    overflow: 'visible',
+  },
 
   sideCol: {
     display: 'flex',
@@ -289,6 +331,12 @@ const s = {
     minWidth: 0,
     minHeight: '660px',
   },
+  sideColMobile: {
+    minHeight: 'auto',
+    width: '100%',
+  },
+  leftVisualMobile: { order: 2 },
+  rightVisualMobile: { order: 3 },
   imgSenalando: {
     width: 'clamp(380px, 38vw, 640px)',
     maxWidth: '145%',
@@ -298,6 +346,10 @@ const s = {
     zIndex: 2,
     filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))',
     transform: 'scaleX(-1)',
+  },
+  imgSenalandoMobile: {
+    width: 'min(76vw, 280px)',
+    maxWidth: '100%',
   },
   imgTablet: {
     position: 'relative',
@@ -309,8 +361,17 @@ const s = {
     display: 'block',
     filter: 'drop-shadow(0 18px 30px rgba(0,0,0,0.28))',
   },
+  imgTabletMobile: {
+    width: 'min(72vw, 260px)',
+    maxWidth: '100%',
+  },
 
   formCol: { width: '460px', flexShrink: 0 },
+  formColMobile: {
+    order: 1,
+    width: '100%',
+    flexShrink: 1,
+  },
   card: {
     background: 'rgba(9,28,45,0.85)',
     border: '1px solid rgba(199,168,106,0.18)',
@@ -318,6 +379,11 @@ const s = {
     padding: '36px 36px 32px',
     backdropFilter: 'blur(14px)',
     boxShadow: '0 24px 60px rgba(0,0,0,0.3)',
+  },
+  cardMobile: {
+    width: '100%',
+    padding: '30px 22px',
+    borderRadius: '14px',
   },
   cardHeader: { marginBottom: '24px' },
   eyebrow: {
@@ -349,6 +415,7 @@ const s = {
   },
 
   fila: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' },
+  filaMobile: { gridTemplateColumns: '1fr', gap: '0px' },
   campo: { display: 'flex', flexDirection: 'column', marginBottom: '14px' },
   label: {
     fontSize: '12px',
@@ -404,6 +471,11 @@ const s = {
     paddingTop: '18px',
     borderTop: '1px solid rgba(199,168,106,0.12)',
   },
+  cardFooterMobile: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '10px',
+  },
   footerMuted: { fontSize: '13px', color: '#8ba3bc' },
   linkGold: { fontSize: '13px', color: '#c9a84c', fontWeight: '600' },
 
@@ -417,6 +489,7 @@ const s = {
     position: 'relative',
     zIndex: 1,
   },
+  successWrapMobile: { padding: '24px 16px' },
   successCard: {
     background: 'rgba(9,28,45,0.85)',
     border: '1px solid rgba(199,168,106,0.18)',
@@ -426,6 +499,10 @@ const s = {
     textAlign: 'center',
     backdropFilter: 'blur(14px)',
     boxShadow: '0 24px 60px rgba(0,0,0,0.3)',
+  },
+  successCardMobile: {
+    width: '100%',
+    padding: '38px 24px',
   },
   successIcon: { fontSize: '44px', display: 'block', marginBottom: '16px' },
   successTitle: { fontSize: '22px', fontWeight: '800', color: '#f5f9fe', marginBottom: '12px', fontFamily: "'Sora', sans-serif" },
