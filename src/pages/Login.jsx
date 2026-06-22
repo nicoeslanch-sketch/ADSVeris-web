@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import saludandoImg from '../../assets/images/saludando.png'
 
 const RATE_LIMIT_MAX = 5
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000
@@ -82,7 +83,7 @@ export default function Login() {
           <div style={s.imageWrap}>
             <div style={s.imageGlow} aria-hidden="true" />
             <img
-              src="/images/saludando.png"
+              src={saludandoImg}
               alt="Bienvenida a ADS Veris"
               style={s.heroImg}
             />

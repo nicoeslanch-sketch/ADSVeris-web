@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import dibujoTabletImg from '../../assets/images/dibujo con tablet.png'
+import senalandoImg from '../../assets/images/señalando.png'
 
 function validarRut(rut) {
   const clean = rut.replace(/[.\-]/g, '').toUpperCase()
@@ -126,19 +128,17 @@ export default function RegisterForm() {
 
             {/* Imagen señalando (apunta hacia el formulario) */}
             <img
-              src="/images/se%C3%B1alando.png"
+              src={senalandoImg}
               alt="Señalando el formulario de registro"
-              style={s.imgSeñalando}
+              style={s.imgSenalando}
             />
 
-            {/* Imagen dibujo con tablet (tarjeta flotante) */}
-            <div style={s.tabletCard}>
-              <img
-                src="/images/dibujo%20con%20tablet.png"
-                alt="Ilustración tablet"
-                style={s.imgTablet}
-              />
-            </div>
+            {/* Imagen dibujo con tablet */}
+            <img
+              src={dibujoTabletImg}
+              alt="Ilustración tablet"
+              style={s.imgTablet}
+            />
 
             {/* Badge decorativo */}
             <div style={s.imageCard}>
@@ -314,7 +314,7 @@ const s = {
     background: 'radial-gradient(circle, rgba(193,154,84,0.1) 0%, transparent 70%)',
     pointerEvents: 'none',
   },
-  imgSeñalando: {
+  imgSenalando: {
     maxHeight: '460px',
     maxWidth: '100%',
     objectFit: 'contain',
@@ -323,23 +323,17 @@ const s = {
     filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))',
     transform: 'scaleX(-1)',
   },
-  tabletCard: {
-    position: 'absolute',
-    bottom: '30px',
-    right: '10px',
-    zIndex: 3,
-    background: 'rgba(13,34,53,0.9)',
-    border: '1px solid rgba(199,168,106,0.2)',
-    borderRadius: '14px',
-    padding: '10px',
-    backdropFilter: 'blur(10px)',
-    boxShadow: '0 12px 30px rgba(0,0,0,0.3)',
-  },
   imgTablet: {
-    width: '110px',
-    height: '110px',
+    position: 'absolute',
+    bottom: '4px',
+    right: '-18px',
+    zIndex: 3,
+    width: '170px',
+    maxWidth: '42%',
+    height: 'auto',
     objectFit: 'contain',
     display: 'block',
+    filter: 'drop-shadow(0 18px 30px rgba(0,0,0,0.28))',
   },
   imageCard: {
     position: 'absolute',
