@@ -6,8 +6,7 @@ function validarRut(rut) {
   if (clean.length < 2) return false
   const body = clean.slice(0, -1)
   const dv = clean.slice(-1)
-  let sum = 0
-  let multiplier = 2
+  let sum = 0, multiplier = 2
   for (let i = body.length - 1; i >= 0; i--) {
     sum += parseInt(body[i]) * multiplier
     multiplier = multiplier === 7 ? 2 : multiplier + 1
@@ -22,69 +21,47 @@ function formatearRut(value) {
   if (clean.length === 0) return ''
   const body = clean.slice(0, -1)
   const dv = clean.slice(-1)
-  const bodyFormatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-  return body.length > 0 ? `${bodyFormatted}-${dv}` : dv
+  return body.length > 0 ? `${body.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}-${dv}` : dv
 }
 
 export default function RegisterForm() {
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-    confirm: '',
-    nombre: '',
-    apellido: '',
-    rut: '',
-    telefono: '',
-  })
+  const [form, setForm] = useState({ email: '', password: '', confirm: '', nombre: '', apellido: '', rut: '', telefono: '' })
   const [errores, setErrores] = useState({})
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [errorGeneral, setErrorGeneral] = useState('')
 
+  const passwordsOk = form.password.length >= 8 && form.confirm.length > 0 && form.password === form.confirm
+
   function handleChange(e) {
     const { name, value } = e.target
-    if (name === 'rut') {
-      setForm(prev => ({ ...prev, rut: formatearRut(value) }))
-    } else {
-      setForm(prev => ({ ...prev, [name]: value }))
-    }
+    setForm(prev => ({ ...prev, [name]: name === 'rut' ? formatearRut(value) : value }))
     setErrores(prev => ({ ...prev, [name]: '' }))
   }
 
   function validar() {
     const e = {}
-    if (!form.nombre.trim()) e.nombre = 'El nombre es obligatorio'
-    if (!form.apellido.trim()) e.apellido = 'El apellido es obligatorio'
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      e.email = 'Ingresa un email válido'
-    if (!form.password || form.password.length < 8)
-      e.password = 'La contraseña debe tener al menos 8 caracteres'
-    if (!form.confirm) e.confirm = 'Debes repetir la contraseña'
-    else if (form.confirm !== form.password) e.confirm = 'Las contraseñas no coinciden'
-    if (!form.rut.trim() || !validarRut(form.rut))
-      e.rut = 'RUT inválido (formato: XX.XXX.XXX-K)'
-    if (!form.telefono.trim()) e.telefono = 'El teléfono es obligatorio'
+    if (!form.nombre.trim()) e.nombre = 'Obligatorio'
+    if (!form.apellido.trim()) e.apellido = 'Obligatorio'
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Email inválido'
+    if (!form.password || form.password.length < 8) e.password = 'Mínimo 8 caracteres'
+    if (!form.confirm) e.confirm = 'Repite la contraseña'
+    else if (form.confirm !== form.password) e.confirm = 'No coinciden'
+    if (!form.rut.trim() || !validarRut(form.rut)) e.rut = 'RUT inválido'
+    if (!form.telefono.trim()) e.telefono = 'Obligatorio'
     return e
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setErrorGeneral('')
-    const erroresValidacion = validar()
-    if (Object.keys(erroresValidacion).length > 0) {
-      setErrores(erroresValidacion)
-      return
-    }
+    const ev = validar()
+    if (Object.keys(ev).length > 0) { setErrores(ev); return }
 
     setLoading(true)
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-      })
-
+      const { data, error: signUpError } = await supabase.auth.signUp({ email: form.email, password: form.password })
       if (signUpError) throw signUpError
-
       const userId = data.user?.id
       if (userId) {
         const { error: metaError } = await supabase.from('users_metadata').insert({
@@ -96,7 +73,6 @@ export default function RegisterForm() {
         })
         if (metaError) throw metaError
       }
-
       setSuccess(true)
     } catch (err) {
       setErrorGeneral(err.message || 'Error al registrarse. Intenta de nuevo.')
@@ -107,12 +83,20 @@ export default function RegisterForm() {
 
   if (success) {
     return (
-      <div style={styles.container}>
-        <div style={styles.card}>
-          <div style={styles.successBox}>
-            <p style={styles.successText}>
-              ✅ Email de confirmación enviado. Revisa tu bandeja.
-            </p>
+      <div style={s.page}>
+        <div style={s.grid} aria-hidden="true" />
+        <header style={s.header}>
+          <a href="/" style={s.logoWrap}>
+            <img src="/assets/images/logo-ads-veris.png" alt="ADS Veris" style={s.logoImg} />
+            <span style={s.logoText}>ADS <span style={s.logoGold}>Veris</span></span>
+          </a>
+        </header>
+        <div style={s.successWrap}>
+          <div style={s.successCard}>
+            <span style={s.successIcon}>✅</span>
+            <h2 style={s.successTitle}>¡Registro exitoso!</h2>
+            <p style={s.successMsg}>Enviamos un correo de confirmación a <strong style={{ color: '#c9a84c' }}>{form.email}</strong>. Revisa tu bandeja y confirma tu cuenta para ingresar.</p>
+            <a href="/login" style={s.successBtn}>Ir a iniciar sesión →</a>
           </div>
         </div>
       </div>
@@ -120,129 +104,120 @@ export default function RegisterForm() {
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.titulo}>Crear cuenta</h1>
+    <div style={s.page}>
+      <div style={s.grid} aria-hidden="true" />
 
-        {errorGeneral && <p style={styles.errorGeneral}>{errorGeneral}</p>}
+      {/* Header */}
+      <header style={s.header}>
+        <a href="/" style={s.logoWrap}>
+          <img src="/assets/images/logo-ads-veris.png" alt="ADS Veris" style={s.logoImg} />
+          <span style={s.logoText}>ADS <span style={s.logoGold}>Veris</span></span>
+        </a>
+        <a href="/login" style={s.headerLink}>¿Ya tienes cuenta? <span style={s.headerLinkGold}>Inicia sesión</span></a>
+      </header>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <div style={styles.fila}>
-            <Campo
-              label="Nombre"
-              name="nombre"
-              value={form.nombre}
-              onChange={handleChange}
-              error={errores.nombre}
+      {/* Main split */}
+      <main style={s.main}>
+
+        {/* Imágenes izquierda */}
+        <div style={s.imageCol}>
+          <div style={s.imageWrap}>
+            <div style={s.imageGlow} aria-hidden="true" />
+
+            {/* Imagen señalando (apunta hacia el formulario) */}
+            <img
+              src="/assets/images/señalando.png"
+              alt="Señalando el formulario de registro"
+              style={s.imgSeñalando}
             />
-            <Campo
-              label="Apellido"
-              name="apellido"
-              value={form.apellido}
-              onChange={handleChange}
-              error={errores.apellido}
-            />
+
+            {/* Imagen dibujo con tablet (tarjeta flotante) */}
+            <div style={s.tabletCard}>
+              <img
+                src="/assets/images/dibujo con tablet.png"
+                alt="Ilustración tablet"
+                style={s.imgTablet}
+              />
+            </div>
+
+            {/* Badge decorativo */}
+            <div style={s.imageCard}>
+              <span style={s.imageCardDot} />
+              <span style={s.imageCardText}>Únete a ADS Veris hoy</span>
+            </div>
           </div>
+        </div>
 
-          <Campo
-            label="Email"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            error={errores.email}
-          />
+        {/* Formulario derecho */}
+        <div style={s.formCol}>
+          <div style={s.card}>
+            <div style={s.cardHeader}>
+              <span style={s.eyebrow}>Empieza gratis</span>
+              <h1 style={s.titulo}>Crear cuenta</h1>
+              <p style={s.subtitulo}>Accede a planillas, análisis y más herramientas para tu PyME.</p>
+            </div>
 
-          {(() => {
-            const ok = form.password.length >= 8 && form.confirm.length > 0 && form.password === form.confirm
-            return (
-              <>
-                <CampoPassword
-                  label="Contraseña"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  error={errores.password}
-                  placeholder="Mínimo 8 caracteres"
-                  ok={ok}
-                />
-                <CampoPassword
-                  label="Repetir contraseña"
-                  name="confirm"
-                  value={form.confirm}
-                  onChange={handleChange}
-                  error={errores.confirm}
-                  placeholder="Repite tu contraseña"
-                  ok={ok}
-                />
-              </>
-            )
-          })()}
+            {errorGeneral && <div style={s.alertError}>{errorGeneral}</div>}
 
-          <Campo
-            label="RUT"
-            name="rut"
-            value={form.rut}
-            onChange={handleChange}
-            error={errores.rut}
-            placeholder="12.345.678-K"
-          />
+            <form onSubmit={handleSubmit} noValidate>
+              <div style={s.fila}>
+                <Campo label="Nombre" name="nombre" value={form.nombre} onChange={handleChange} error={errores.nombre} placeholder="Juan" />
+                <Campo label="Apellido" name="apellido" value={form.apellido} onChange={handleChange} error={errores.apellido} placeholder="Pérez" />
+              </div>
 
-          <Campo
-            label="Teléfono"
-            name="telefono"
-            value={form.telefono}
-            onChange={handleChange}
-            error={errores.telefono}
-            placeholder="+56912345678"
-          />
+              <Campo label="Email" name="email" type="email" value={form.email} onChange={handleChange} error={errores.email} placeholder="tu@email.com" />
 
-          <button
-            type="submit"
-            disabled={loading || form.confirm !== form.password || !form.confirm}
-            style={{
-              ...styles.boton,
-              opacity: (loading || form.confirm !== form.password || !form.confirm) ? 0.5 : 1,
-              cursor: (loading || form.confirm !== form.password || !form.confirm) ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {loading ? 'Registrando...' : 'Registrarse'}
-          </button>
-        </form>
+              <CampoPassword label="Contraseña" name="password" value={form.password} onChange={handleChange} error={errores.password} placeholder="Mínimo 8 caracteres" ok={passwordsOk} />
+              <CampoPassword label="Repetir contraseña" name="confirm" value={form.confirm} onChange={handleChange} error={errores.confirm} placeholder="Repite tu contraseña" ok={passwordsOk} />
 
-        <p style={styles.linkTexto}>
-          ¿Ya tienes cuenta?{' '}
-          <a href="/login" style={styles.link}>
-            Inicia sesión
-          </a>
-        </p>
-      </div>
+              <div style={s.fila}>
+                <Campo label="RUT" name="rut" value={form.rut} onChange={handleChange} error={errores.rut} placeholder="12.345.678-K" />
+                <Campo label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} error={errores.telefono} placeholder="+56912345678" />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || !passwordsOk}
+                style={{ ...s.btn, opacity: (loading || !passwordsOk) ? 0.5 : 1, cursor: (loading || !passwordsOk) ? 'not-allowed' : 'pointer' }}
+              >
+                {loading ? 'Registrando...' : 'Crear cuenta'}
+              </button>
+            </form>
+
+            <div style={s.cardFooter}>
+              <span style={s.footerMuted}>¿Ya tienes cuenta?</span>
+              <a href="/login" style={s.linkGold}>Iniciar sesión →</a>
+            </div>
+          </div>
+        </div>
+
+      </main>
     </div>
   )
 }
 
 function Campo({ label, name, type = 'text', value, onChange, error, placeholder }) {
   return (
-    <div style={styles.campo}>
-      <label style={styles.label}>{label}</label>
+    <div style={s.campo}>
+      <label style={s.label}>{label}</label>
       <input
         type={type}
         name={name}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        style={{ ...styles.input, ...(error ? styles.inputError : {}) }}
+        style={{ ...s.input, ...(error ? s.inputError : {}) }}
       />
-      {error && <span style={styles.error}>{error}</span>}
+      {error && <span style={s.errorMsg}>{error}</span>}
     </div>
   )
 }
 
 function CampoPassword({ label, name, value, onChange, error, placeholder, ok }) {
-  const borderColor = ok ? '#16a34a' : error ? '#ef4444' : '#d1d5db'
+  const borderColor = ok ? '#43c59e' : error ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.12)'
   return (
-    <div style={styles.campo}>
-      <label style={styles.label}>{label}</label>
+    <div style={s.campo}>
+      <label style={s.label}>{label}</label>
       <div style={{ position: 'relative' }}>
         <input
           type="password"
@@ -250,134 +225,272 @@ function CampoPassword({ label, name, value, onChange, error, placeholder, ok })
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          style={{
-            ...styles.input,
-            borderColor,
-            paddingRight: ok ? '38px' : '12px',
-            width: '100%',
-            boxSizing: 'border-box',
-          }}
+          style={{ ...s.input, borderColor, paddingRight: ok ? '40px' : '14px', width: '100%' }}
         />
         {ok && (
-          <span style={styles.tick} aria-label="contraseñas coinciden">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <circle cx="8" cy="8" r="8" fill="#16a34a"/>
-              <polyline points="4.5,8.5 7,11 11.5,5.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          <span style={s.tick}>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <circle cx="9" cy="9" r="9" fill="#43c59e" />
+              <polyline points="5,9.5 7.5,12 13,6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </span>
         )}
       </div>
-      {error && <span style={styles.error}>{error}</span>}
+      {error && <span style={s.errorMsg}>{error}</span>}
     </div>
   )
 }
 
-const styles = {
-  container: {
+const s = {
+  page: {
     minHeight: '100vh',
+    background: 'linear-gradient(160deg, #0d2235 0%, #1a3a52 55%, #0f2a3f 100%)',
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  grid: {
+    position: 'fixed',
+    inset: 0,
+    pointerEvents: 'none',
+    background: `
+      linear-gradient(rgba(108,141,168,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(108,141,168,0.07) 1px, transparent 1px)
+    `,
+    backgroundSize: '48px 48px',
+    zIndex: 0,
+  },
+  header: {
+    position: 'relative',
+    zIndex: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '18px 40px',
+    borderBottom: '1px solid rgba(247,199,95,0.1)',
+    backdropFilter: 'blur(8px)',
+  },
+  logoWrap: { display: 'flex', alignItems: 'center', gap: '10px' },
+  logoImg: { height: '34px', width: 'auto' },
+  logoText: { fontSize: '17px', fontWeight: '700', color: '#f5f9fe', fontFamily: "'Sora', sans-serif" },
+  logoGold: { color: '#c9a84c' },
+  headerLink: { fontSize: '14px', color: '#ccd8ea' },
+  headerLinkGold: { color: '#c9a84c', fontWeight: '600' },
+
+  main: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    position: 'relative',
+    zIndex: 1,
+    padding: '32px 40px 48px',
+    gap: '60px',
+    maxWidth: '1160px',
+    margin: '0 auto',
+    width: '100%',
+  },
+
+  imageCol: {
+    flex: 1,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
+    minHeight: '500px',
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: '8px',
-    padding: '40px',
+  imageWrap: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     width: '100%',
-    maxWidth: '480px',
-    boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+    height: '500px',
+  },
+  imageGlow: {
+    position: 'absolute',
+    width: '360px',
+    height: '360px',
+    borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(193,154,84,0.1) 0%, transparent 70%)',
+    pointerEvents: 'none',
+  },
+  imgSeñalando: {
+    maxHeight: '460px',
+    maxWidth: '100%',
+    objectFit: 'contain',
+    position: 'relative',
+    zIndex: 2,
+    filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))',
+    transform: 'scaleX(-1)',
+  },
+  tabletCard: {
+    position: 'absolute',
+    bottom: '30px',
+    right: '10px',
+    zIndex: 3,
+    background: 'rgba(13,34,53,0.9)',
+    border: '1px solid rgba(199,168,106,0.2)',
+    borderRadius: '14px',
+    padding: '10px',
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 12px 30px rgba(0,0,0,0.3)',
+  },
+  imgTablet: {
+    width: '110px',
+    height: '110px',
+    objectFit: 'contain',
+    display: 'block',
+  },
+  imageCard: {
+    position: 'absolute',
+    bottom: '20px',
+    left: '10px',
+    zIndex: 3,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    background: 'rgba(13,34,53,0.9)',
+    border: '1px solid rgba(247,199,95,0.18)',
+    borderRadius: '30px',
+    padding: '8px 16px',
+    backdropFilter: 'blur(10px)',
+  },
+  imageCardDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    background: '#43c59e',
+    flexShrink: 0,
+  },
+  imageCardText: { fontSize: '12px', color: '#ccd8ea', fontWeight: '500' },
+
+  formCol: { width: '460px', flexShrink: 0 },
+  card: {
+    background: 'rgba(9,28,45,0.85)',
+    border: '1px solid rgba(199,168,106,0.18)',
+    borderRadius: '16px',
+    padding: '36px 36px 32px',
+    backdropFilter: 'blur(14px)',
+    boxShadow: '0 24px 60px rgba(0,0,0,0.3)',
+  },
+  cardHeader: { marginBottom: '24px' },
+  eyebrow: {
+    fontSize: '12px',
+    fontWeight: '700',
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase',
+    color: '#c9a84c',
+    display: 'block',
+    marginBottom: '8px',
   },
   titulo: {
     fontSize: '24px',
-    fontWeight: '700',
-    marginBottom: '24px',
-    color: '#111',
-  },
-  fila: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '12px',
-  },
-  campo: {
-    display: 'flex',
-    flexDirection: 'column',
-    marginBottom: '16px',
-  },
-  label: {
-    fontSize: '14px',
-    fontWeight: '500',
+    fontWeight: '800',
+    color: '#f5f9fe',
     marginBottom: '6px',
-    color: '#333',
+    fontFamily: "'Sora', sans-serif",
   },
-  input: {
-    padding: '10px 12px',
-    border: '1px solid #d1d5db',
-    borderRadius: '6px',
-    fontSize: '15px',
-    outline: 'none',
-    transition: 'border-color 0.2s',
-  },
-  inputError: {
-    borderColor: '#ef4444',
-  },
-  error: {
-    color: '#ef4444',
-    fontSize: '12px',
-    marginTop: '4px',
-  },
-  errorGeneral: {
-    color: '#ef4444',
-    backgroundColor: '#fef2f2',
-    border: '1px solid #fecaca',
-    borderRadius: '6px',
+  subtitulo: { fontSize: '13px', color: '#8ba3bc', lineHeight: '1.5' },
+
+  alertError: {
+    background: 'rgba(239,68,68,0.1)',
+    border: '1px solid rgba(239,68,68,0.3)',
+    borderRadius: '8px',
     padding: '10px 14px',
     marginBottom: '16px',
-    fontSize: '14px',
+    fontSize: '13px',
+    color: '#fca5a5',
   },
-  boton: {
-    width: '100%',
-    padding: '12px',
-    backgroundColor: '#2563eb',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '16px',
+
+  fila: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' },
+  campo: { display: 'flex', flexDirection: 'column', marginBottom: '14px' },
+  label: {
+    fontSize: '12px',
     fontWeight: '600',
-    cursor: 'pointer',
-    marginTop: '8px',
+    color: '#ccd8ea',
+    marginBottom: '6px',
+    letterSpacing: '0.04em',
+    textTransform: 'uppercase',
   },
-  successBox: {
-    backgroundColor: '#f0fdf4',
-    border: '1px solid #bbf7d0',
-    borderRadius: '6px',
-    padding: '20px',
-    textAlign: 'center',
-  },
-  successText: {
-    color: '#15803d',
-    fontSize: '15px',
-    margin: 0,
-  },
-  linkTexto: {
-    textAlign: 'center',
-    marginTop: '20px',
+  input: {
+    padding: '11px 14px',
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.12)',
+    borderRadius: '8px',
+    color: '#f5f9fe',
     fontSize: '14px',
-    color: '#555',
+    outline: 'none',
+    width: '100%',
+    transition: 'border-color 0.2s',
   },
-  link: {
-    color: '#2563eb',
-    textDecoration: 'none',
-    fontWeight: '500',
-  },
+  inputError: { borderColor: 'rgba(239,68,68,0.6)' },
+  errorMsg: { color: '#fca5a5', fontSize: '11px', marginTop: '4px' },
+
   tick: {
     position: 'absolute',
-    right: '10px',
+    right: '11px',
     top: '50%',
     transform: 'translateY(-50%)',
     display: 'flex',
     alignItems: 'center',
     pointerEvents: 'none',
+  },
+
+  btn: {
+    width: '100%',
+    padding: '13px',
+    background: 'linear-gradient(135deg, #c19a54, #e0c589)',
+    color: '#09111f',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '15px',
+    fontWeight: '700',
+    marginTop: '8px',
+    letterSpacing: '0.02em',
+    transition: 'opacity 0.2s',
+  },
+
+  cardFooter: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: '20px',
+    paddingTop: '18px',
+    borderTop: '1px solid rgba(199,168,106,0.12)',
+  },
+  footerMuted: { fontSize: '13px', color: '#8ba3bc' },
+  linkGold: { fontSize: '13px', color: '#c9a84c', fontWeight: '600' },
+
+  // Success screen
+  successWrap: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '40px',
+    position: 'relative',
+    zIndex: 1,
+  },
+  successCard: {
+    background: 'rgba(9,28,45,0.85)',
+    border: '1px solid rgba(199,168,106,0.18)',
+    borderRadius: '16px',
+    padding: '52px 44px',
+    maxWidth: '440px',
+    textAlign: 'center',
+    backdropFilter: 'blur(14px)',
+    boxShadow: '0 24px 60px rgba(0,0,0,0.3)',
+  },
+  successIcon: { fontSize: '44px', display: 'block', marginBottom: '16px' },
+  successTitle: { fontSize: '22px', fontWeight: '800', color: '#f5f9fe', marginBottom: '12px', fontFamily: "'Sora', sans-serif" },
+  successMsg: { fontSize: '14px', color: '#8ba3bc', lineHeight: '1.7', marginBottom: '28px' },
+  successBtn: {
+    display: 'inline-block',
+    padding: '12px 28px',
+    background: 'linear-gradient(135deg, #c19a54, #e0c589)',
+    color: '#09111f',
+    borderRadius: '8px',
+    fontWeight: '700',
+    fontSize: '14px',
   },
 }
