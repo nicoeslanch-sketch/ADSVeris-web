@@ -69,6 +69,7 @@ export default function RegisterForm() {
         phone: form.telefono,
         plan_id: 'free',
       }
+      saveLocalProfile(form.email, userMetadata)
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -259,6 +260,14 @@ function useIsMobile(maxWidth = 780) {
 
 function sx(...styles) {
   return Object.assign({}, ...styles.filter(Boolean))
+}
+
+function saveLocalProfile(email, metadata) {
+  try {
+    localStorage.setItem(`adsveris_profile:${email.trim().toLowerCase()}`, JSON.stringify(metadata))
+  } catch {
+    // El registro no debe fallar si el navegador bloquea localStorage.
+  }
 }
 
 const s = {

@@ -21,13 +21,14 @@ export default function Dashboard() {
         setUsuario(session.user)
 
         const authMetadata = metadataFromAuth(session.user)
+        const localMetadata = metadataFromLocal(session.user.email)
         const { data, error: metaError } = await supabase
           .from('users_metadata')
           .select('*')
           .eq('user_id', session.user.id)
           .single()
 
-        setMetadata(metaError ? authMetadata : { ...authMetadata, ...data })
+        setMetadata(mergeMetadata(authMetadata, data, localMetadata))
       } catch (err) {
         setError(err.message || 'Error al cargar los datos.')
       } finally {
@@ -109,11 +110,32 @@ export default function Dashboard() {
 function metadataFromAuth(user) {
   const data = user?.user_metadata || {}
   return {
-    full_name: data.full_name || user?.email || '',
-    rut: data.rut || '',
-    phone: data.phone || '',
-    plan_id: data.plan_id || 'free',
+    full_name: firstValue(data.full_name, data.name, user?.email),
+    rut: firstValue(data.rut),
+    phone: firstValue(data.phone, data.telefono, data.phone_number),
+    plan_id: firstValue(data.plan_id, 'free'),
   }
+}
+
+function metadataFromLocal(email) {
+  try {
+    return JSON.parse(localStorage.getItem(`adsveris_profile:${email?.trim().toLowerCase()}`)) || {}
+  } catch {
+    return {}
+  }
+}
+
+function mergeMetadata(...sources) {
+  return {
+    full_name: firstValue(...sources.map(source => source?.full_name), ...sources.map(source => source?.name)),
+    rut: firstValue(...sources.map(source => source?.rut)),
+    phone: firstValue(...sources.map(source => source?.phone), ...sources.map(source => source?.telefono), ...sources.map(source => source?.phone_number)),
+    plan_id: firstValue(...sources.map(source => source?.plan_id), 'free'),
+  }
+}
+
+function firstValue(...values) {
+  return values.find(value => value !== undefined && value !== null && String(value).trim() !== '') || ''
 }
 
 function Fila({ label, valor, badge }) {
