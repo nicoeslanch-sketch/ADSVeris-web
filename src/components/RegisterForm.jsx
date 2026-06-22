@@ -121,33 +121,14 @@ export default function RegisterForm() {
       {/* Main split */}
       <main style={s.main}>
 
-        {/* Imágenes izquierda */}
-        <div style={s.imageCol}>
-          <div style={s.imageWrap}>
-            <div style={s.imageGlow} aria-hidden="true" />
-
-            {/* Imagen señalando (apunta hacia el formulario) */}
-            <img
-              src={senalandoImg}
-              alt="Señalando el formulario de registro"
-              style={s.imgSenalando}
-            />
-
-            {/* Imagen dibujo con tablet */}
-            <img
-              src={dibujoTabletImg}
-              alt="Ilustración tablet"
-              style={s.imgTablet}
-            />
-
-            {/* Badge decorativo */}
-            <div style={s.imageCard}>
-              <span style={s.imageCardDot} />
-              <span style={s.imageCardText}>Únete a ADS Veris hoy</span>
-            </div>
-          </div>
+        {/* Imagen izquierda */}
+        <div style={s.sideCol}>
+          <img
+            src={senalandoImg}
+            alt="Señalando el formulario de registro"
+            style={s.imgSenalando}
+          />
         </div>
-
         {/* Formulario derecho */}
         <div style={s.formCol}>
           <div style={s.card}>
@@ -189,6 +170,14 @@ export default function RegisterForm() {
               <a href="/login" style={s.linkGold}>Iniciar sesión →</a>
             </div>
           </div>
+        </div>
+
+        <div style={s.sideCol}>
+          <img
+            src={dibujoTabletImg}
+            alt="Ilustración tablet"
+            style={s.imgTablet}
+          />
         </div>
 
       </main>
@@ -280,43 +269,30 @@ const s = {
 
   main: {
     flex: 1,
-    display: 'flex',
+    display: 'grid',
+    gridTemplateColumns: 'minmax(220px, 1fr) minmax(420px, 460px) minmax(220px, 1fr)',
     alignItems: 'center',
     position: 'relative',
     zIndex: 1,
     padding: '32px 40px 48px',
-    gap: '60px',
-    maxWidth: '1160px',
+    gap: '28px',
+    maxWidth: '1380px',
     margin: '0 auto',
     width: '100%',
   },
 
-  imageCol: {
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '500px',
-  },
-  imageWrap: {
-    position: 'relative',
+  sideCol: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    height: '500px',
-  },
-  imageGlow: {
-    position: 'absolute',
-    width: '360px',
-    height: '360px',
-    borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(193,154,84,0.1) 0%, transparent 70%)',
-    pointerEvents: 'none',
+    minWidth: 0,
+    minHeight: '520px',
   },
   imgSenalando: {
-    maxHeight: '460px',
-    maxWidth: '100%',
+    width: 'clamp(260px, 28vw, 430px)',
+    maxWidth: '115%',
+    height: 'auto',
     objectFit: 'contain',
     position: 'relative',
     zIndex: 2,
@@ -324,39 +300,15 @@ const s = {
     transform: 'scaleX(-1)',
   },
   imgTablet: {
-    position: 'absolute',
-    bottom: '4px',
-    right: '-18px',
+    position: 'relative',
     zIndex: 3,
-    width: '170px',
-    maxWidth: '42%',
+    width: 'clamp(250px, 26vw, 400px)',
+    maxWidth: '110%',
     height: 'auto',
     objectFit: 'contain',
     display: 'block',
     filter: 'drop-shadow(0 18px 30px rgba(0,0,0,0.28))',
   },
-  imageCard: {
-    position: 'absolute',
-    bottom: '20px',
-    left: '10px',
-    zIndex: 3,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    background: 'rgba(13,34,53,0.9)',
-    border: '1px solid rgba(247,199,95,0.18)',
-    borderRadius: '30px',
-    padding: '8px 16px',
-    backdropFilter: 'blur(10px)',
-  },
-  imageCardDot: {
-    width: '8px',
-    height: '8px',
-    borderRadius: '50%',
-    background: '#43c59e',
-    flexShrink: 0,
-  },
-  imageCardText: { fontSize: '12px', color: '#ccd8ea', fontWeight: '500' },
 
   formCol: { width: '460px', flexShrink: 0 },
   card: {

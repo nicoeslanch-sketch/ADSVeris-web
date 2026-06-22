@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import saludandoImg from '../../assets/images/saludando.png'
+import seguridadImg from '../../assets/images/seguridad.png'
 
 const RATE_LIMIT_MAX = 5
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000
@@ -79,22 +80,15 @@ export default function Login() {
       <main style={s.main}>
 
         {/* Imagen izquierda */}
-        <div style={s.imageCol}>
-          <div style={s.imageWrap}>
-            <div style={s.imageGlow} aria-hidden="true" />
-            <img
-              src={saludandoImg}
-              alt="Bienvenida a ADS Veris"
-              style={s.heroImg}
-            />
-            <div style={s.imageCard}>
-              <span style={s.imageCardDot} />
-              <span style={s.imageCardText}>Tu cuenta, tus herramientas</span>
-            </div>
-          </div>
+        <div style={s.sideCol}>
+          <img
+            src={saludandoImg}
+            alt="Bienvenida a ADS Veris"
+            style={s.heroImg}
+          />
         </div>
 
-        {/* Formulario derecho */}
+        {/* Formulario centro */}
         <div style={s.formCol}>
           <div style={s.card}>
             <div style={s.cardHeader}>
@@ -133,6 +127,15 @@ export default function Login() {
               <a href="/register" style={s.linkGold}>Crear cuenta gratis →</a>
             </div>
           </div>
+        </div>
+
+        {/* Imagen derecha */}
+        <div style={s.sideCol}>
+          <img
+            src={seguridadImg}
+            alt="Seguridad de cuenta ADS Veris"
+            style={s.securityImg}
+          />
         </div>
 
       </main>
@@ -201,70 +204,41 @@ const s = {
 
   main: {
     flex: 1,
-    display: 'flex',
+    display: 'grid',
+    gridTemplateColumns: 'minmax(220px, 1fr) minmax(380px, 420px) minmax(220px, 1fr)',
     alignItems: 'center',
     position: 'relative',
     zIndex: 1,
     padding: '40px',
-    gap: '60px',
-    maxWidth: '1100px',
+    gap: '30px',
+    maxWidth: '1360px',
     margin: '0 auto',
     width: '100%',
   },
 
-  imageCol: {
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '480px',
-  },
-  imageWrap: {
-    position: 'relative',
+  sideCol: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-  },
-  imageGlow: {
-    position: 'absolute',
-    width: '340px',
-    height: '340px',
-    borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(193,154,84,0.12) 0%, transparent 70%)',
-    pointerEvents: 'none',
+    minWidth: 0,
+    minHeight: '500px',
   },
   heroImg: {
-    maxHeight: '480px',
-    maxWidth: '100%',
+    width: 'clamp(270px, 28vw, 430px)',
+    maxWidth: '115%',
+    height: 'auto',
     objectFit: 'contain',
     position: 'relative',
     filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))',
   },
-  imageCard: {
-    position: 'absolute',
-    bottom: '20px',
-    left: '10px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    background: 'rgba(13,34,53,0.9)',
-    border: '1px solid rgba(247,199,95,0.18)',
-    borderRadius: '30px',
-    padding: '8px 16px',
-    backdropFilter: 'blur(10px)',
-  },
-  imageCardDot: {
-    width: '8px',
-    height: '8px',
-    borderRadius: '50%',
-    background: '#43c59e',
-    flexShrink: 0,
-  },
-  imageCardText: {
-    fontSize: '12px',
-    color: '#ccd8ea',
-    fontWeight: '500',
+  securityImg: {
+    width: 'clamp(260px, 27vw, 410px)',
+    maxWidth: '112%',
+    height: 'auto',
+    objectFit: 'contain',
+    position: 'relative',
+    filter: 'drop-shadow(0 18px 34px rgba(0,0,0,0.32))',
   },
 
   formCol: {
