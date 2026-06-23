@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { sendPasswordChangedEmail } from '../lib/sendEmails'
 
 function serviciosFromPlan(planId) {
   const base = { planillasCompradas: 0, paginaWeb: null, procesos: false, analisis: false, plataforma: null, planBundle: null }
@@ -17,6 +18,7 @@ export default function Profile() {
   const [metadata, setMetadata] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [modalOpen, setModalOpen] = useState(false)
 
   useEffect(() => {
     async function cargar() {
@@ -90,7 +92,7 @@ export default function Profile() {
             <Fila label="RUT" valor={metadata?.rut} />
             <Fila label="Plan" valor={metadata?.plan_id === 'free' ? 'Gratuito' : metadata?.plan_id} badge />
           </div>
-          <button style={s.btnContrasena} disabled title="Próximamente">
+          <button style={s.btnContrasena} onClick={() => setModalOpen(true)}>
             Cambiar contraseña
           </button>
         </section>
@@ -141,6 +143,133 @@ export default function Profile() {
           </div>
         </section>
       </main>
+
+      {modalOpen && (
+        <ModalCambiarContrasena
+          usuario={usuario}
+          metadata={metadata}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+function ModalCambiarContrasena({ usuario, metadata, onClose }) {
+  const [actual, setActual] = useState('')
+  const [nueva, setNueva] = useState('')
+  const [repetir, setRepetir] = useState('')
+  const [loadingM, setLoadingM] = useState(false)
+  const [errorM, setErrorM] = useState('')
+  const [exito, setExito] = useState(false)
+
+  const coinciden = nueva.length >= 8 && repetir.length >= 8 && nueva === repetir
+  const valido = actual.length > 0 && coinciden
+
+  async function handleCambiar(e) {
+    e.preventDefault()
+    if (!valido) return
+    setErrorM('')
+    setLoadingM(true)
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: usuario.email,
+        password: actual,
+      })
+      if (authError) throw new Error('La contraseña actual es incorrecta.')
+
+      const { error: updateError } = await supabase.auth.updateUser({ password: nueva })
+      if (updateError) throw updateError
+
+      const nombre = metadata?.full_name || usuario.email
+      await sendPasswordChangedEmail(usuario.email, nombre).catch(() => {})
+
+      setExito(true)
+      setTimeout(onClose, 2000)
+    } catch (err) {
+      setErrorM(err.message || 'Error al cambiar la contraseña.')
+    } finally {
+      setLoadingM(false)
+    }
+  }
+
+  return (
+    <div style={s.overlay} onClick={onClose}>
+      <div style={s.modal} onClick={e => e.stopPropagation()}>
+        <div style={s.modalHeader}>
+          <h2 style={s.modalTitulo}>Cambiar contraseña</h2>
+          <button style={s.btnCerrar} onClick={onClose}>✕</button>
+        </div>
+
+        {exito ? (
+          <div style={s.exitoBox}>
+            <p style={s.exitoTexto}>✅ Contraseña cambiada exitosamente</p>
+          </div>
+        ) : (
+          <form onSubmit={handleCambiar} style={s.modalForm}>
+            {errorM && <div style={s.errorBox}>{errorM}</div>}
+
+            <CampoPassword
+              label="Contraseña actual"
+              value={actual}
+              onChange={setActual}
+              autoComplete="current-password"
+            />
+            <CampoPassword
+              label="Nueva contraseña"
+              value={nueva}
+              onChange={setNueva}
+              autoComplete="new-password"
+              hint={nueva.length > 0 && nueva.length < 8 ? 'Mínimo 8 caracteres' : ''}
+            />
+            <CampoPassword
+              label="Repetir nueva contraseña"
+              value={repetir}
+              onChange={setRepetir}
+              autoComplete="new-password"
+              validacion={
+                repetir.length > 0
+                  ? nueva === repetir
+                    ? 'ok'
+                    : 'error'
+                  : null
+              }
+            />
+
+            <button
+              type="submit"
+              disabled={!valido || loadingM}
+              style={{ ...s.btnGuardar, opacity: !valido || loadingM ? 0.5 : 1, cursor: !valido || loadingM ? 'not-allowed' : 'pointer' }}
+            >
+              {loadingM ? 'Cambiando...' : 'Cambiar contraseña'}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function CampoPassword({ label, value, onChange, autoComplete, hint, validacion }) {
+  return (
+    <div style={s.campoWrap}>
+      <label style={s.campoLabel}>{label}</label>
+      <div style={s.inputWrap}>
+        <input
+          type="password"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          autoComplete={autoComplete}
+          style={{
+            ...s.campoInput,
+            ...(validacion === 'ok' ? s.inputOk : {}),
+            ...(validacion === 'error' ? s.inputErr : {}),
+          }}
+        />
+        {validacion === 'ok' && <span style={s.iconOk}>✅</span>}
+        {validacion === 'error' && <span style={s.iconErr}>❌</span>}
+      </div>
+      {hint && <span style={s.hint}>{hint}</span>}
     </div>
   )
 }
@@ -278,13 +407,102 @@ const s = {
 
   btnContrasena: {
     padding: '10px 20px',
-    backgroundColor: '#f3f4f6',
-    color: '#9ca3af',
-    border: '1px solid #e5e7eb',
+    backgroundColor: '#09111f',
+    color: '#fff',
+    border: '1px solid rgba(201,168,76,0.3)',
     borderRadius: '6px',
     fontSize: '14px',
-    cursor: 'not-allowed',
+    cursor: 'pointer',
     fontFamily: 'inherit',
+    fontWeight: '500',
+  },
+
+  overlay: {
+    position: 'fixed',
+    inset: 0,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    padding: '20px',
+  },
+  modal: {
+    background: '#fff',
+    borderRadius: '12px',
+    padding: '32px',
+    width: '100%',
+    maxWidth: '420px',
+    boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+  },
+  modalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '24px',
+  },
+  modalTitulo: {
+    margin: 0,
+    fontSize: '18px',
+    fontWeight: '700',
+    color: '#111',
+  },
+  btnCerrar: {
+    background: 'none',
+    border: 'none',
+    fontSize: '16px',
+    color: '#6b7280',
+    cursor: 'pointer',
+    padding: '4px',
+    lineHeight: 1,
+  },
+  modalForm: { display: 'flex', flexDirection: 'column', gap: '16px' },
+  errorBox: {
+    background: '#fef2f2',
+    border: '1px solid #fecaca',
+    borderRadius: '8px',
+    padding: '12px 14px',
+    fontSize: '13px',
+    color: '#dc2626',
+  },
+  exitoBox: {
+    background: '#f0fdf4',
+    border: '1px solid #bbf7d0',
+    borderRadius: '8px',
+    padding: '20px',
+    textAlign: 'center',
+  },
+  exitoTexto: { margin: 0, fontSize: '15px', color: '#16a34a', fontWeight: '600' },
+  campoWrap: { display: 'flex', flexDirection: 'column', gap: '6px' },
+  campoLabel: { fontSize: '13px', fontWeight: '600', color: '#374151' },
+  inputWrap: { position: 'relative', display: 'flex', alignItems: 'center' },
+  campoInput: {
+    width: '100%',
+    padding: '11px 40px 11px 14px',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    fontSize: '15px',
+    color: '#111',
+    outline: 'none',
+    fontFamily: 'inherit',
+    boxSizing: 'border-box',
+  },
+  inputOk: { borderColor: '#16a34a', background: '#f0fdf4' },
+  inputErr: { borderColor: '#dc2626', background: '#fef2f2' },
+  iconOk: { position: 'absolute', right: '12px', fontSize: '14px' },
+  iconErr: { position: 'absolute', right: '12px', fontSize: '14px' },
+  hint: { fontSize: '12px', color: '#f59e0b' },
+  btnGuardar: {
+    padding: '13px',
+    background: 'linear-gradient(135deg,#c19a54,#e0c589)',
+    color: '#09111f',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '15px',
+    fontWeight: '700',
+    fontFamily: 'inherit',
+    marginTop: '4px',
+    transition: 'opacity 0.2s',
   },
 
   grid: {

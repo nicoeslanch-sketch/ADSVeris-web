@@ -3,6 +3,8 @@
     { "source": "/register", "destination": "/app.html" },
     { "source": "/login", "destination": "/app.html" },
     { "source": "/profile", "destination": "/app.html" },
-    { "source": "/dashboard", "destination": "/app.html" }
+    { "source": "/dashboard", "destination": "/app.html" },
+    { "source": "/forgot-password", "destination": "/app.html" },
+    { "source": "/reset-password", "destination": "/app.html" }
   ]
 }

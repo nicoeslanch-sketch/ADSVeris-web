@@ -124,7 +124,7 @@ export default function Login() {
             </form>
 
             <div style={sx(s.cardFooter, isMobile && s.cardFooterMobile)}>
-              <a href="/reset-password" style={s.linkMuted}>¿Olvidaste tu contraseña?</a>
+              <a href="/forgot-password" style={s.linkMuted}>¿Olvidaste tu contraseña?</a>
               <a href="/register" style={s.linkGold}>Crear cuenta gratis →</a>
             </div>
           </div>
