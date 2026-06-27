@@ -6,6 +6,17 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import EmailConfirmed from './pages/EmailConfirmed'
 
+function RootHandler() {
+  const hash = window.location.hash
+  if (hash.includes('type=signup')) {
+    return <Navigate to={'/email-confirmed' + hash} replace />
+  }
+  if (hash.includes('type=recovery')) {
+    return <Navigate to={'/reset-password' + hash} replace />
+  }
+  return <Navigate to="/register" replace />
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -17,7 +28,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/email-confirmed" element={<EmailConfirmed />} />
         <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
-        <Route path="/" element={<Navigate to="/register" />} />
+        <Route path="/" element={<RootHandler />} />
       </Routes>
     </BrowserRouter>
   )
