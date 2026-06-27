@@ -13,6 +13,8 @@ export default function Login() {
   const [errores, setErrores] = useState({})
   const [errorGeneral, setErrorGeneral] = useState('')
   const [loading, setLoading] = useState(false)
+  const [emailSinConfirmar, setEmailSinConfirmar] = useState(false)
+  const [reenvioEstado, setReenvioEstado] = useState('idle')
   const intentos = useRef(0)
   const ventanaInicio = useRef(Date.now())
 
@@ -44,6 +46,8 @@ export default function Login() {
     const rl = verificarRateLimit()
     if (rl) { setErrorGeneral(rl); return }
 
+    setEmailSinConfirmar(false)
+    setReenvioEstado('idle')
     setLoading(true)
     intentos.current += 1
     try {
@@ -57,9 +61,29 @@ export default function Login() {
       }))
       window.location.href = '/'
     } catch (err) {
-      setErrorGeneral(err.message || 'Email o contraseña incorrectos.')
+      const msg = err.message || 'Email o contraseña incorrectos.'
+      setErrorGeneral(msg)
+      if (msg === 'Email not confirmed') setEmailSinConfirmar(true)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleReenviar() {
+    const key = `adsveris_resend:${email.trim().toLowerCase()}`
+    const ultimo = localStorage.getItem(key)
+    if (ultimo && Date.now() - Number(ultimo) < 24 * 60 * 60 * 1000) {
+      setReenvioEstado('ya-enviado')
+      return
+    }
+    setReenvioEstado('loading')
+    try {
+      const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
+      if (error) throw error
+      localStorage.setItem(key, String(Date.now()))
+      setReenvioEstado('exito')
+    } catch {
+      setReenvioEstado('error')
     }
   }
 
@@ -99,6 +123,29 @@ export default function Login() {
             </div>
 
             {errorGeneral && <div style={s.alertError}>{errorGeneral}</div>}
+
+            {emailSinConfirmar && (
+              <div style={s.resendBox}>
+                <p style={s.resendTexto}>¿No te llegó el correo de confirmación?</p>
+                {reenvioEstado === 'idle' && (
+                  <button type="button" onClick={handleReenviar} style={s.btnReenviar}>
+                    Reenviar confirmación
+                  </button>
+                )}
+                {reenvioEstado === 'loading' && (
+                  <span style={s.resendMuted}>Enviando...</span>
+                )}
+                {reenvioEstado === 'exito' && (
+                  <span style={s.resendOk}>✅ Correo reenviado. Revisa tu bandeja de entrada y spam.</span>
+                )}
+                {reenvioEstado === 'ya-enviado' && (
+                  <span style={s.resendWarn}>Ya reenviamos el correo hoy. Revisa spam o intenta mañana.</span>
+                )}
+                {reenvioEstado === 'error' && (
+                  <span style={s.resendErr}>No se pudo reenviar. Intenta más tarde.</span>
+                )}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} noValidate style={s.form}>
               <Campo
@@ -401,4 +448,32 @@ const s = {
   },
   linkMuted: { fontSize: '13px', color: '#8ba3bc' },
   linkGold: { fontSize: '13px', color: '#c9a84c', fontWeight: '600' },
+
+  resendBox: {
+    background: 'rgba(201,168,76,0.07)',
+    border: '1px solid rgba(201,168,76,0.2)',
+    borderRadius: '8px',
+    padding: '14px 16px',
+    marginBottom: '16px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+  },
+  resendTexto: { margin: 0, fontSize: '13px', color: '#ccd8ea' },
+  btnReenviar: {
+    alignSelf: 'flex-start',
+    padding: '8px 16px',
+    background: 'linear-gradient(135deg, #c19a54, #e0c589)',
+    color: '#09111f',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '13px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  },
+  resendMuted: { fontSize: '13px', color: '#8ba3bc' },
+  resendOk: { fontSize: '13px', color: '#43c59e' },
+  resendWarn: { fontSize: '13px', color: '#f59e0b' },
+  resendErr: { fontSize: '13px', color: '#fca5a5' },
 }
