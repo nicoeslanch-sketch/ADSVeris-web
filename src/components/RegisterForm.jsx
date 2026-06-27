@@ -72,7 +72,10 @@ export default function RegisterForm() {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: { data: userMetadata },
+        options: {
+          data: userMetadata,
+          emailRedirectTo: 'https://pymex-web.vercel.app/email-confirmed',
+        },
       })
       if (signUpError) throw signUpError
       saveLocalProfile(form.email, userMetadata)
