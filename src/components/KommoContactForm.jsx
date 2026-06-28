@@ -7,16 +7,18 @@ const SERVICES = [
   'Plataforma de Análisis',
 ]
 
-const initialForm = {
-  name: '',
-  email: '',
-  phone: '',
-  serviceType: SERVICES[0],
+function createInitialForm(defaultService = SERVICES[0]) {
+  return {
+    name: '',
+    email: '',
+    phone: '',
+    serviceType: SERVICES.includes(defaultService) ? defaultService : SERVICES[0],
+  }
 }
 
-export default function KommoContactForm({ isOpen = true, onClose }) {
+export default function KommoContactForm({ isOpen = true, onClose, defaultService = SERVICES[0] }) {
   const isCompact = useIsCompact()
-  const [form, setForm] = useState(initialForm)
+  const [form, setForm] = useState(() => createInitialForm(defaultService))
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState({ type: '', message: '' })
   const [loading, setLoading] = useState(false)
@@ -28,6 +30,11 @@ export default function KommoContactForm({ isOpen = true, onClose }) {
     if (isSuccess) return 'Solicitud recibida'
     return 'Conversemos sobre tu proyecto'
   }, [isSuccess])
+
+  useEffect(() => {
+    if (!isOpen || isSuccess) return
+    setForm(prev => ({ ...prev, serviceType: createInitialForm(defaultService).serviceType }))
+  }, [defaultService, isOpen, isSuccess])
 
   if (!isOpen) return null
 
@@ -79,7 +86,7 @@ export default function KommoContactForm({ isOpen = true, onClose }) {
         type: 'success',
         message: 'Gracias. Ya tenemos tus datos y te contactaremos pronto.',
       })
-      setForm(initialForm)
+      setForm(createInitialForm(defaultService))
     } catch (error) {
       setStatus({
         type: 'error',

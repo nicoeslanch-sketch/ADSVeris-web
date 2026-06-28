@@ -7,7 +7,15 @@ export default defineConfig({
   build: {
     assetsDir: 'app-assets',
     rollupOptions: {
-      input: 'app.html',
+      input: {
+        app: 'app.html',
+        'kommo-widget': 'src/kommo-widget.jsx',
+      },
+      output: {
+        entryFileNames: 'app-assets/[name].js',
+        chunkFileNames: 'app-assets/[name]-[hash].js',
+        assetFileNames: 'app-assets/[name]-[hash][extname]',
+      },
     },
   },
 })

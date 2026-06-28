@@ -383,8 +383,70 @@ function initHeroCarousel() {
 function bindWhatsappButtons() {
   document.querySelectorAll(".js-whatsapp-contact").forEach((btn) => {
     btn.href = WHATSAPP_URL;
-    if (WHATSAPP_URL !== "#") btn.target = "_blank";
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      openKommoModal(resolveKommoService(btn));
+    });
   });
+}
+
+function resolveKommoService(button) {
+  if (button.dataset.kommoService) return button.dataset.kommoService;
+
+  const text = (button.textContent || "").toLowerCase();
+  const page = document.body.dataset.page || "";
+  const slide = button.closest(".carousel-slide");
+  const slideLabel = (slide?.querySelector(".carousel-label")?.textContent || "").toLowerCase();
+
+  if (text.includes("web") || text.includes("plan b") || text.includes("plan comercial") || text.includes("plan avanzado") || page === "paginas-web" || slideLabel.includes("web")) {
+    return "Página Web";
+  }
+
+  if (text.includes("diagn") || text.includes("proceso") || page === "procesos" || slideLabel.includes("proceso")) {
+    return "Optimización de Procesos";
+  }
+
+  if (text.includes("plataforma") || text.includes("análisis") || page === "plataforma") {
+    return "Plataforma de Análisis";
+  }
+
+  return "Planilla Excel Personalizada";
+}
+
+function getKommoWidgetSrc() {
+  const inSubfolder = window.location.pathname.includes('/soluciones/');
+  return `${inSubfolder ? '../' : ''}app-assets/kommo-widget.js`;
+}
+
+function loadKommoWidget() {
+  if (window.openKommoContactForm) return Promise.resolve();
+
+  const existing = document.querySelector('script[data-kommo-widget]');
+  if (existing) {
+    return new Promise((resolve, reject) => {
+      window.addEventListener('adsveris:kommo-widget-ready', resolve, { once: true });
+      existing.addEventListener('error', reject, { once: true });
+    });
+  }
+
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = getKommoWidgetSrc();
+    script.dataset.kommoWidget = 'true';
+    script.addEventListener('error', reject, { once: true });
+    window.addEventListener('adsveris:kommo-widget-ready', resolve, { once: true });
+    document.head.appendChild(script);
+  });
+}
+
+async function openKommoModal(serviceType) {
+  try {
+    await loadKommoWidget();
+    window.openKommoContactForm?.(serviceType);
+  } catch (error) {
+    console.error('No se pudo cargar el modal Kommo:', error);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
