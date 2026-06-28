@@ -6,6 +6,7 @@
     { "source": "/dashboard", "destination": "/app.html" },
     { "source": "/forgot-password", "destination": "/app.html" },
     { "source": "/reset-password", "destination": "/app.html" },
-    { "source": "/email-confirmed", "destination": "/app.html" }
+    { "source": "/email-confirmed", "destination": "/app.html" },
+    { "source": "/contacto-kommo", "destination": "/app.html" }
   ]
 }
