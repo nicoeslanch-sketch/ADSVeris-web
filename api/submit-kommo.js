@@ -2,22 +2,22 @@ const SERVICES = {
   planilla: {
     label: 'Planilla Excel Personalizada',
     pipeline_id: 14023387,
-    status_id: 108238127,
+    status_id: 108238131,
   },
   web: {
-    label: 'Página Web',
+    label: 'Pagina Web',
     pipeline_id: 14023535,
-    status_id: 108239223,
+    status_id: 108239227,
   },
   procesos: {
-    label: 'Optimización de Procesos',
+    label: 'Optimizacion de Procesos',
     pipeline_id: 14023539,
-    status_id: 108239239,
+    status_id: 108239243,
   },
   plataforma: {
-    label: 'Plataforma de Análisis',
+    label: 'Plataforma de Analisis',
     pipeline_id: 14023551,
-    status_id: 108239307,
+    status_id: 108239311,
   },
 }
 
@@ -64,6 +64,31 @@ async function requestJson(url, options) {
   const response = await fetch(url, options)
   const data = await response.json().catch(() => ({}))
   return { response, data }
+}
+
+function getKommoError(data, fallback) {
+  return data?.detail || data?.title || fallback
+}
+
+function logKommoError(label, status, data) {
+  console.error(label, status, JSON.stringify(data, null, 2))
+}
+
+async function createLead({ kommoBaseUrl, headers, service, name, includeStatus }) {
+  const leadPayload = [
+    {
+      name: `${service.label} - ${name}`,
+      pipeline_id: service.pipeline_id,
+      price: 0,
+      ...(includeStatus ? { status_id: service.status_id } : {}),
+    },
+  ]
+
+  return requestJson(`${kommoBaseUrl}/api/v4/leads`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(leadPayload),
+  })
 }
 
 export default async function handler(req, res) {
@@ -134,10 +159,11 @@ export default async function handler(req, res) {
     })
 
     if (!contactResponse.ok) {
-      console.error('Kommo contact error:', contactResponse.status, contactData)
+      logKommoError('Kommo contact error:', contactResponse.status, contactData)
       return res.status(contactResponse.status).json({
         success: false,
-        error: contactData?.detail || contactData?.title || 'Error creando contacto en Kommo',
+        error: getKommoError(contactData, 'Error creando contacto en Kommo'),
+        details: contactData,
       })
     }
 
@@ -146,29 +172,35 @@ export default async function handler(req, res) {
       : contactData?._embedded?.contacts?.[0]
     const contactId = contact?.id
 
-    const leadPayload = [
-    {
-      name: `${service.label} - ${name}`,
-      pipeline_id: service.pipeline_id,
-      status_id: service.status_id,
-      price: 0,
-      _embedded: {
-        contacts: contactId ? [{ id: contactId }] : [],
-      },
-    },
-  ]
-
-    const { response, data } = await requestJson(`${kommoBaseUrl}/api/v4/leads`, {
-      method: 'POST',
+    let { response, data } = await createLead({
+      kommoBaseUrl,
       headers,
-      body: JSON.stringify(leadPayload),
+      service,
+      name,
+      includeStatus: true,
     })
+    let usedFallbackStatus = false
+
+    if (!response.ok && response.status === 400) {
+      logKommoError('Kommo lead status error, retrying with pipeline only:', response.status, data)
+      const fallback = await createLead({
+        kommoBaseUrl,
+        headers,
+        service,
+        name,
+        includeStatus: false,
+      })
+      response = fallback.response
+      data = fallback.data
+      usedFallbackStatus = true
+    }
 
     if (!response.ok) {
-      console.error('Kommo API error:', response.status, data)
+      logKommoError('Kommo API error:', response.status, data)
       return res.status(response.status).json({
         success: false,
-        error: data?.detail || data?.title || 'Error creando lead en Kommo',
+        error: getKommoError(data, 'Error creando lead en Kommo'),
+        details: data,
       })
     }
 
@@ -177,12 +209,30 @@ export default async function handler(req, res) {
       : data?._embedded?.leads?.[0]
     const leadId = lead?.id
 
+    if (leadId && contactId) {
+      const { response: linkResponse, data: linkData } = await requestJson(`${kommoBaseUrl}/api/v4/leads/${leadId}/link`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify([
+          {
+            to_entity_id: contactId,
+            to_entity_type: 'contacts',
+          },
+        ]),
+      })
+
+      if (!linkResponse.ok) {
+        console.warn('Kommo contact link warning:', leadId, contactId, linkResponse.status, JSON.stringify(linkData, null, 2))
+      }
+    }
+
     if (leadId) {
       const noteText = [
         'Solicitud enviada desde pymex-web',
         `Servicio: ${service.label}`,
         `Pipeline asignado: ${service.pipeline_id}`,
         `Estado asignado: ${service.status_id}`,
+        `Estado fallback: ${usedFallbackStatus ? 'si' : 'no'}`,
         `Nombre: ${name}`,
         `Email: ${email}`,
         `Telefono: ${phone}`,
@@ -200,7 +250,7 @@ export default async function handler(req, res) {
       })
 
       if (!noteResponse.ok) {
-        console.warn('Kommo note warning:', leadId, noteResponse.status, noteError)
+        console.warn('Kommo note warning:', leadId, noteResponse.status, JSON.stringify(noteError, null, 2))
       }
     }
 
@@ -212,7 +262,7 @@ export default async function handler(req, res) {
       })
 
       if (!confirmResponse.ok) {
-        console.warn('Kommo confirm warning:', leadId, confirmResponse.status, confirmData)
+        console.warn('Kommo confirm warning:', leadId, confirmResponse.status, JSON.stringify(confirmData, null, 2))
       } else {
         confirmedLead = confirmData
       }
@@ -220,10 +270,7 @@ export default async function handler(req, res) {
 
     const confirmedPipelineId = confirmedLead?.pipeline_id
     const confirmedStatusId = confirmedLead?.status_id
-    const pipelineOk = !leadId || (
-      confirmedPipelineId === service.pipeline_id &&
-      confirmedStatusId === service.status_id
-    )
+    const pipelineOk = !leadId || confirmedPipelineId === service.pipeline_id
 
     if (!pipelineOk) {
       console.error('Kommo pipeline mismatch:', {
@@ -249,6 +296,7 @@ export default async function handler(req, res) {
       statusId: service.status_id,
       confirmedPipelineId,
       confirmedStatusId,
+      usedFallbackStatus,
     })
 
     return res.status(200).json({
@@ -260,6 +308,7 @@ export default async function handler(req, res) {
       statusId: service.status_id,
       confirmedPipelineId,
       confirmedStatusId,
+      usedFallbackStatus,
       data,
     })
   } catch (error) {
