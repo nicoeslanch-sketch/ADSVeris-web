@@ -107,10 +107,12 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
         onClick={event => event.stopPropagation()}
       >
         <div style={{ ...s.brandPanel, ...(isCompact ? s.brandPanelCompact : {}) }}>
+          <div style={s.brandGlow} aria-hidden="true" />
           <div style={s.logoRow}>
             <img src="/images/logo-ads-veris.png" alt="ADS Veris" style={s.logo} />
             <strong style={s.brandName}>ADS <span style={s.goldText}>Veris</span></strong>
           </div>
+          <img src="/images/oreja celu.png" alt="" style={{ ...s.agentImage, ...(isCompact ? s.agentImageCompact : {}) }} />
           <div style={s.colorRail} aria-hidden="true">
             <span style={{ ...s.railDot, background: '#0f766e' }} />
             <span style={{ ...s.railDot, background: '#c9a84c' }} />
@@ -272,15 +274,42 @@ const s = {
     flexDirection: 'column',
     justifyContent: 'space-between',
     background: 'linear-gradient(150deg, #081525 0%, #0b2b3c 58%, #0f766e 100%)',
+    overflow: 'hidden',
   },
   brandPanelCompact: {
-    minHeight: '116px',
+    minHeight: '210px',
     padding: '20px',
+  },
+  brandGlow: {
+    position: 'absolute',
+    inset: 'auto -70px -80px -70px',
+    height: '230px',
+    background: 'radial-gradient(circle, rgba(201,168,76,0.34), rgba(15,118,110,0.2) 38%, transparent 70%)',
+    pointerEvents: 'none',
+  },
+  agentImage: {
+    position: 'absolute',
+    right: '-34px',
+    bottom: '-22px',
+    width: 'min(118%, 430px)',
+    maxHeight: '92%',
+    objectFit: 'contain',
+    objectPosition: 'right bottom',
+    filter: 'drop-shadow(0 24px 36px rgba(0,0,0,0.35))',
+    pointerEvents: 'none',
+  },
+  agentImageCompact: {
+    width: '260px',
+    right: '-18px',
+    bottom: '-42px',
+    maxHeight: '235px',
   },
   logoRow: {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
+    position: 'relative',
+    zIndex: 2,
   },
   logo: {
     width: '38px',
@@ -298,6 +327,8 @@ const s = {
   colorRail: {
     display: 'flex',
     gap: '10px',
+    position: 'relative',
+    zIndex: 2,
   },
   railDot: {
     width: '42px',
