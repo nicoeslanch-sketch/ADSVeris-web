@@ -29,7 +29,7 @@ Do not store API tokens in this file. Use Vercel environment variables or a loca
 | Status | ID | Sort | Type | Color | Editable |
 | --- | ---: | ---: | ---: | --- | --- |
 | Leads Entrantes | `108238127` | 10 | 1 | `#c1c1c1` | false |
-| Contacto planilla | `108238131` | 20 | 0 | `#fffeb2` | true |
+| Contactados | `108238131` | 20 | 0 | `#fffeb2` | true |
 | Levantamiento planilla | `108238135` | 30 | 0 | `#fffeb2` | true |
 | Propuesta planilla | `108238139` | 40 | 0 | `#fffeb2` | true |
 | Logrado con exito | `142` | 10000 | 0 | `#CCFF66` | false |
@@ -44,7 +44,7 @@ Do not store API tokens in this file. Use Vercel environment variables or a loca
 | Status | ID | Sort | Type | Color | Editable |
 | --- | ---: | ---: | ---: | --- | --- |
 | Leads Entrantes | `108239223` | 10 | 1 | `#c1c1c1` | false |
-| Contacto web | `108239227` | 20 | 0 | `#fffeb2` | true |
+| Contactados | `108239227` | 20 | 0 | `#fffeb2` | true |
 | Brief sitio web | `108239231` | 30 | 0 | `#fffeb2` | true |
 | Propuesta web | `108239235` | 40 | 0 | `#fffeb2` | true |
 | Logrado con exito | `142` | 10000 | 0 | `#CCFF66` | false |
@@ -59,7 +59,7 @@ Do not store API tokens in this file. Use Vercel environment variables or a loca
 | Status | ID | Sort | Type | Color | Editable |
 | --- | ---: | ---: | ---: | --- | --- |
 | Leads Entrantes | `108239239` | 10 | 1 | `#c1c1c1` | false |
-| Contacto procesos | `108239243` | 20 | 0 | `#fffeb2` | true |
+| Contactados | `108239243` | 20 | 0 | `#fffeb2` | true |
 | Diagnostico operativo | `108239247` | 30 | 0 | `#fffeb2` | true |
 | Propuesta de mejora | `108239251` | 40 | 0 | `#fffeb2` | true |
 | Cotizacion procesos | `108246983` | 50 | 0 | `#fffeb2` | true |
@@ -75,7 +75,7 @@ Do not store API tokens in this file. Use Vercel environment variables or a loca
 | Status | ID | Sort | Type | Color | Editable |
 | --- | ---: | ---: | ---: | --- | --- |
 | Leads Entrantes | `108239307` | 10 | 1 | `#c1c1c1` | false |
-| Contacto plataforma | `108239311` | 20 | 0 | `#fffeb2` | true |
+| Contactados | `108239311` | 20 | 0 | `#fffeb2` | true |
 | Levantamiento datos | `108239315` | 30 | 0 | `#fffeb2` | true |
 | Propuesta dashboard | `108239319` | 40 | 0 | `#fffeb2` | true |
 | Logrado con exito | `142` | 10000 | 0 | `#CCFF66` | false |
@@ -133,5 +133,21 @@ Do not store API tokens in this file. Use Vercel environment variables or a loca
   - Plataforma de Analisis: pipeline `14023551`, status `108239311`, tag `22514`.
 - Closed statuses `142` and `143` are shared across pipelines.
 - Web integration assigns service tags automatically when creating a lead.
+- `api/kommo-contactados-webhook.js` sends a service-specific email when a lead reaches the `Contactados` status in a service pipeline.
+- Registered Kommo webhook ID: `47387135`.
+- The registered webhook has `add_lead` and `update_lead` enabled in Kommo, but the Vercel handler intentionally ignores `add` events and processes status updates only.
+- The Contactados webhook requires these Vercel Production env vars:
+  - `KOMMO_WEBHOOK_SECRET`
+  - `KOMMO_API_TOKEN`
+  - `KOMMO_SUBDOMAIN`
+  - `KOMMO_ACCOUNT_ID`
+  - `SENDGRID_API_KEY`
+- Contactados webhook target statuses:
+  - Planillas: pipeline `14023387`, status `108238131`.
+  - Paginas web: pipeline `14023535`, status `108239227`.
+  - Procesos: pipeline `14023539`, status `108239243`.
+  - Plataforma: pipeline `14023551`, status `108239311`.
+- Contactados email templates live in `KOMMO_EMAIL_TEMPLATES.md`.
+- If SendGrid rejects a send, the webhook writes a failure note into the lead with the manual email template.
 - Kommo allowed renaming editable statuses through `PATCH /api/v4/leads/pipelines/{pipeline_id}/statuses/{status_id}`. It rejected color-only updates with HTTP 400, and name updates returned editable statuses with color `#fffeb2`.
 - `Embudo de ventas` was not modified.
