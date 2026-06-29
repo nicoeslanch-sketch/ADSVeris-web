@@ -156,15 +156,12 @@ export default async function handler(req, res) {
     const contactId = lead?.contact_id
 
     if (leadId) {
-      const updatePayload = [
-        {
-          id: leadId,
-          pipeline_id: service.pipeline_id,
-          status_id: service.status_id,
-        },
-      ]
+      const updatePayload = {
+        pipeline_id: service.pipeline_id,
+        status_id: service.status_id,
+      }
 
-      const { response: updateResponse, data: updateData } = await requestJson(`${kommoBaseUrl}/api/v4/leads`, {
+      const { response: updateResponse, data: updateData } = await requestJson(`${kommoBaseUrl}/api/v4/leads/${leadId}`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify(updatePayload),
@@ -177,6 +174,7 @@ export default async function handler(req, res) {
           leadId,
           contactId,
           error: 'Lead creado, pero Kommo no permitio moverlo al embudo correcto',
+          details: updateData,
         })
       }
 
