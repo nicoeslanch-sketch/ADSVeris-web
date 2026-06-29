@@ -313,7 +313,10 @@ const s = {
   },
   logoRow: {
     display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
     alignItems: 'center',
+    justifyContent: 'flex-start',
     gap: '8px',
     position: 'relative',
     zIndex: 2,
@@ -329,6 +332,8 @@ const s = {
     fontSize: '28px',
     fontWeight: 800,
     letterSpacing: 0,
+    lineHeight: 1,
+    whiteSpace: 'nowrap',
   },
   goldText: {
     color: '#c9a84c',
