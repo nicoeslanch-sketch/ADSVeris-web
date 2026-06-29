@@ -110,37 +110,58 @@ export default async function handler(req, res) {
     'X-Account-ID': accountId,
   }
 
-  const payload = [
+  const contactPayload = [
+    {
+      first_name: name,
+      custom_fields_values: [
+        {
+          field_code: 'EMAIL',
+          values: [{ value: email, enum_code: 'WORK' }],
+        },
+        {
+          field_code: 'PHONE',
+          values: [{ value: phone, enum_code: 'WORK' }],
+        },
+      ],
+    },
+  ]
+
+  try {
+    const { response: contactResponse, data: contactData } = await requestJson(`${kommoBaseUrl}/api/v4/contacts`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(contactPayload),
+    })
+
+    if (!contactResponse.ok) {
+      console.error('Kommo contact error:', contactResponse.status, contactData)
+      return res.status(contactResponse.status).json({
+        success: false,
+        error: contactData?.detail || contactData?.title || 'Error creando contacto en Kommo',
+      })
+    }
+
+    const contact = Array.isArray(contactData)
+      ? contactData[0]
+      : contactData?._embedded?.contacts?.[0]
+    const contactId = contact?.id
+
+    const leadPayload = [
     {
       name: `${service.label} - ${name}`,
       pipeline_id: service.pipeline_id,
       status_id: service.status_id,
       price: 0,
       _embedded: {
-        contacts: [
-          {
-            first_name: name,
-            custom_fields_values: [
-              {
-                field_code: 'EMAIL',
-                values: [{ value: email, enum_code: 'WORK' }],
-              },
-              {
-                field_code: 'PHONE',
-                values: [{ value: phone, enum_code: 'WORK' }],
-              },
-            ],
-          },
-        ],
+        contacts: contactId ? [{ id: contactId }] : [],
       },
     },
   ]
 
-  try {
-    const { response, data } = await requestJson(`${kommoBaseUrl}/api/v4/leads/complex`, {
+    const { response, data } = await requestJson(`${kommoBaseUrl}/api/v4/leads`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(payload),
+      body: JSON.stringify(leadPayload),
     })
 
     if (!response.ok) {
@@ -151,33 +172,12 @@ export default async function handler(req, res) {
       })
     }
 
-    const lead = Array.isArray(data) ? data[0] : null
+    const lead = Array.isArray(data)
+      ? data[0]
+      : data?._embedded?.leads?.[0]
     const leadId = lead?.id
-    const contactId = lead?.contact_id
 
     if (leadId) {
-      const updatePayload = {
-        pipeline_id: service.pipeline_id,
-        status_id: service.status_id,
-      }
-
-      const { response: updateResponse, data: updateData } = await requestJson(`${kommoBaseUrl}/api/v4/leads/${leadId}`, {
-        method: 'PATCH',
-        headers,
-        body: JSON.stringify(updatePayload),
-      })
-
-      if (!updateResponse.ok) {
-        console.error('Kommo pipeline update error:', leadId, updateResponse.status, updateData)
-        return res.status(502).json({
-          success: false,
-          leadId,
-          contactId,
-          error: 'Lead creado, pero Kommo no permitio moverlo al embudo correcto',
-          details: updateData,
-        })
-      }
-
       const noteText = [
         'Solicitud enviada desde pymex-web',
         `Servicio: ${service.label}`,
