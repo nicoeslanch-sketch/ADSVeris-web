@@ -285,9 +285,10 @@ export default async function handler(req, res) {
     const confirmedTags = confirmedLead?._embedded?.tags || []
     const tagOk = !leadId || confirmedTags.some(tag => tag.id === service.tag_id)
     const pipelineOk = !leadId || confirmedPipelineId === service.pipeline_id
+    const statusOk = !leadId || confirmedStatusId === service.status_id
 
-    if (!pipelineOk) {
-      console.error('Kommo pipeline mismatch:', {
+    if (!pipelineOk || !statusOk) {
+      console.error('Kommo routing mismatch:', {
         leadId,
         expectedPipelineId: service.pipeline_id,
         expectedStatusId: service.status_id,
@@ -299,7 +300,11 @@ export default async function handler(req, res) {
         success: false,
         leadId,
         contactId,
-        error: 'Lead creado, pero quedo en un embudo distinto al esperado',
+        error: 'Lead creado, pero quedo en un embudo o estado distinto al esperado',
+        expectedPipelineId: service.pipeline_id,
+        expectedStatusId: service.status_id,
+        confirmedPipelineId,
+        confirmedStatusId,
       })
     }
 
@@ -315,6 +320,7 @@ export default async function handler(req, res) {
       tagName: service.tag_name,
       confirmedTags,
       tagOk,
+      statusOk,
       usedFallbackStatus,
     })
 
@@ -331,6 +337,7 @@ export default async function handler(req, res) {
       tagName: service.tag_name,
       confirmedTags,
       tagOk,
+      statusOk,
       usedFallbackStatus,
       data,
     })
