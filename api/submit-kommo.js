@@ -48,6 +48,8 @@ const SERVICE_ALIASES = [
   ['analisis', 'plataforma'],
 ]
 
+const CONTACTADO_MOVE_DELAY_MS = 4000
+
 function clean(value) {
   return typeof value === 'string' ? value.trim() : ''
 }
@@ -84,6 +86,10 @@ function getKommoError(data, fallback) {
 
 function logKommoError(label, status, data) {
   console.error(label, status, JSON.stringify(data, null, 2))
+}
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 async function createLead({ kommoBaseUrl, headers, service, name }) {
@@ -238,6 +244,8 @@ export default async function handler(req, res) {
 
     let movedToServiceStatus = false
     if (leadId) {
+      await wait(CONTACTADO_MOVE_DELAY_MS)
+
       const { response: moveResponse, data: moveData } = await moveLeadToServiceStatus({
         kommoBaseUrl,
         headers,
