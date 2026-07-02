@@ -151,7 +151,7 @@ Do not store API tokens in this file. Use Vercel environment variables or a loca
 
 ## Implementation Notes
 
-- For new website leads, create the lead in the service pipeline's `Leads Entrantes` status and then move it to the operational first-contact status. This keeps the final location correct and gives Kommo stage-entry triggers a clear move to `Contactado`.
+- For new website leads, create the lead in an editable source status in the service pipeline and then move it to the operational first-contact status. Kommo rejects direct API creation in the system `Leads Entrantes` status, so this gives Kommo stage-entry triggers a clear move to `Contactado` while keeping the final location correct.
 - Current service routing:
   - Planilla Excel Personalizada: pipeline `14023387`, status `108238131`, tag `22508`.
   - Pagina Web: pipeline `14023535`, status `108239227`, tag `22510`.

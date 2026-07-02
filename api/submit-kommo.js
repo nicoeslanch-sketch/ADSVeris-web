@@ -2,7 +2,7 @@ const SERVICES = {
   planilla: {
     label: 'Planilla Excel Personalizada',
     pipeline_id: 14023387,
-    incoming_status_id: 108238127,
+    trigger_source_status_id: 108238139,
     status_id: 108238131,
     tag_id: 22508,
     tag_name: 'Planillas',
@@ -10,7 +10,7 @@ const SERVICES = {
   web: {
     label: 'Pagina Web',
     pipeline_id: 14023535,
-    incoming_status_id: 108239223,
+    trigger_source_status_id: 108239235,
     status_id: 108239227,
     tag_id: 22510,
     tag_name: 'Paginas web',
@@ -18,7 +18,7 @@ const SERVICES = {
   procesos: {
     label: 'Optimizacion de Procesos',
     pipeline_id: 14023539,
-    incoming_status_id: 108239239,
+    trigger_source_status_id: 108246983,
     status_id: 108239243,
     tag_id: 22512,
     tag_name: 'Procesos',
@@ -26,7 +26,7 @@ const SERVICES = {
   plataforma: {
     label: 'Plataforma de Analisis',
     pipeline_id: 14023551,
-    incoming_status_id: 108239307,
+    trigger_source_status_id: 108239319,
     status_id: 108239311,
     tag_id: 22514,
     tag_name: 'Plataforma',
@@ -91,7 +91,7 @@ async function createLead({ kommoBaseUrl, headers, service, name }) {
     {
       name: `${service.label} - ${name}`,
       pipeline_id: service.pipeline_id,
-      status_id: service.incoming_status_id,
+      status_id: service.trigger_source_status_id,
       price: 0,
       _embedded: {
         tags: [{ id: service.tag_id }],
