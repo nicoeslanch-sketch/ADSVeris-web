@@ -62,6 +62,8 @@ const CONTACTADOS = {
   },
 }
 
+const CONTACTADOS_EMAILS_ENABLED = false
+
 function clean(value) {
   return typeof value === 'string' ? value.trim() : ''
 }
@@ -300,6 +302,15 @@ export default async function handler(req, res) {
   const expectedSecret = process.env.KOMMO_WEBHOOK_SECRET
   if (expectedSecret && req.query?.secret !== expectedSecret) {
     return res.status(401).json({ success: false, error: 'Unauthorized webhook' })
+  }
+
+  if (!CONTACTADOS_EMAILS_ENABLED) {
+    return res.status(200).json({
+      success: true,
+      webhook: 'kommo-contactados',
+      disabled: true,
+      reason: 'Contactado emails are handled manually in Kommo',
+    })
   }
 
   const candidates = parseWebhookBody(req.body)

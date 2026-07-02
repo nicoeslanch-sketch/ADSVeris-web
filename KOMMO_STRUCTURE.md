@@ -159,7 +159,7 @@ Do not store API tokens in this file. Use Vercel environment variables or a loca
   - Plataforma de Analisis: pipeline `14023551`, status `108239311`, tag `22514`.
 - Closed statuses `142` and `143` are shared across pipelines.
 - Web integration assigns service tags automatically when creating a lead.
-- `api/kommo-contactados-webhook.js` sends a service-specific email when a lead reaches the `Contactado` status in a service pipeline.
+- `api/kommo-contactados-webhook.js` is currently disabled in code. Contactado emails are handled manually inside Kommo.
 - Registered Kommo webhook ID: `47387135`.
 - The registered webhook has `add_lead` and `update_lead` enabled in Kommo, but the Vercel handler intentionally ignores `add` events and processes status updates only.
 - The Contactados webhook requires these Vercel Production env vars:
@@ -179,6 +179,6 @@ Do not store API tokens in this file. Use Vercel environment variables or a loca
 - Missing PDF: `ADS_Veris_Plataforma_Analisis.pdf`.
 - Kommo email-template endpoints tested for native `Tema` dropdown creation returned HTTP 404, so those templates must be created manually in Kommo using `KOMMO_EMAIL_TEMPLATES.md`.
 - Kommo rejected renaming closed system statuses `142` and `143` through the API. Editable `Venta cerrada` stages were created where requested, and native won/lost statuses remain after them.
-- If SendGrid rejects a send, the webhook writes a failure note into the lead with the manual email template.
+- Automatic SendGrid sending is disabled; do not rely on this webhook for email delivery.
 - Kommo allowed renaming editable statuses through `PATCH /api/v4/leads/pipelines/{pipeline_id}/statuses/{status_id}`. It rejected color-only updates with HTTP 400, and name updates returned editable statuses with color `#fffeb2`.
 - `Embudo de ventas` was not modified.
