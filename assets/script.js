@@ -193,33 +193,31 @@ function renderProductDetail() {
   if (!host) return;
 
   const params = new URLSearchParams(window.location.search);
-  const slug = params.get("id") || "planilla-integral-gestion-pyme";
+  const slug = params.get("id") || "balance-general";
   const product = getProductBySlug(slug) || getProducts()[0];
   document.title = `${product.shortTitle} | ADS Veris`;
+  const images = product.images && product.images.length ? product.images : [product.thumb];
 
-  const thumbs = (product.images || []).map((image, index) => `
-    <button type="button" data-gallery-thumb="${index}" aria-label="Ver imagen ${index + 1}">
+  const thumbs = images.map((image, index) => `
+    <button type="button" class="${index === 0 ? "active" : ""}" data-gallery-thumb="${index}" aria-label="Ver imagen ${index + 1}">
       <img src="${image}" alt="${product.title} vista ${index + 1}">
     </button>
   `).join("");
 
   host.innerHTML = `
-    <section class="page-hero">
-      <div class="container page-shell">
-        <div class="breadcrumbs"><a href="index.html">Inicio</a> / <a href="tienda.html">Tienda</a> / ${product.shortTitle}</div>
-        <span class="eyebrow">Detalle de producto</span>
-        <h1>${product.title}</h1>
-        <p>${product.subtitle}</p>
-      </div>
-    </section>
-    <section class="section section-tight">
+    <section class="section section-tight product-detail-section">
       <div class="container product-detail">
         <div class="card gallery">
           <div class="gallery-main" data-gallery-main>
-            <img src="${product.images[0]}" alt="${product.title}">
+            <button class="gallery-arrow gallery-arrow-prev" type="button" data-gallery-prev aria-label="Imagen anterior">&#8249;</button>
+            <img src="${images[0]}" alt="${product.title}">
+            <button class="gallery-arrow gallery-arrow-next" type="button" data-gallery-next aria-label="Imagen siguiente">&#8250;</button>
           </div>
-          <div class="gallery-note">Placeholder visual listo para reemplazar por capturas reales del Excel en <code>assets/products.js</code>.</div>
-          <div class="gallery-thumbs">${thumbs}</div>
+          <div class="gallery-thumbs-wrap">
+            <button class="gallery-strip-btn" type="button" data-gallery-strip-prev aria-label="Miniaturas anteriores">&#8249;</button>
+            <div class="gallery-thumbs" data-gallery-thumbs>${thumbs}</div>
+            <button class="gallery-strip-btn" type="button" data-gallery-strip-next aria-label="Miniaturas siguientes">&#8250;</button>
+          </div>
         </div>
         <aside class="card detail-panel">
           <div class="pill">${product.categoryLabel}</div>
@@ -240,23 +238,37 @@ function renderProductDetail() {
             <h3>Qué incluye</h3>
             <ul class="info-list">${product.includes.map((item) => `<li>${item}</li>`).join("")}</ul>
           </div>
-          <div class="review-shell">
-            <h3>Reseñas</h3>
-            <p class="small">Espacio preparado para estrellas, comentarios y prueba social.</p>
-            <!-- Integra aquí tu sistema de reseñas real cuando definas la fuente de datos. -->
-            <div class="empty-review">★★★★★<span>Próximamente podrás mostrar reseñas reales aquí.</span></div>
-          </div>
         </aside>
       </div>
     </section>
   `;
 
   const mainImage = host.querySelector("[data-gallery-main] img");
-  host.querySelectorAll("[data-gallery-thumb]").forEach((button, index) => {
-    button.addEventListener("click", () => {
-      mainImage.src = product.images[index];
-      mainImage.alt = `${product.title} vista ${index + 1}`;
+  const thumbButtons = [...host.querySelectorAll("[data-gallery-thumb]")];
+  const thumbsTrack = host.querySelector("[data-gallery-thumbs]");
+  let currentImage = 0;
+
+  function setImage(index) {
+    currentImage = (index + images.length) % images.length;
+    mainImage.src = images[currentImage];
+    mainImage.alt = `${product.title} vista ${currentImage + 1}`;
+    thumbButtons.forEach((button, thumbIndex) => {
+      button.classList.toggle("active", thumbIndex === currentImage);
     });
+    thumbButtons[currentImage]?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }
+
+  thumbButtons.forEach((button, index) => {
+    button.addEventListener("click", () => setImage(index));
+  });
+
+  host.querySelector("[data-gallery-prev]")?.addEventListener("click", () => setImage(currentImage - 1));
+  host.querySelector("[data-gallery-next]")?.addEventListener("click", () => setImage(currentImage + 1));
+  host.querySelector("[data-gallery-strip-prev]")?.addEventListener("click", () => {
+    thumbsTrack?.scrollBy({ left: -260, behavior: "smooth" });
+  });
+  host.querySelector("[data-gallery-strip-next]")?.addEventListener("click", () => {
+    thumbsTrack?.scrollBy({ left: 260, behavior: "smooth" });
   });
 }
 

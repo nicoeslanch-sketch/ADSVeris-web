@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-label="Balance General">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-label="Dashboard">
   <defs>
     <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
       <stop offset="0" stop-color="#0b2538"/>
@@ -20,76 +20,86 @@
     <circle cx="124" cy="87" r="9" fill="#f7c75f"/>
     <circle cx="156" cy="87" r="9" fill="#54d89d"/>
     <text x="204" y="92" fill="#f8fbfc" font-family="Arial, sans-serif" font-size="22" font-weight="800">Balance_General.xlsx</text>
-    <text x="74" y="164" fill="#0f766e" font-family="Arial, sans-serif" font-size="16" font-weight="800" letter-spacing="2">BALANCE HORIZONTAL</text>
+    <text x="74" y="164" fill="#0f766e" font-family="Arial, sans-serif" font-size="16" font-weight="800" letter-spacing="2">DASHBOARD</text>
     <text x="74" y="204" fill="#0d2235" font-family="Arial, sans-serif" font-size="34" font-weight="900"></text>
     <text x="74" y="228" fill="#526173" font-family="Arial, sans-serif" font-size="15" font-weight="600"></text>
     <g font-family="Arial, sans-serif"><rect x="74" y="238" width="260" height="44" fill="#f7fbff" stroke="#d9e2ea" />
 <rect x="334" y="238" width="260" height="44" fill="#f7fbff" stroke="#d9e2ea" />
+<text x="348" y="265" fill="#0d2235" font-size="15" font-weight="800">Total activos</text>
 <rect x="594" y="238" width="260" height="44" fill="#f7fbff" stroke="#d9e2ea" />
 <rect x="854" y="238" width="180" height="44" fill="#f7fbff" stroke="#d9e2ea" />
-<text x="868" y="265" fill="#0d2235" font-size="15" font-weight="800">Pon el nombre de tu Pyme aquí</text>
 <rect x="1034" y="238" width="140" height="44" fill="#f7fbff" stroke="#d9e2ea" />
+<text x="1048" y="265" fill="#0d2235" font-size="15" font-weight="800">Total pasivos</text>
 <rect x="1174" y="238" width="180" height="44" fill="#f7fbff" stroke="#d9e2ea" />
 <rect x="74" y="282" width="260" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
 <rect x="334" y="282" width="260" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
+<text x="348" y="309" fill="#243447" font-size="15" font-weight="600">$42.000.000</text>
 <rect x="594" y="282" width="260" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
 <rect x="854" y="282" width="180" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
-<text x="868" y="309" fill="#243447" font-size="15" font-weight="600">Balance General</text>
 <rect x="1034" y="282" width="140" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
+<text x="1048" y="309" fill="#243447" font-size="15" font-weight="600">$8.250.000</text>
 <rect x="1174" y="282" width="180" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
 <rect x="74" y="326" width="260" height="44" fill="#ffffff" stroke="#d9e2ea" />
 <rect x="334" y="326" width="260" height="44" fill="#ffffff" stroke="#d9e2ea" />
+<text x="348" y="353" fill="#243447" font-size="15" font-weight="600">Capital de trabajo</text>
 <rect x="594" y="326" width="260" height="44" fill="#ffffff" stroke="#d9e2ea" />
 <rect x="854" y="326" width="180" height="44" fill="#ffffff" stroke="#d9e2ea" />
-<text x="868" y="353" fill="#243447" font-size="15" font-weight="600">Fecha de corte: xx-xx-20xx</text>
 <rect x="1034" y="326" width="140" height="44" fill="#ffffff" stroke="#d9e2ea" />
+<text x="1048" y="353" fill="#243447" font-size="15" font-weight="600">Razón corriente</text>
 <rect x="1174" y="326" width="180" height="44" fill="#ffffff" stroke="#d9e2ea" />
 <rect x="74" y="370" width="260" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
 <rect x="334" y="370" width="260" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
+<text x="348" y="397" fill="#243447" font-size="15" font-weight="600">$17.450.000</text>
 <rect x="594" y="370" width="260" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
 <rect x="854" y="370" width="180" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
-<text x="868" y="397" fill="#243447" font-size="15" font-weight="600">ACTIVO</text>
 <rect x="1034" y="370" width="140" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
+<text x="1048" y="397" fill="#243447" font-size="15" font-weight="600">5.31</text>
 <rect x="1174" y="370" width="180" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
 <rect x="74" y="414" width="260" height="44" fill="#ffffff" stroke="#d9e2ea" />
 <rect x="334" y="414" width="260" height="44" fill="#ffffff" stroke="#d9e2ea" />
+<text x="348" y="441" fill="#243447" font-size="15" font-weight="600">Composición activos</text>
 <rect x="594" y="414" width="260" height="44" fill="#ffffff" stroke="#d9e2ea" />
+<text x="608" y="441" fill="#243447" font-size="15" font-weight="600">Monto</text>
 <rect x="854" y="414" width="180" height="44" fill="#ffffff" stroke="#d9e2ea" />
-<text x="868" y="441" fill="#243447" font-size="15" font-weight="600">A) ACTIVO CORRIENTE</text>
 <rect x="1034" y="414" width="140" height="44" fill="#ffffff" stroke="#d9e2ea" />
-<text x="1048" y="441" fill="#243447" font-size="15" font-weight="600">Monto</text>
+<text x="1048" y="441" fill="#243447" font-size="15" font-weight="600">Financiamiento</text>
 <rect x="1174" y="414" width="180" height="44" fill="#ffffff" stroke="#d9e2ea" />
+<text x="1188" y="441" fill="#243447" font-size="15" font-weight="600">Monto</text>
 <rect x="74" y="458" width="260" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
 <rect x="334" y="458" width="260" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
+<text x="348" y="485" fill="#243447" font-size="15" font-weight="600">Activo corriente</text>
 <rect x="594" y="458" width="260" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
+<text x="608" y="485" fill="#243447" font-size="15" font-weight="600">$21.500.000</text>
 <rect x="854" y="458" width="180" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
-<text x="868" y="485" fill="#243447" font-size="15" font-weight="600">Caja</text>
 <rect x="1034" y="458" width="140" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
-<text x="1048" y="485" fill="#243447" font-size="15" font-weight="600">$1.200.000</text>
+<text x="1048" y="485" fill="#243447" font-size="15" font-weight="600">Pasivos</text>
 <rect x="1174" y="458" width="180" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
+<text x="1188" y="485" fill="#243447" font-size="15" font-weight="600">$8.250.000</text>
 <rect x="74" y="502" width="260" height="44" fill="#ffffff" stroke="#d9e2ea" />
 <rect x="334" y="502" width="260" height="44" fill="#ffffff" stroke="#d9e2ea" />
+<text x="348" y="529" fill="#243447" font-size="15" font-weight="600">Activo no corriente</text>
 <rect x="594" y="502" width="260" height="44" fill="#ffffff" stroke="#d9e2ea" />
+<text x="608" y="529" fill="#243447" font-size="15" font-weight="600">$20.500.000</text>
 <rect x="854" y="502" width="180" height="44" fill="#ffffff" stroke="#d9e2ea" />
-<text x="868" y="529" fill="#243447" font-size="15" font-weight="600">Banco</text>
 <rect x="1034" y="502" width="140" height="44" fill="#ffffff" stroke="#d9e2ea" />
-<text x="1048" y="529" fill="#243447" font-size="15" font-weight="600">$8.500.000</text>
+<text x="1048" y="529" fill="#243447" font-size="15" font-weight="600">Patrimonio</text>
 <rect x="1174" y="502" width="180" height="44" fill="#ffffff" stroke="#d9e2ea" />
+<text x="1188" y="529" fill="#243447" font-size="15" font-weight="600">$17.100.000</text>
 <rect x="74" y="546" width="260" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
 <rect x="334" y="546" width="260" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
+<text x="348" y="573" fill="#243447" font-size="15" font-weight="600">Otros activos</text>
 <rect x="594" y="546" width="260" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
+<text x="608" y="573" fill="#243447" font-size="15" font-weight="600">0</text>
 <rect x="854" y="546" width="180" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
-<text x="868" y="573" fill="#243447" font-size="15" font-weight="600">Clientes por cobrar</text>
 <rect x="1034" y="546" width="140" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
-<text x="1048" y="573" fill="#243447" font-size="15" font-weight="600">$3.200.000</text>
 <rect x="1174" y="546" width="180" height="44" fill="#e9f6f2" stroke="#d9e2ea" />
 <rect x="74" y="590" width="260" height="44" fill="#ffffff" stroke="#d9e2ea" />
 <rect x="334" y="590" width="260" height="44" fill="#ffffff" stroke="#d9e2ea" />
+<text x="348" y="617" fill="#243447" font-size="15" font-weight="600">Resultado ejercicio</text>
 <rect x="594" y="590" width="260" height="44" fill="#ffffff" stroke="#d9e2ea" />
+<text x="608" y="617" fill="#243447" font-size="15" font-weight="600">Monto</text>
 <rect x="854" y="590" width="180" height="44" fill="#ffffff" stroke="#d9e2ea" />
-<text x="868" y="617" fill="#243447" font-size="15" font-weight="600">Inventario</text>
 <rect x="1034" y="590" width="140" height="44" fill="#ffffff" stroke="#d9e2ea" />
-<text x="1048" y="617" fill="#243447" font-size="15" font-weight="600">$4.600.000</text>
 <rect x="1174" y="590" width="180" height="44" fill="#ffffff" stroke="#d9e2ea" /></g>
   </g>
 </svg>
