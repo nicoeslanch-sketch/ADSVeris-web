@@ -1,5 +1,6 @@
 // TODO: reemplazar por link real de WhatsApp cuando esté disponible
 const WHATSAPP_URL = "#";
+const CALENDAR_URL = "https://calendar.app.google/iLWW6MV4nTWBHchHA";
 
 function _getAuthUser() {
   try {
@@ -227,7 +228,7 @@ function renderProductDetail() {
           <p>${product.description}</p>
           <div class="actions">
             <!-- Conecta aquí el checkout real o enlace de pago cuando definas el flujo comercial. -->
-            <a class="btn btn-primary" href="contacto.html">Coordinar compra</a>
+            <a class="btn btn-primary" href="${CALENDAR_URL}" target="_blank" rel="noreferrer">Coordinar compra</a>
             <a class="btn btn-secondary" href="tienda.html">Volver al catálogo</a>
           </div>
           <div class="detail-block">
