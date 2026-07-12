@@ -7,7 +7,7 @@ import ResetPassword from './pages/ResetPassword'
 import EmailConfirmed from './pages/EmailConfirmed'
 import KommoContactForm from './components/KommoContactForm'
 
-const WHATSAPP_URL = 'https://wa.me/56948217345?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.'
+const WHATSAPP_URL = 'https://wa.me/56983894129?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.'
 
 function FloatingWhatsapp() {
   return (

@@ -1,4 +1,4 @@
-const WHATSAPP_URL = "https://wa.me/56948217345?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.";
+const WHATSAPP_URL = "https://wa.me/56983894129?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.";
 
 function _getAuthUser() {
   try {
@@ -31,6 +31,16 @@ function renderChrome() {
   const solActive = ['soluciones', 'paginas-web', 'procesos', 'tienda', 'producto'].includes(page);
   const headerHost = document.querySelector("[data-header]");
   const footerHost = document.querySelector("[data-footer]");
+  const main = document.querySelector("main");
+
+  if (main && !main.id) main.id = "main-content";
+  if (main && !document.querySelector(".skip-link")) {
+    const skipLink = document.createElement("a");
+    skipLink.className = "skip-link";
+    skipLink.href = "#main-content";
+    skipLink.textContent = "Saltar al contenido";
+    document.body.prepend(skipLink);
+  }
 
   if (headerHost) {
     headerHost.innerHTML = `
@@ -86,6 +96,9 @@ function renderChrome() {
               <div class="footer-links">
                 <a href="${base}index.html">Inicio</a>
                 <a href="${base}soluciones/index.html">Soluciones</a>
+                <a href="${base}tienda.html">Plantillas</a>
+                <a href="${base}soluciones/paginas-web.html">Páginas web</a>
+                <a href="${base}soluciones/procesos.html">Procesos</a>
                 <a href="${base}nosotros.html">Nosotros</a>
                 <a href="${base}ayuda.html">Ayuda</a>
               </div>
@@ -94,8 +107,9 @@ function renderChrome() {
               <h3>Empresa</h3>
               <div class="footer-links">
                 <a href="${base}contacto.html">Contacto</a>
-                <a href="${base}plataforma.html">Plataforma de análisis</a>
-                <a href="${base}tienda.html">Tienda de plantillas</a>
+                <a href="mailto:servicios@adsveris.com">servicios@adsveris.com</a>
+                <a href="${WHATSAPP_URL}" target="_blank" rel="noreferrer">WhatsApp</a>
+                <a href="${base}plataforma.html">Plataforma · Próximamente</a>
               </div>
             </div>
             <div>
@@ -109,7 +123,7 @@ function renderChrome() {
           </div>
           <div class="footer-bottom">
             <span>© <span data-current-year></span> ADS Veris. Del dato al criterio.</span>
-            <span>Soporte, documentos e información disponibles dentro del mismo proyecto.</span>
+            <span>Soluciones de gestión para PyMEs en Chile.</span>
           </div>
         </div>
       </footer>
@@ -138,7 +152,7 @@ function productCard(product) {
   return `
     <article class="card product-card" data-category="${product.category}">
       <a class="thumb" href="producto.html?id=${product.slug}" aria-label="Ver ${product.title}">
-        <img src="${product.thumb}" alt="${product.title}">
+        <img src="${product.thumb}" alt="${product.title}" loading="lazy" decoding="async">
         <div class="thumb-overlay">
           <div class="thumb-title">${product.shortTitle}</div>
           <span class="badge ${product.badgeClass}">${product.badge}</span>
@@ -216,7 +230,7 @@ function renderProductDetail() {
 
   const thumbs = images.map((image, index) => `
     <button type="button" class="${index === 0 ? "active" : ""}" data-gallery-thumb="${index}" aria-label="Ver imagen ${index + 1}">
-      <img src="${image}" alt="${product.title} vista ${index + 1}">
+      <img src="${image}" alt="${product.title} vista ${index + 1}" loading="lazy" decoding="async">
     </button>
   `).join("");
 
@@ -226,7 +240,7 @@ function renderProductDetail() {
         <div class="card gallery">
           <div class="gallery-main" data-gallery-main>
             <button class="gallery-arrow gallery-arrow-prev" type="button" data-gallery-prev aria-label="Imagen anterior">&#8249;</button>
-            <img src="${images[0]}" alt="${product.title}" data-gallery-open role="button" tabindex="0" aria-label="Ampliar imagen">
+            <img src="${images[0]}" alt="${product.title}" data-gallery-open role="button" tabindex="0" aria-label="Ampliar imagen" fetchpriority="high" decoding="async">
             <span class="gallery-counter"><strong data-gallery-current>1</strong> / ${images.length}</span>
             <button class="gallery-arrow gallery-arrow-next" type="button" data-gallery-next aria-label="Imagen siguiente">&#8250;</button>
           </div>
@@ -238,7 +252,7 @@ function renderProductDetail() {
         </div>
         <aside class="card detail-panel">
           <div class="pill">${product.categoryLabel}</div>
-          <h2>${product.subtitle}</h2>
+          <h1 class="product-title">${product.title}</h1>
           <div class="detail-price">${product.price}</div>
           <p class="small">${product.priceNote}</p>
           <p>${product.description}</p>
@@ -262,7 +276,7 @@ function renderProductDetail() {
       <button class="gallery-lightbox-close" type="button" data-lightbox-close aria-label="Cerrar galeria">&times;</button>
       <button class="gallery-lightbox-arrow gallery-lightbox-prev" type="button" data-lightbox-prev aria-label="Imagen anterior">&#8249;</button>
       <figure class="gallery-lightbox-figure">
-        <img src="${images[0]}" alt="${product.title} vista ampliada 1" data-lightbox-image>
+        <img src="${images[0]}" alt="${product.title} vista ampliada 1" data-lightbox-image decoding="async">
         <figcaption><strong data-lightbox-current>1</strong> / ${images.length}</figcaption>
       </figure>
       <button class="gallery-lightbox-arrow gallery-lightbox-next" type="button" data-lightbox-next aria-label="Imagen siguiente">&#8250;</button>
@@ -399,14 +413,23 @@ function initHeroCarousel() {
   const prevBtn = document.getElementById("heroPrev");
   const nextBtn = document.getElementById("heroNext");
   const counter = document.getElementById("heroCounter");
+  const toggleBtn = document.getElementById("heroToggle");
 
   let current = 0;
   let autoTimer = null;
-  let paused = false;
+  let userPaused = false;
+  let interactionPaused = false;
 
   function updateCounter() {
     if (!counter) return;
     counter.textContent = `${String(current + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
+  }
+
+  function updateToggle() {
+    if (!toggleBtn) return;
+    toggleBtn.innerHTML = userPaused ? "&#9654;" : "&#10074;&#10074;";
+    toggleBtn.setAttribute("aria-label", userPaused ? "Reproducir carrusel" : "Pausar carrusel");
+    toggleBtn.title = userPaused ? "Reproducir carrusel" : "Pausar carrusel";
   }
 
   function activate(index) {
@@ -415,6 +438,8 @@ function initHeroCarousel() {
     current = (index + slides.length) % slides.length;
     slides[current].classList.add("is-active");
     dots[current].classList.add("is-active");
+    slides.forEach((slide, slideIndex) => slide.setAttribute("aria-hidden", slideIndex === current ? "false" : "true"));
+    dots.forEach((dot, dotIndex) => dot.toggleAttribute("aria-current", dotIndex === current));
     updateCounter();
   }
 
@@ -422,14 +447,15 @@ function initHeroCarousel() {
   function prev() { activate(current - 1); }
 
   function startAuto() {
-    if (paused) return;
     clearInterval(autoTimer);
-    autoTimer = setInterval(next, 3000);
+    if (userPaused || interactionPaused || document.hidden) return;
+    autoTimer = setInterval(next, 8000);
   }
 
   function stopAuto() {
     clearInterval(autoTimer);
-    paused = true;
+    userPaused = true;
+    updateToggle();
   }
 
   if (prevBtn) prevBtn.addEventListener("click", () => { stopAuto(); prev(); });
@@ -442,10 +468,40 @@ function initHeroCarousel() {
     });
   });
 
-  // Navegación por teclado (flechas ← →)
-  document.addEventListener("keydown", (e) => {
+  toggleBtn?.addEventListener("click", () => {
+    userPaused = !userPaused;
+    updateToggle();
+    startAuto();
+  });
+
+  carousel.addEventListener("mouseenter", () => {
+    interactionPaused = true;
+    clearInterval(autoTimer);
+  });
+  carousel.addEventListener("mouseleave", () => {
+    interactionPaused = false;
+    startAuto();
+  });
+  carousel.addEventListener("focusin", () => {
+    interactionPaused = true;
+    clearInterval(autoTimer);
+  });
+  carousel.addEventListener("focusout", () => {
+    window.setTimeout(() => {
+      interactionPaused = carousel.contains(document.activeElement);
+      startAuto();
+    }, 0);
+  });
+
+  // Las flechas solo controlan el carrusel cuando el foco esta dentro de el.
+  carousel.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft")  { stopAuto(); prev(); }
     if (e.key === "ArrowRight") { stopAuto(); next(); }
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) clearInterval(autoTimer);
+    else startAuto();
   });
 
   // Soporte touch/swipe
@@ -458,7 +514,9 @@ function initHeroCarousel() {
     if (Math.abs(delta) > 50) { stopAuto(); delta > 0 ? next() : prev(); }
   }, { passive: true });
 
+  activate(0);
   updateCounter();
+  updateToggle();
   startAuto();
 }
 

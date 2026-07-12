@@ -4,7 +4,7 @@ import path from 'path'
 const staticHtml = [
   'index.html', 'tienda.html', 'contacto.html', 'plataforma.html',
   'legal.html', 'terminos.html', 'privacidad.html', 'reembolsos.html',
-  'nosotros.html', 'ayuda.html', 'producto.html',
+  'nosotros.html', 'ayuda.html', 'producto.html', 'robots.txt', 'sitemap.xml',
 ]
 
 const staticDirs = [
