@@ -1,6 +1,4 @@
-// TODO: reemplazar por link real de WhatsApp cuando esté disponible
-const WHATSAPP_URL = "#";
-const CALENDAR_URL = "https://calendar.app.google/iLWW6MV4nTWBHchHA";
+const WHATSAPP_URL = "https://wa.me/56948217345?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.";
 
 function _getAuthUser() {
   try {
@@ -119,6 +117,23 @@ function renderChrome() {
   }
 }
 
+function renderFloatingWhatsapp() {
+  if (document.querySelector("[data-floating-whatsapp]")) return;
+
+  const inSubfolder = window.location.pathname.includes("/soluciones/");
+  const base = inSubfolder ? "../" : "";
+  const button = document.createElement("a");
+  button.className = "floating-whatsapp";
+  button.href = WHATSAPP_URL;
+  button.target = "_blank";
+  button.rel = "noreferrer";
+  button.setAttribute("data-floating-whatsapp", "");
+  button.setAttribute("aria-label", "Escribir a ADS Veris por WhatsApp");
+  button.title = "Escribir por WhatsApp";
+  button.innerHTML = `<img src="${base}assets/images/wasap_boton.png" alt="">`;
+  document.body.appendChild(button);
+}
+
 function productCard(product) {
   return `
     <article class="card product-card" data-category="${product.category}">
@@ -211,7 +226,8 @@ function renderProductDetail() {
         <div class="card gallery">
           <div class="gallery-main" data-gallery-main>
             <button class="gallery-arrow gallery-arrow-prev" type="button" data-gallery-prev aria-label="Imagen anterior">&#8249;</button>
-            <img src="${images[0]}" alt="${product.title}">
+            <img src="${images[0]}" alt="${product.title}" data-gallery-open role="button" tabindex="0" aria-label="Ampliar imagen">
+            <span class="gallery-counter"><strong data-gallery-current>1</strong> / ${images.length}</span>
             <button class="gallery-arrow gallery-arrow-next" type="button" data-gallery-next aria-label="Imagen siguiente">&#8250;</button>
           </div>
           <div class="gallery-thumbs-wrap">
@@ -228,7 +244,7 @@ function renderProductDetail() {
           <p>${product.description}</p>
           <div class="actions">
             <!-- Conecta aquí el checkout real o enlace de pago cuando definas el flujo comercial. -->
-            <a class="btn btn-primary" href="${CALENDAR_URL}" target="_blank" rel="noreferrer">Coordinar compra</a>
+            <a class="btn btn-primary product-download" href="${product.download}" download="${product.downloadName}" data-download-mode="direct">Descargar planilla</a>
             <a class="btn btn-secondary" href="tienda.html">Volver al catálogo</a>
           </div>
           <div class="detail-block">
@@ -242,17 +258,36 @@ function renderProductDetail() {
         </aside>
       </div>
     </section>
+    <div class="gallery-lightbox" data-gallery-lightbox hidden role="dialog" aria-modal="true" aria-label="Galeria ampliada de ${product.title}">
+      <button class="gallery-lightbox-close" type="button" data-lightbox-close aria-label="Cerrar galeria">&times;</button>
+      <button class="gallery-lightbox-arrow gallery-lightbox-prev" type="button" data-lightbox-prev aria-label="Imagen anterior">&#8249;</button>
+      <figure class="gallery-lightbox-figure">
+        <img src="${images[0]}" alt="${product.title} vista ampliada 1" data-lightbox-image>
+        <figcaption><strong data-lightbox-current>1</strong> / ${images.length}</figcaption>
+      </figure>
+      <button class="gallery-lightbox-arrow gallery-lightbox-next" type="button" data-lightbox-next aria-label="Imagen siguiente">&#8250;</button>
+    </div>
   `;
 
   const mainImage = host.querySelector("[data-gallery-main] img");
+  const galleryCurrent = host.querySelector("[data-gallery-current]");
   const thumbButtons = [...host.querySelectorAll("[data-gallery-thumb]")];
   const thumbsTrack = host.querySelector("[data-gallery-thumbs]");
+  const lightbox = host.querySelector("[data-gallery-lightbox]");
+  const lightboxImage = host.querySelector("[data-lightbox-image]");
+  const lightboxCurrent = host.querySelector("[data-lightbox-current]");
   let currentImage = 0;
 
   function setImage(index) {
     currentImage = (index + images.length) % images.length;
     mainImage.src = images[currentImage];
     mainImage.alt = `${product.title} vista ${currentImage + 1}`;
+    if (galleryCurrent) galleryCurrent.textContent = String(currentImage + 1);
+    if (lightboxImage) {
+      lightboxImage.src = images[currentImage];
+      lightboxImage.alt = `${product.title} vista ampliada ${currentImage + 1}`;
+    }
+    if (lightboxCurrent) lightboxCurrent.textContent = String(currentImage + 1);
     thumbButtons.forEach((button, thumbIndex) => {
       button.classList.toggle("active", thumbIndex === currentImage);
     });
@@ -270,6 +305,40 @@ function renderProductDetail() {
   });
   host.querySelector("[data-gallery-strip-next]")?.addEventListener("click", () => {
     thumbsTrack?.scrollBy({ left: 260, behavior: "smooth" });
+  });
+
+  function openLightbox() {
+    if (!lightbox) return;
+    lightbox.hidden = false;
+    document.body.classList.add("gallery-is-open");
+    host.querySelector("[data-lightbox-close]")?.focus();
+  }
+
+  function closeLightbox() {
+    if (!lightbox) return;
+    lightbox.hidden = true;
+    document.body.classList.remove("gallery-is-open");
+    mainImage?.focus();
+  }
+
+  mainImage?.addEventListener("click", openLightbox);
+  mainImage?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openLightbox();
+    }
+  });
+  host.querySelector("[data-lightbox-close]")?.addEventListener("click", closeLightbox);
+  host.querySelector("[data-lightbox-prev]")?.addEventListener("click", () => setImage(currentImage - 1));
+  host.querySelector("[data-lightbox-next]")?.addEventListener("click", () => setImage(currentImage + 1));
+  lightbox?.addEventListener("click", (event) => {
+    if (event.target === lightbox) closeLightbox();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (!lightbox || lightbox.hidden) return;
+    if (event.key === "Escape") closeLightbox();
+    if (event.key === "ArrowLeft") setImage(currentImage - 1);
+    if (event.key === "ArrowRight") setImage(currentImage + 1);
   });
 }
 
@@ -464,6 +533,7 @@ async function openKommoModal(serviceType) {
 
 document.addEventListener("DOMContentLoaded", () => {
   renderChrome();
+  renderFloatingWhatsapp();
   renderFeaturedProducts();
   renderStoreProducts();
   renderProductDetail();

@@ -13,6 +13,20 @@
       body { font-family: 'Manrope', sans-serif; background: #0d2235; color: #f5f9fe; overflow-x: hidden; }
       input, button, select, textarea { font-family: inherit; }
       a { text-decoration: none; }
+      .app-floating-whatsapp {
+        position: fixed; right: clamp(16px, 2.4vw, 34px); bottom: clamp(18px, 3vw, 34px); z-index: 900;
+        width: 66px; height: 66px; display: grid; place-items: center; border-radius: 50%;
+        background: #08b94e; border: 2px solid rgba(255,255,255,.9);
+        box-shadow: 0 12px 30px rgba(0,0,0,.34), 0 0 0 6px rgba(8,185,78,.12);
+        transition: transform .2s ease, box-shadow .2s ease;
+      }
+      .app-floating-whatsapp:hover { transform: translateY(-3px) scale(1.04); }
+      .app-floating-whatsapp:focus-visible { outline: 3px solid #f7c75f; outline-offset: 4px; }
+      .app-floating-whatsapp img { width: 49px; height: 49px; object-fit: contain; }
+      @media (max-width: 640px) {
+        .app-floating-whatsapp { width: 58px; height: 58px; right: 14px; bottom: 16px; }
+        .app-floating-whatsapp img { width: 43px; height: 43px; }
+      }
     </style>
   </head>
   <body>

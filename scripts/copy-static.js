@@ -7,7 +7,21 @@ const staticHtml = [
   'nosotros.html', 'ayuda.html', 'producto.html',
 ]
 
-const staticDirs = ['assets', 'soluciones']
+const staticDirs = [
+  'assets',
+  'soluciones',
+  'Balance_General',
+  'Control_PYME_Ingresos_Gastos_Ganancia',
+  'Costeo_y_Precio_Productos',
+  'CRM_Clientes_Ventas_Cobranza',
+  'Dashboard_Financiero',
+  'Estado_de_Resultados',
+  'Finanzas_Personales_Presupuesto_Mensual',
+  'Inventario_Compras_Stock',
+  'Plantilla_Flujo_Caja',
+  'Presupuesto_mensual_control_desviaciones',
+  'Ratios_Financieros_PYME_Dashboard',
+]
 
 function copyDir(src, dest) {
   fs.mkdirSync(dest, { recursive: true })

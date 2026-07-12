@@ -7,6 +7,23 @@ import ResetPassword from './pages/ResetPassword'
 import EmailConfirmed from './pages/EmailConfirmed'
 import KommoContactForm from './components/KommoContactForm'
 
+const WHATSAPP_URL = 'https://wa.me/56948217345?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.'
+
+function FloatingWhatsapp() {
+  return (
+    <a
+      className="app-floating-whatsapp"
+      href={WHATSAPP_URL}
+      target="_blank"
+      rel="noreferrer"
+      aria-label="Escribir a ADS Veris por WhatsApp"
+      title="Escribir por WhatsApp"
+    >
+      <img src="/images/wasap_boton.png" alt="" />
+    </a>
+  )
+}
+
 function RootHandler() {
   const hash = window.location.hash
   if (hash.includes('type=signup')) {
@@ -32,6 +49,7 @@ function App() {
         <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
         <Route path="/" element={<RootHandler />} />
       </Routes>
+      <FloatingWhatsapp />
     </BrowserRouter>
   )
 }
