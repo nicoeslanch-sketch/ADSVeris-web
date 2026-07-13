@@ -614,6 +614,97 @@ function initPlatformExperience() {
     activate(0);
   });
 
+  const viewerTriggers = [...document.querySelectorAll("[data-platform-viewer]")];
+  const lightbox = document.querySelector("[data-platform-lightbox]");
+  const lightboxImage = lightbox?.querySelector("[data-platform-lightbox-image]");
+  const lightboxCaption = lightbox?.querySelector("[data-platform-lightbox-caption]");
+  const lightboxCurrent = lightbox?.querySelector("[data-platform-lightbox-current]");
+  const lightboxTotal = lightbox?.querySelector("[data-platform-lightbox-total]");
+  const lightboxClose = lightbox?.querySelector("[data-platform-lightbox-close]");
+  const lightboxPrevious = lightbox?.querySelector("[data-platform-lightbox-prev]");
+  const lightboxNext = lightbox?.querySelector("[data-platform-lightbox-next]");
+  const viewerItems = [];
+  let viewerIndex = 0;
+  let viewerReturnFocus = null;
+  let viewerTouchStartX = 0;
+  let viewerTouchStartY = 0;
+
+  viewerTriggers.forEach((image) => {
+    const source = image.getAttribute("src");
+    if (!source) return;
+
+    if (!viewerItems.some((item) => item.source === source)) {
+      const caption = image.closest("figure")?.querySelector("figcaption")?.textContent.trim();
+      viewerItems.push({ source, alt: image.alt, caption: caption || image.alt });
+    }
+
+    image.tabIndex = 0;
+    image.setAttribute("role", "button");
+    image.setAttribute("aria-haspopup", "dialog");
+    image.setAttribute("aria-label", `Ampliar: ${image.alt}`);
+  });
+
+  const renderViewer = (index) => {
+    if (!viewerItems.length || !lightboxImage) return;
+    viewerIndex = (index + viewerItems.length) % viewerItems.length;
+    const item = viewerItems[viewerIndex];
+    lightboxImage.src = item.source;
+    lightboxImage.alt = `${item.alt}, vista ampliada`;
+    if (lightboxCaption) lightboxCaption.textContent = item.caption;
+    if (lightboxCurrent) lightboxCurrent.textContent = String(viewerIndex + 1);
+    if (lightboxTotal) lightboxTotal.textContent = String(viewerItems.length);
+  };
+
+  const openViewer = (image) => {
+    if (!lightbox) return;
+    const source = image.getAttribute("src");
+    const index = viewerItems.findIndex((item) => item.source === source);
+    viewerReturnFocus = image;
+    renderViewer(index < 0 ? 0 : index);
+    lightbox.hidden = false;
+    document.body.classList.add("gallery-is-open");
+    lightboxClose?.focus();
+  };
+
+  const closeViewer = () => {
+    if (!lightbox || lightbox.hidden) return;
+    lightbox.hidden = true;
+    document.body.classList.remove("gallery-is-open");
+    viewerReturnFocus?.focus();
+  };
+
+  viewerTriggers.forEach((image) => {
+    image.addEventListener("click", () => openViewer(image));
+    image.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      openViewer(image);
+    });
+  });
+
+  lightboxClose?.addEventListener("click", closeViewer);
+  lightboxPrevious?.addEventListener("click", () => renderViewer(viewerIndex - 1));
+  lightboxNext?.addEventListener("click", () => renderViewer(viewerIndex + 1));
+  lightbox?.addEventListener("click", (event) => {
+    if (event.target === lightbox) closeViewer();
+  });
+  lightboxImage?.addEventListener("touchstart", (event) => {
+    viewerTouchStartX = event.touches[0].clientX;
+    viewerTouchStartY = event.touches[0].clientY;
+  }, { passive: true });
+  lightboxImage?.addEventListener("touchend", (event) => {
+    const deltaX = viewerTouchStartX - event.changedTouches[0].clientX;
+    const deltaY = viewerTouchStartY - event.changedTouches[0].clientY;
+    if (Math.abs(deltaX) < 42 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+    renderViewer(viewerIndex + (deltaX > 0 ? 1 : -1));
+  }, { passive: true });
+  document.addEventListener("keydown", (event) => {
+    if (!lightbox || lightbox.hidden) return;
+    if (event.key === "Escape") closeViewer();
+    if (event.key === "ArrowLeft") renderViewer(viewerIndex - 1);
+    if (event.key === "ArrowRight") renderViewer(viewerIndex + 1);
+  });
+
   const modal = document.querySelector("[data-platform-modal]");
   const openButton = document.querySelector("[data-platform-open]");
   const closeButton = modal?.querySelector("[data-platform-close]");
