@@ -291,6 +291,7 @@ function renderProductDetail() {
   const lightboxImage = host.querySelector("[data-lightbox-image]");
   const lightboxCurrent = host.querySelector("[data-lightbox-current]");
   let currentImage = 0;
+  let lastGallerySwipeAt = 0;
 
   function setImage(index) {
     currentImage = (index + images.length) % images.length;
@@ -335,7 +336,10 @@ function renderProductDetail() {
     mainImage?.focus();
   }
 
-  mainImage?.addEventListener("click", openLightbox);
+  mainImage?.addEventListener("click", () => {
+    if (Date.now() - lastGallerySwipeAt < 500) return;
+    openLightbox();
+  });
   mainImage?.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
@@ -348,6 +352,25 @@ function renderProductDetail() {
   lightbox?.addEventListener("click", (event) => {
     if (event.target === lightbox) closeLightbox();
   });
+
+  [host.querySelector("[data-gallery-main]"), lightboxImage].filter(Boolean).forEach((swipeTarget) => {
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    swipeTarget.addEventListener("touchstart", (event) => {
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+    }, { passive: true });
+
+    swipeTarget.addEventListener("touchend", (event) => {
+      const deltaX = touchStartX - event.changedTouches[0].clientX;
+      const deltaY = touchStartY - event.changedTouches[0].clientY;
+      if (Math.abs(deltaX) < 42 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+      lastGallerySwipeAt = Date.now();
+      setImage(currentImage + (deltaX > 0 ? 1 : -1));
+    }, { passive: true });
+  });
+
   document.addEventListener("keydown", (event) => {
     if (!lightbox || lightbox.hidden) return;
     if (event.key === "Escape") closeLightbox();
@@ -520,6 +543,101 @@ function initHeroCarousel() {
   startAuto();
 }
 
+function bindImageFallbacks() {
+  document.querySelectorAll("img[data-preferred-src]").forEach((image) => {
+    const preferred = new Image();
+    preferred.addEventListener("load", () => {
+      image.src = image.dataset.preferredSrc;
+      if (image.hasAttribute("data-preferred-only")) image.hidden = false;
+    }, { once: true });
+    preferred.src = image.dataset.preferredSrc;
+  });
+
+  document.querySelectorAll("img[data-fallback-src], img[data-hide-on-error]").forEach((image) => {
+    const handleError = () => {
+      if (image.dataset.fallbackSrc && image.src !== new URL(image.dataset.fallbackSrc, window.location.href).href) {
+        image.src = image.dataset.fallbackSrc;
+        return;
+      }
+      if (image.hasAttribute("data-hide-on-error")) image.hidden = true;
+    };
+
+    image.addEventListener("error", handleError);
+    if (image.complete && image.naturalWidth === 0) handleError();
+  });
+}
+
+function initPlatformExperience() {
+  document.querySelectorAll("[data-platform-carousel]").forEach((carousel) => {
+    const slides = [...carousel.querySelectorAll("[data-platform-slide]")];
+    const counter = carousel.querySelector("[data-platform-counter]");
+    const previous = carousel.querySelector("[data-platform-prev]");
+    const next = carousel.querySelector("[data-platform-next]");
+    let current = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    const activate = (index) => {
+      if (!slides.length) return;
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, slideIndex) => {
+        const isActive = slideIndex === current;
+        slide.hidden = !isActive;
+        slide.classList.toggle("is-active", isActive);
+      });
+      if (counter) counter.textContent = `${current + 1} / ${slides.length}`;
+    };
+
+    previous?.addEventListener("click", () => activate(current - 1));
+    next?.addEventListener("click", () => activate(current + 1));
+    carousel.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        activate(current - 1);
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        activate(current + 1);
+      }
+    });
+    carousel.addEventListener("touchstart", (event) => {
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+    }, { passive: true });
+    carousel.addEventListener("touchend", (event) => {
+      const deltaX = touchStartX - event.changedTouches[0].clientX;
+      const deltaY = touchStartY - event.changedTouches[0].clientY;
+      if (Math.abs(deltaX) < 42 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+      activate(current + (deltaX > 0 ? 1 : -1));
+    }, { passive: true });
+
+    activate(0);
+  });
+
+  const modal = document.querySelector("[data-platform-modal]");
+  const openButton = document.querySelector("[data-platform-open]");
+  const closeButton = modal?.querySelector("[data-platform-close]");
+
+  const openModal = () => {
+    if (!modal) return;
+    if (typeof modal.showModal === "function") modal.showModal();
+    else modal.setAttribute("open", "");
+    closeButton?.focus();
+  };
+  const closeModal = () => {
+    if (!modal) return;
+    if (typeof modal.close === "function") modal.close();
+    else modal.removeAttribute("open");
+    openButton?.focus();
+  };
+
+  openButton?.addEventListener("click", openModal);
+  closeButton?.addEventListener("click", closeModal);
+  modal?.addEventListener("click", (event) => {
+    if (event.target === modal) closeModal();
+  });
+}
+
 function bindWhatsappButtons() {
   document.querySelectorAll(".js-whatsapp-contact").forEach((btn) => {
     btn.href = WHATSAPP_URL;
@@ -590,6 +708,7 @@ async function openKommoModal(serviceType) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  bindImageFallbacks();
   renderChrome();
   renderFloatingWhatsapp();
   renderFeaturedProducts();
@@ -599,5 +718,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderYear();
   initHomeMotion();
   initHeroCarousel();
+  initPlatformExperience();
   bindWhatsappButtons();
 });
