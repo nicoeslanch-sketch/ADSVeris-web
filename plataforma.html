@@ -4,45 +4,151 @@
 <title>Plataforma de análisis | ADS Veris</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Página de plataforma de análisis de ADS Veris y lista de espera preparada para una conexión posterior.">
+<meta name="description" content="Conoce la plataforma de análisis de ADS Veris para estandarizar, limpiar, visualizar e interpretar datos de PyMEs.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/styles.css">
-<script defer src="assets/products.js"></script>
 <script defer src="assets/script.js"></script>
 </head>
 <body data-page="plataforma">
 <div data-header></div>
 
 <main>
-  <section class="page-hero">
-    <div class="container page-shell">
+  <section class="plt-hero">
+    <img src="assets/images/vision-ipad.jpg" alt="Tecnología aplicada al análisis empresarial" class="plt-hero-image" fetchpriority="high" decoding="async">
+    <div class="plt-hero-shade" aria-hidden="true"></div>
+    <div class="container plt-hero-content">
       <div class="breadcrumbs"><a href="index.html">Inicio</a> / Plataforma de análisis</div>
-      <span class="eyebrow">Plataforma de análisis</span>
-      <h1>ADS Veris puede crecer hacia una capa analítica más profunda, pero sin prometer algo que aún no está lanzado.</h1>
-      <p>Esta página presenta la dirección de producto de ADS Veris. Hoy el foco del negocio son las plantillas empresariales y la claridad operativa que entregan.</p>
+      <span class="plt-status"><i></i> Producto en desarrollo</span>
+      <h1>Plataforma de análisis ADS Veris</h1>
+      <p>Una herramienta creada para que una PyME pueda ordenar sus datos, visualizar lo que ocurre y recibir una interpretación práctica sin depender de un equipo interno de analistas.</p>
+      <div class="plt-hero-actions">
+        <a href="#como-funciona" class="btn btn-gold">Cómo funciona</a>
+        <a href="#novedades" class="btn btn-secondary">Recibir novedades</a>
+      </div>
+      <div class="plt-hero-facts" aria-label="Alcance principal">
+        <span>Excel y CSV</span><span>Google Sheets</span><span>Dashboards</span><span>IA sobre datos</span>
+      </div>
     </div>
   </section>
 
-  <section class="section section-tight">
-    <div class="container split-layout">
-      <article class="card growth-card">
-        <span class="eyebrow">Lo que vendrá</span>
-        <h2>Más lectura, más interpretación y mejor acompañamiento.</h2>
-        <p>A futuro, la marca puede evolucionar hacia servicios y herramientas que profundicen análisis, visualización y criterios de decisión. Esa evolución debe ser coherente con lo que hoy ya resuelve la base del producto.</p>
-      </article>
-      <article class="card waitlist-panel">
-        <span class="eyebrow">Lista de espera</span>
-        <h3>Deja tu correo para enterarte cuando esa siguiente etapa exista.</h3>
-        <!-- Conecta este formulario a tu proveedor real cuando definas backend o automatización de correo. -->
+  <section class="plt-premise">
+    <div class="container plt-premise-grid">
+      <span class="plt-premise-index">01</span>
+      <h2>Todo parte de los datos.</h2>
+      <p>La plataforma no muestra gráficos vacíos ni recomendaciones genéricas. Primero recibe, estandariza y limpia la información; solo entonces construye métricas, hallazgos y contexto para decidir.</p>
+    </div>
+  </section>
+
+  <section class="plt-flow" id="como-funciona">
+    <div class="container">
+      <div class="plt-section-head">
+        <span class="eyebrow">DEL ARCHIVO A UNA DECISIÓN</span>
+        <h2>Un flujo claro, de principio a fin.</h2>
+      </div>
+      <div class="plt-flow-line">
+        <article><span>01</span><h3>Conecta</h3><p>Carga Excel o CSV, o incorpora una hoja compartida de Google Sheets.</p></article>
+        <article><span>02</span><h3>Estandariza</h3><p>Reconoce columnas, formatos, fechas, números y estructuras distintas.</p></article>
+        <article><span>03</span><h3>Limpia</h3><p>Detecta duplicados, nulos, inconsistencias y problemas de calidad.</p></article>
+        <article><span>04</span><h3>Interpreta</h3><p>Activa dashboard, exploración, alertas y lectura asistida sobre la base limpia.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="plt-dashboard">
+    <div class="container plt-dashboard-grid">
+      <div class="plt-dashboard-copy">
+        <span class="eyebrow">RESUMEN ADAPTABLE</span>
+        <h2>El tablero cambia según la información que realmente existe.</h2>
+        <p>Ingresos, costos, utilidad, margen, categorías, canales, productos y proyecciones aparecen únicamente cuando el archivo contiene las columnas necesarias. La plataforma evita llenar la pantalla con indicadores que no corresponden al negocio.</p>
+        <div class="plt-metric-row">
+          <span>KPIs del periodo</span><span>Evolución mensual</span><span>Top productos</span><span>Proyección</span>
+        </div>
+      </div>
+      <figure class="plt-dashboard-visual">
+        <img src="assets/images/laptop-chart.jpg" alt="Computador mostrando información gráfica para análisis" loading="lazy" decoding="async">
+        <figcaption>Lectura visual para convertir registros en contexto de gestión.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="plt-modules">
+    <div class="container">
+      <div class="plt-section-head plt-section-head-inline">
+        <div>
+          <span class="eyebrow">MÓDULOS DEL PRODUCTO</span>
+          <h2>Una ruta completa para trabajar con datos empresariales.</h2>
+        </div>
+        <p>La aplicación está organizada como una mesa de trabajo, no como una colección de gráficos aislados.</p>
+      </div>
+      <div class="plt-module-list">
+        <div><strong>Resumen</strong><span>KPIs, tendencias y lectura ejecutiva.</span></div>
+        <div><strong>Explorar datos</strong><span>Análisis guiados, hallazgos y comparaciones.</span></div>
+        <div><strong>Estandarización</strong><span>Mapeo y normalización de columnas.</span></div>
+        <div><strong>Limpieza</strong><span>Problemas, reglas y base actualizada.</span></div>
+        <div><strong>Historial</strong><span>Trazabilidad y continuidad del trabajo.</span></div>
+        <div><strong>Conectores</strong><span>Archivos y fuentes compartidas.</span></div>
+        <div><strong>Alertas</strong><span>Señales tempranas y reglas configurables.</span></div>
+        <div><strong>Reportes</strong><span>Salidas ejecutivas para compartir.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="plt-ai">
+    <div class="container plt-ai-grid">
+      <figure class="plt-ai-visual">
+        <img src="assets/images/trading-desk.jpg" alt="Mesa de análisis con gráficos y herramientas de revisión" loading="lazy" decoding="async">
+      </figure>
+      <div class="plt-ai-copy">
+        <span class="eyebrow">ASISTENTE IA</span>
+        <h2>No conversa en el vacío: interpreta el contexto del negocio.</h2>
+        <p>El asistente trabaja sobre métricas calculadas desde la base limpia. Puede resumir un periodo, responder preguntas y entregar una recomendación práctica, manteniendo las llamadas de IA protegidas en el backend.</p>
+        <blockquote>“¿Qué cambió este mes y dónde debería mirar primero?”</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section class="plt-trust">
+    <div class="container plt-trust-grid">
+      <div>
+        <span class="eyebrow">SEGURIDAD Y CONTROL</span>
+        <h2>Los datos se diseñan para permanecer privados.</h2>
+      </div>
+      <ul>
+        <li>Archivos almacenados en un espacio privado por usuario.</li>
+        <li>Accesos protegidos mediante sesión y validación de identidad.</li>
+        <li>Cada cuenta consulta únicamente su propia información.</li>
+        <li>Las claves de IA y administración permanecen fuera del navegador.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="plt-state">
+    <div class="container plt-state-grid">
+      <div>
+        <span class="plt-state-label">ESTADO ACTUAL</span>
+        <h2>Producto independiente, preparación comercial en curso.</h2>
+      </div>
+      <p>Los módulos centrales y el motor de datos se desarrollan en un repositorio separado. La plataforma todavía no está conectada con esta web pública y desde aquí no se habilita acceso a la aplicación.</p>
+    </div>
+  </section>
+
+  <section class="plt-waitlist" id="novedades">
+    <div class="container plt-waitlist-grid">
+      <div>
+        <span class="eyebrow">NOVEDADES DE PRODUCTO</span>
+        <h2>Entérate cuando la plataforma abra su siguiente etapa.</h2>
+        <p>La conexión con el sitio comercial se realizará más adelante. Por ahora puedes dejar preparado tu interés.</p>
+      </div>
+      <div class="plt-waitlist-form-wrap">
         <form class="waitlist-form waitlist-inline" data-waitlist-form>
           <label class="sr-only" for="waitlist-email-vision">Correo electrónico</label>
           <input class="input" id="waitlist-email-vision" type="email" name="email" placeholder="tu@empresa.cl" required>
-          <button class="btn btn-primary" type="submit">Quiero saber cuándo esté listo</button>
+          <button class="btn btn-primary" type="submit">Quiero recibir novedades</button>
         </form>
         <div class="form-ok" data-form-ok>Formulario listo para conectarse más adelante. Hoy todavía no envía datos a un servicio externo.</div>
-      </article>
+      </div>
     </div>
   </section>
 </main>
