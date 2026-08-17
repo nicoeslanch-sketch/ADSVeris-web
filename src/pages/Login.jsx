@@ -1,7 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import {
+  authErrorMessage,
+  getAuthRedirectUrl,
+  isEmailNotConfirmed,
+  isValidEmail,
+  normalizeEmail,
+  safeStorageGet,
+  safeStorageSet,
+} from '../lib/auth'
 import saludandoImg from '../../assets/images/saludando.png'
 import seguridadImg from '../../assets/images/seguridad.png'
+import AuthBrand from '../components/AuthBrand'
 
 const RATE_LIMIT_MAX = 5
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000
@@ -20,7 +30,7 @@ export default function Login() {
 
   function validar() {
     const e = {}
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = 'Ingresa un email válido'
+    if (!isValidEmail(email)) e.email = 'Ingresa un email válido'
     if (!password) e.password = 'La contraseña es obligatoria'
     return e
   }
@@ -51,36 +61,41 @@ export default function Login() {
     setLoading(true)
     intentos.current += 1
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      const cleanEmail = normalizeEmail(email)
+      const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
       if (error) throw error
       const inicial = (data.user.email || '?')[0].toUpperCase()
-      localStorage.setItem('adsveris_user', JSON.stringify({
+      safeStorageSet('adsveris_user', JSON.stringify({
         name: data.user.email,
         email: data.user.email,
         initial: inicial,
       }))
       window.location.href = '/'
     } catch (err) {
-      const msg = err.message || 'Email o contraseña incorrectos.'
-      setErrorGeneral(msg)
-      if (msg === 'Email not confirmed') setEmailSinConfirmar(true)
+      setErrorGeneral(authErrorMessage(err, 'No pudimos iniciar sesión. Revisa tus datos e intenta nuevamente.'))
+      setEmailSinConfirmar(isEmailNotConfirmed(err))
     } finally {
       setLoading(false)
     }
   }
 
   async function handleReenviar() {
-    const key = `adsveris_resend:${email.trim().toLowerCase()}`
-    const ultimo = localStorage.getItem(key)
+    const cleanEmail = normalizeEmail(email)
+    const key = `adsveris_resend:${cleanEmail}`
+    const ultimo = safeStorageGet(key)
     if (ultimo && Date.now() - Number(ultimo) < 24 * 60 * 60 * 1000) {
       setReenvioEstado('ya-enviado')
       return
     }
     setReenvioEstado('loading')
     try {
-      const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: cleanEmail,
+        options: { emailRedirectTo: getAuthRedirectUrl('/email-confirmed') },
+      })
       if (error) throw error
-      localStorage.setItem(key, String(Date.now()))
+      safeStorageSet(key, String(Date.now()))
       setReenvioEstado('exito')
     } catch {
       setReenvioEstado('error')
@@ -94,10 +109,7 @@ export default function Login() {
 
       {/* Header */}
       <header style={sx(s.header, isMobile && s.headerMobile)}>
-        <a href="/" style={s.logoWrap}>
-          <img src="/images/logo-ads-veris.png" alt="ADS Veris" style={s.logoImg} />
-          <span style={s.logoText}>ADS <span style={s.logoGold}>Veris</span></span>
-        </a>
+        <AuthBrand />
         <a href="/register" style={sx(s.headerLink, isMobile && s.headerLinkMobile)}>¿No tienes cuenta? <span style={s.headerLinkGold}>Regístrate</span></a>
       </header>
 

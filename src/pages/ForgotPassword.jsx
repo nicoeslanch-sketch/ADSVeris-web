@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { authErrorMessage, getAuthRedirectUrl, isValidEmail, normalizeEmail } from '../lib/auth'
+import AuthBrand from '../components/AuthBrand'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -10,19 +12,20 @@ export default function ForgotPassword() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
-    if (!email.trim()) {
-      setError('Ingresa tu email.')
+    if (!isValidEmail(email)) {
+      setError('Ingresa un email válido.')
       return
     }
     setLoading(true)
     try {
-      const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: 'https://pymex-web.vercel.app/reset-password',
+      const cleanEmail = normalizeEmail(email)
+      const { error: err } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+        redirectTo: getAuthRedirectUrl('/reset-password'),
       })
       if (err) throw err
       setExito(true)
     } catch (err) {
-      setError(err.message || 'Error al enviar el email. Verifica que el email sea correcto.')
+      setError(authErrorMessage(err, 'No pudimos enviar el enlace. Intenta nuevamente en unos minutos.'))
     } finally {
       setLoading(false)
     }
@@ -33,10 +36,7 @@ export default function ForgotPassword() {
       <div style={s.grid} aria-hidden="true" />
 
       <header style={s.header}>
-        <a href="/" style={s.logoWrap}>
-          <img src="/images/logo-ads-veris.png" alt="ADS Veris" style={s.logoImg} />
-          <span style={s.logoText}>ADS <span style={s.logoGold}>Veris</span></span>
-        </a>
+        <AuthBrand />
       </header>
 
       <main style={s.main}>

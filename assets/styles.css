@@ -1516,6 +1516,14 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   .future-note { align-items: flex-start; flex-direction: column; }
 }
 @media (max-width: 760px) {
+  .header-inner {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px 12px;
+    padding: 12px 0;
+  }
   .section { padding: 72px 0; }
   .comparison-shell {
     padding: 24px 18px;
@@ -1528,13 +1536,19 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
     display: inline-flex;
     margin-bottom: 14px;
   }
-  .site-header .brand-mark,
   .footer .brand-mark {
     width: 50px;
     height: 50px;
   }
+  .site-header .brand-mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+  }
+  .site-header .brand-mark img { transform: scale(3.05); }
   .site-header .brand-name {
-    font-size: 1.22rem;
+    font-size: 1.08rem;
+    white-space: nowrap;
   }
   .footer .brand-name {
     font-size: 1.22rem;
@@ -1551,6 +1565,26 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   .help-illustrations,
   .help-figure-card,
   .social-card { grid-template-columns: 1fr; }
+  .main-nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    flex-wrap: nowrap;
+    gap: 2px;
+    width: 100%;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .main-nav::-webkit-scrollbar { display: none; }
+  .main-nav a { padding: 7px 5px; font-size: 0.8rem; white-space: nowrap; }
+  .header-actions {
+    grid-column: 2;
+    grid-row: 1;
+    width: auto;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+  .header-actions .header-login { display: none; }
+  .header-actions .btn { padding: 10px 15px; font-size: 0.82rem; white-space: nowrap; }
 }
 
 /* ── HEADER: Iniciar sesión ─────────────────────────── */
@@ -1945,7 +1979,7 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
     min-height: auto;
   }
   .carousel-visual {
-    justify-content: flex-start;
+    justify-content: center;
     height: clamp(300px, 52vw, 420px);
   }
   .carousel-img-wrap img {
@@ -1955,10 +1989,17 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
 }
 @media (max-width: 760px) {
   .hero-carousel { padding: 32px 0 0; }
-  .carousel-layout { padding: 16px 0 36px; gap: 18px; }
-  .carousel-visual { height: clamp(220px, 58vw, 320px); }
+  .hero-carousel .hero-socials { justify-content: center; }
+  .carousel-layout { padding: 16px 0 36px; gap: 24px; }
+  .carousel-copy { align-items: center; text-align: center; padding-inline: 6px; }
+  .carousel-actions { justify-content: center; }
+  .carousel-desc, .carousel-sub { margin-inline: auto; }
+  .carousel-visual { width: 100%; height: auto; padding: 8px 38px 0; }
+  .carousel-img-wrap { width: min(100%, 600px); margin-inline: auto; border-radius: 18px; }
+  .carousel-img-wrap::after { border-radius: 18px; }
   .carousel-img-wrap img {
-    max-height: clamp(220px, 58vw, 320px);
+    width: 100%;
+    max-height: none;
   }
   .carousel-prev { left: 6px; }
   .carousel-next { right: 6px; }
@@ -1966,6 +2007,7 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   .carousel-heading { font-size: clamp(1.4rem, 5vw, 1.9rem); }
   .price-amount { font-size: clamp(1.3rem, 4vw, 1.7rem); }
   .btn-gold, .btn-gold-outline { padding: 11px 18px; font-size: 0.88rem; }
+  .carousel-footer { justify-content: center; }
 }
 
 /* ── WHY CHOOSE US SECTION ───────────────────────────────────────────── */

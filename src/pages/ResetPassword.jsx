@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { sendPasswordResetConfirmationEmail } from '../lib/sendEmails'
+import { authErrorMessage } from '../lib/auth'
+import AuthBrand from '../components/AuthBrand'
 
 export default function ResetPassword() {
   const [listo, setListo] = useState(false)
@@ -10,13 +12,79 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [exito, setExito] = useState(false)
+  const [verificando, setVerificando] = useState(true)
 
   useEffect(() => {
-    const hash = window.location.hash
-    if (hash.includes('type=recovery') || hash.includes('access_token')) {
+    let active = true
+    let fallbackTimer
+    const url = new URL(window.location.href)
+    const hashParams = new URLSearchParams(url.hash.replace(/^#/, ''))
+    const callbackError = url.searchParams.get('error_description') || hashParams.get('error_description')
+    const hasRecoveryMarker =
+      hashParams.get('type') === 'recovery' ||
+      Boolean(hashParams.get('access_token')) ||
+      Boolean(url.searchParams.get('code'))
+
+    function showReady() {
+      if (!active) return
       setListo(true)
-    } else {
+      setSinToken(false)
+      setVerificando(false)
+    }
+
+    function showInvalid(message = '') {
+      if (!active) return
+      setListo(false)
       setSinToken(true)
+      setVerificando(false)
+      if (message) setError(message)
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' && session) showReady()
+    })
+
+    async function verifyCallback() {
+      if (callbackError) {
+        showInvalid(decodeURIComponent(callbackError.replace(/\+/g, ' ')))
+        return
+      }
+
+      const code = url.searchParams.get('code')
+      if (code) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+        if (exchangeError) {
+          showInvalid(authErrorMessage(exchangeError, 'El enlace no es válido o expiró. Solicita uno nuevo.'))
+          return
+        }
+      }
+
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError) {
+        showInvalid(authErrorMessage(sessionError, 'No pudimos validar el enlace. Solicita uno nuevo.'))
+        return
+      }
+      if (session && hasRecoveryMarker) {
+        showReady()
+        return
+      }
+      if (!hasRecoveryMarker) {
+        showInvalid()
+        return
+      }
+
+      fallbackTimer = window.setTimeout(async () => {
+        const { data } = await supabase.auth.getSession()
+        if (data.session) showReady()
+        else showInvalid()
+      }, 1500)
+    }
+
+    verifyCallback()
+    return () => {
+      active = false
+      window.clearTimeout(fallbackTimer)
+      subscription.unsubscribe()
     }
   }, [])
 
@@ -40,7 +108,7 @@ export default function ResetPassword() {
       setExito(true)
       setTimeout(() => { window.location.href = '/login' }, 2000)
     } catch (err) {
-      setError(err.message || 'Error al cambiar la contraseña.')
+      setError(authErrorMessage(err, 'No pudimos cambiar la contraseña. Solicita un enlace nuevo e intenta nuevamente.'))
     } finally {
       setLoading(false)
     }
@@ -51,26 +119,31 @@ export default function ResetPassword() {
       <div style={s.grid} aria-hidden="true" />
 
       <header style={s.header}>
-        <a href="/" style={s.logoWrap}>
-          <img src="/images/logo-ads-veris.png" alt="ADS Veris" style={s.logoImg} />
-          <span style={s.logoText}>ADS <span style={s.logoGold}>Veris</span></span>
-        </a>
+        <AuthBrand />
       </header>
 
       <main style={s.main}>
         <div style={s.card}>
-          {sinToken && (
+          {verificando && (
+            <div style={s.sinTokenWrap}>
+              <span style={s.eyebrow}>Verificando enlace</span>
+              <p style={s.desc}>Estamos validando tu solicitud de recuperación…</p>
+            </div>
+          )}
+
+          {!verificando && sinToken && (
             <div style={s.sinTokenWrap}>
               <span style={s.exitoIcono}>⚠️</span>
               <h1 style={s.titulo}>Link inválido</h1>
-              <p style={s.desc}>
+              <p style={s.desc} role="alert">
                 Este link no es válido o ha expirado. Solicita un nuevo link de recuperación.
               </p>
+              {error && <p style={s.callbackError}>{error}</p>}
               <a href="/forgot-password" style={s.linkBtn}>Solicitar nuevo link</a>
             </div>
           )}
 
-          {listo && !exito && (
+          {!verificando && listo && !exito && (
             <>
               <div style={s.cardHeader}>
                 <span style={s.eyebrow}>Nueva contraseña</span>
@@ -251,6 +324,7 @@ const s = {
   inputErr: { borderColor: 'rgba(220,38,38,0.6)', background: 'rgba(220,38,38,0.07)' },
   iconPos: { position: 'absolute', right: '12px', fontSize: '14px' },
   hint: { fontSize: '12px', color: '#f59e0b' },
+  callbackError: { fontSize: '13px', color: '#fca5a5', lineHeight: '1.5', marginTop: '10px' },
   btn: {
     width: '100%',
     padding: '14px',

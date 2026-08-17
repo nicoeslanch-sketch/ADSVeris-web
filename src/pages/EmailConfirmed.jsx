@@ -1,11 +1,76 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import AuthBrand from '../components/AuthBrand'
+import { authErrorMessage } from '../lib/auth'
 
 export default function EmailConfirmed() {
   const [verificando, setVerificando] = useState(true)
+  const [confirmado, setConfirmado] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    supabase.auth.getSession().then(() => setVerificando(false))
+    let active = true
+    let fallbackTimer
+    const url = new URL(window.location.href)
+    const hashParams = new URLSearchParams(url.hash.replace(/^#/, ''))
+    const callbackError = url.searchParams.get('error_description') || hashParams.get('error_description')
+    const hasCallback =
+      hashParams.get('type') === 'signup' ||
+      Boolean(hashParams.get('access_token')) ||
+      Boolean(url.searchParams.get('code'))
+
+    function finish(ok, message = '') {
+      if (!active) return
+      setConfirmado(ok)
+      setError(message)
+      setVerificando(false)
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && hasCallback) finish(true)
+    })
+
+    async function verify() {
+      if (callbackError) {
+        finish(false, 'No pudimos confirmar el correo. El enlace puede haber expirado.')
+        return
+      }
+
+      const code = url.searchParams.get('code')
+      if (code) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+        if (exchangeError) {
+          finish(false, authErrorMessage(exchangeError, 'No pudimos confirmar el correo. Solicita un enlace nuevo.'))
+          return
+        }
+      }
+
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError) {
+        finish(false, authErrorMessage(sessionError, 'No pudimos validar la confirmación.'))
+        return
+      }
+      if (session && hasCallback) {
+        finish(true)
+        return
+      }
+      if (!hasCallback) {
+        finish(false, 'Este enlace de confirmación no es válido o ya expiró.')
+        return
+      }
+
+      fallbackTimer = window.setTimeout(async () => {
+        const { data } = await supabase.auth.getSession()
+        finish(Boolean(data.session), data.session ? '' : 'Este enlace de confirmación no es válido o ya expiró.')
+      }, 1500)
+    }
+
+    verify()
+    return () => {
+      active = false
+      window.clearTimeout(fallbackTimer)
+      subscription.unsubscribe()
+    }
   }, [])
 
   if (verificando) {
@@ -19,15 +84,30 @@ export default function EmailConfirmed() {
     )
   }
 
+  if (!confirmado) {
+    return (
+      <div style={s.page}>
+        <div style={s.grid} aria-hidden="true" />
+        <header style={s.header}><AuthBrand /></header>
+        <main style={s.main}>
+          <div style={s.card}>
+            <span style={s.icono}>⚠️</span>
+            <span style={s.eyebrow}>Confirmación pendiente</span>
+            <h1 style={s.titulo}>No pudimos confirmar tu email</h1>
+            <p style={s.desc} role="alert">{error}</p>
+            <a href="/login" style={s.btn}>Volver a iniciar sesión</a>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div style={s.page}>
       <div style={s.grid} aria-hidden="true" />
 
       <header style={s.header}>
-        <a href="/" style={s.logoWrap}>
-          <img src="/images/logo-ads-veris.png" alt="ADS Veris" style={s.logoImg} />
-          <span style={s.logoText}>ADS <span style={s.logoGold}>Veris</span></span>
-        </a>
+        <AuthBrand />
       </header>
 
       <main style={s.main}>

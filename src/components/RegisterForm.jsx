@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { authErrorMessage, getAuthRedirectUrl, isValidEmail, normalizeEmail } from '../lib/auth'
 import dibujoTabletImg from '../../assets/images/dibujo con tablet.png'
 import senalandoImg from '../../assets/images/señalando.png'
+import AuthBrand from './AuthBrand'
 
 function validarRut(rut) {
   const clean = rut.replace(/[.\-]/g, '').toUpperCase()
@@ -46,7 +48,7 @@ export default function RegisterForm() {
     const e = {}
     if (!form.nombre.trim()) e.nombre = 'Obligatorio'
     if (!form.apellido.trim()) e.apellido = 'Obligatorio'
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Email inválido'
+    if (!isValidEmail(form.email)) e.email = 'Email inválido'
     if (!form.password || form.password.length < 8) e.password = 'Mínimo 8 caracteres'
     if (!form.confirm) e.confirm = 'Repite la contraseña'
     else if (form.confirm !== form.password) e.confirm = 'No coinciden'
@@ -70,11 +72,11 @@ export default function RegisterForm() {
         plan_id: 'free',
       }
       const { data, error: signUpError } = await supabase.auth.signUp({
-        email: form.email,
+        email: normalizeEmail(form.email),
         password: form.password,
         options: {
           data: userMetadata,
-          emailRedirectTo: 'https://pymex-web.vercel.app/email-confirmed',
+          emailRedirectTo: getAuthRedirectUrl('/email-confirmed'),
         },
       })
       if (signUpError) throw signUpError
@@ -90,17 +92,7 @@ export default function RegisterForm() {
       setSuccess(true)
     } catch (err) {
       console.error('Error registro completo:', JSON.stringify(err), err)
-      const status = err?.status
-      let msg = err?.message && err.message.trim() !== '{}' && err.message.trim() !== ''
-        ? err.message
-        : null
-
-      if (!msg) {
-        if (status === 429 || msg?.includes('rate')) msg = 'Demasiados intentos. Espera unos minutos e intenta de nuevo.'
-        else if (status === 422) msg = 'El email ya está registrado. Intenta iniciar sesión.'
-        else msg = 'Error al registrarse. Intenta de nuevo.'
-      }
-      setErrorGeneral(msg)
+      setErrorGeneral(authErrorMessage(err, 'No pudimos crear la cuenta. Revisa tus datos e intenta nuevamente.'))
     } finally {
       setLoading(false)
     }
@@ -111,10 +103,7 @@ export default function RegisterForm() {
       <div style={sx(s.page, isMobile && s.pageMobile)}>
         <div style={s.grid} aria-hidden="true" />
         <header style={sx(s.header, isMobile && s.headerMobile)}>
-          <a href="/" style={s.logoWrap}>
-            <img src="/images/logo-ads-veris.png" alt="ADS Veris" style={s.logoImg} />
-            <span style={s.logoText}>ADS <span style={s.logoGold}>Veris</span></span>
-          </a>
+          <AuthBrand />
         </header>
         <div style={sx(s.successWrap, isMobile && s.successWrapMobile)}>
           <div style={sx(s.successCard, isMobile && s.successCardMobile)}>
@@ -134,10 +123,7 @@ export default function RegisterForm() {
 
       {/* Header */}
       <header style={sx(s.header, isMobile && s.headerMobile)}>
-        <a href="/" style={s.logoWrap}>
-          <img src="/images/logo-ads-veris.png" alt="ADS Veris" style={s.logoImg} />
-          <span style={s.logoText}>ADS <span style={s.logoGold}>Veris</span></span>
-        </a>
+        <AuthBrand />
         <a href="/login" style={sx(s.headerLink, isMobile && s.headerLinkMobile)}>¿Ya tienes cuenta? <span style={s.headerLinkGold}>Inicia sesión</span></a>
       </header>
 
