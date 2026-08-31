@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import '../site-config.js'
 import RegisterForm from './components/RegisterForm'
 import Login from './pages/Login'
 import Profile from './pages/Profile'
@@ -8,6 +10,19 @@ import EmailConfirmed from './pages/EmailConfirmed'
 import KommoContactForm from './components/KommoContactForm'
 
 const WHATSAPP_URL = 'https://wa.me/56983894129?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.'
+const PUBLIC_AUTH_ENABLED = window.ADS_VERIS_CONFIG?.publicAuthEnabled === true
+
+function PublicSiteRedirect() {
+  useEffect(() => {
+    window.location.replace('/index.html')
+  }, [])
+
+  return null
+}
+
+function PublicAuthRoute({ children }) {
+  return PUBLIC_AUTH_ENABLED ? children : <PublicSiteRedirect />
+}
 
 function FloatingWhatsapp() {
   return (
@@ -25,6 +40,8 @@ function FloatingWhatsapp() {
 }
 
 function RootHandler() {
+  if (!PUBLIC_AUTH_ENABLED) return <PublicSiteRedirect />
+
   const hash = window.location.hash
   if (hash.includes('type=signup')) {
     return <Navigate to={'/email-confirmed' + hash} replace />
@@ -39,14 +56,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/register" element={<RegisterForm />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/email-confirmed" element={<EmailConfirmed />} />
+        <Route path="/register" element={<PublicAuthRoute><RegisterForm /></PublicAuthRoute>} />
+        <Route path="/login" element={<PublicAuthRoute><Login /></PublicAuthRoute>} />
+        <Route path="/profile" element={<PublicAuthRoute><Profile /></PublicAuthRoute>} />
+        <Route path="/forgot-password" element={<PublicAuthRoute><ForgotPassword /></PublicAuthRoute>} />
+        <Route path="/reset-password" element={<PublicAuthRoute><ResetPassword /></PublicAuthRoute>} />
+        <Route path="/email-confirmed" element={<PublicAuthRoute><EmailConfirmed /></PublicAuthRoute>} />
         <Route path="/contacto-kommo" element={<KommoContactForm />} />
-        <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
+        <Route path="/dashboard" element={<PublicAuthRoute><Navigate to="/profile" replace /></PublicAuthRoute>} />
         <Route path="/" element={<RootHandler />} />
       </Routes>
       <FloatingWhatsapp />

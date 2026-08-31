@@ -54,6 +54,12 @@ function clean(value) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
+function cleanDetails(value) {
+  return typeof value === 'string'
+    ? value.replace(/\r\n/g, '\n').replace(/\0/g, '').trim().slice(0, 3000)
+    : ''
+}
+
 function normalizeText(value) {
   return clean(value)
     .toLowerCase()
@@ -143,6 +149,7 @@ export default async function handler(req, res) {
   const email = clean(req.body?.email).toLowerCase()
   const phone = clean(req.body?.phone)
   const rawServiceType = clean(req.body?.serviceType)
+  const details = cleanDetails(req.body?.details)
   const service = getService(rawServiceType)
 
   if (!name || !email || !phone || !rawServiceType) {
@@ -278,6 +285,7 @@ export default async function handler(req, res) {
         `Nombre: ${name}`,
         `Email: ${email}`,
         `Telefono: ${phone}`,
+        `Descripcion del problema o necesidad: ${details || 'No informada'}`,
       ].join('\n')
 
       const { response: noteResponse, data: noteError } = await requestJson(`${kommoBaseUrl}/api/v4/leads/${leadId}/notes`, {

@@ -1,5 +1,9 @@
 const WHATSAPP_URL = "https://wa.me/56983894129?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.";
 
+function isPublicAuthEnabled() {
+  return window.ADS_VERIS_CONFIG?.publicAuthEnabled === true;
+}
+
 function _getAuthUser() {
   try {
     const raw = localStorage.getItem('adsveris_user');
@@ -61,6 +65,7 @@ function renderChrome() {
           </nav>
           <div class="header-actions">
             ${(function() {
+              if (!isPublicAuthEnabled()) return '';
               const u = _getAuthUser();
               if (u) return `
                 <button class="header-logout" onclick="_adsLogout()">Cerrar sesión</button>

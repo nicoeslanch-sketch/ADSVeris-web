@@ -13,6 +13,7 @@ function createInitialForm(defaultService = SERVICES[0]) {
     email: '',
     phone: '',
     serviceType: SERVICES.includes(defaultService) ? defaultService : SERVICES[0],
+    details: '',
   }
 }
 
@@ -74,6 +75,7 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
           email: form.email.trim(),
           phone: form.phone.trim(),
           serviceType: form.serviceType,
+          details: form.details.trim(),
         }),
       })
 
@@ -183,6 +185,22 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
                   ))}
                 </select>
                 {errors.serviceType && <span style={s.errorText}>{errors.serviceType}</span>}
+              </div>
+
+              <div style={s.field}>
+                <label htmlFor="details" style={s.label}>
+                  Describe tu problema o lo que necesitas <span style={s.optionalLabel}>(opcional)</span>
+                </label>
+                <textarea
+                  id="details"
+                  name="details"
+                  value={form.details}
+                  onChange={handleChange}
+                  placeholder="Cuéntanos brevemente qué ocurre, qué necesitas o qué resultado esperas."
+                  maxLength={3000}
+                  rows={4}
+                  style={{ ...s.input, ...s.textarea }}
+                />
               </div>
 
               <button
@@ -425,6 +443,17 @@ const s = {
   },
   select: {
     appearance: 'auto',
+  },
+  textarea: {
+    minHeight: '112px',
+    resize: 'vertical',
+    lineHeight: 1.5,
+  },
+  optionalLabel: {
+    color: '#6b7788',
+    fontWeight: 500,
+    textTransform: 'none',
+    letterSpacing: 0,
   },
   inputError: {
     borderColor: '#f06a5b',
