@@ -59,7 +59,10 @@ export default async function handler(req, res) {
     const data = await response.json().catch(() => ({}))
     if (!response.ok) {
       // No customer data, vendor payloads or credentials in logs/errors.
-      console.error('Kommo request failed', { path, method, status: response.status, leadId })
+      console.error('Kommo request failed', { path, method, status: response.status, leadId,
+        contentType: response.headers.get('content-type'), responseKeys: Object.keys(data),
+        accountRestriction: /payment|subscription|license|tariff|user.*limit|expired/i.test(`${data.title || ''} ${data.detail || ''}`),
+      })
       const validation = (data['validation-errors'] || []).flatMap(item => item.errors || []).map(item => ({
         code: /^[a-z0-9_-]{1,80}$/i.test(item.code || '') ? item.code : 'unknown',
         path: /^[a-z0-9_.\[\]-]{1,150}$/i.test(item.path || '') ? item.path : 'unknown',
