@@ -1,11 +1,12 @@
-import { test, afterEach } from 'node:test'
+import { test, afterEach, beforeEach, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import handler, { ROUTES } from '../api/submit-kommo.js'
 import { CONTACT_SERVICES, findContactService } from '../shared/contact-services.js'
 
 const originalFetch = global.fetch
 const envBefore = { ...process.env }
-afterEach(() => { global.fetch = originalFetch; process.env = { ...envBefore } })
+beforeEach(() => { mock.method(Date, 'now', () => Date.parse('2026-10-02T12:00:00Z')) })
+afterEach(() => { global.fetch = originalFetch; process.env = { ...envBefore }; mock.restoreAll() })
 const valid = { name: 'Prueba', email: 'prueba@example.com', phone: '+56 9 1234 5678', serviceType: 'Página Web', details: 'Error 500', privacyConsent: true }
 
 async function submit(body = valid, method = 'POST') {
@@ -13,7 +14,7 @@ async function submit(body = valid, method = 'POST') {
     code: 200, headers: {}, setHeader(key, value) { this.headers[key] = value },
     status(code) { this.code = code; return this }, json(data) { this.data = data; return this },
   }
-  await handler({ body, method }, res)
+  await handler({ body, method, headers: { origin: 'https://pymex-web.vercel.app', 'content-type': 'application/json' } }, res)
   return res
 }
 
@@ -83,6 +84,14 @@ test('no activa el correo cuando falla el guardado de la nota', async () => {
   assert.ok(!JSON.stringify(res.data).includes('private'))
 })
 
+test('no entrega una descarga si no se pudo registrar la autorización', async () => {
+  fakeKommo(findContactService('Descarga de planilla gratuita'), 3)
+  const res = await submit({ ...valid, serviceType: 'Descarga de planilla gratuita', phone: '', downloadSlug: 'balance-general' })
+  assert.equal(res.code, 202)
+  assert.equal(res.data.pending, true)
+  assert.equal(res.data.downloadUrl, undefined)
+})
+
 test('error previo al lead no publica payloads privados ni anuncia éxito', async () => {
   fakeKommo(findContactService(valid.serviceType), 1)
   const res = await submit()
@@ -94,6 +103,14 @@ test('error previo al lead no publica payloads privados ni anuncia éxito', asyn
 test('honeypot no crea contactos ni dispara correos', async () => {
   global.fetch = () => { throw new Error('Must not call Kommo') }
   assert.equal((await submit({ ...valid, website: 'bot.example' })).code, 200)
+})
+
+test('la oferta termina realmente y no crea solicitudes gratuitas fuera de plazo', async () => {
+  mock.method(Date, 'now', () => Date.parse('2026-10-16T03:00:00Z'))
+  global.fetch = () => { throw new Error('Must not call Kommo') }
+  const res = await submit({ ...valid, serviceType: 'Descarga de planilla gratuita', phone: '', downloadSlug: 'balance-general' })
+  assert.equal(res.code, 410)
+  assert.equal(res.data.downloadUrl, undefined)
 })
 
 test('restricción real de Kommo no anuncia éxito ni habilita descarga sin registro', async () => {

@@ -22,8 +22,6 @@ window.ADS_VERIS_PRODUCTS = [
       "Balance_General/Balance_7_BalanceGeneral.png",
       "Balance_General/Balance_8_Dashboard.png"
     ],
-    download: "Balance_General/Balance_General.xlsx",
-    downloadName: "ADS-Veris-Balance-General.xlsx",
     summary: "Completa tus cuentas y obtiene automaticamente el balance, capital de trabajo, razon corriente y endeudamiento.",
     description: "Una plantilla guiada para registrar activos, deudas, patrimonio y el resultado del ejercicio. Construye automaticamente un balance horizontal y un dashboard para revisar estructura financiera y equilibrio.",
     problem: "Evita trabajar con cifras dispersas y no saber con claridad que tiene la empresa, cuanto debe ni como se compone su patrimonio.",
@@ -61,8 +59,6 @@ window.ADS_VERIS_PRODUCTS = [
       "Estado_de_Resultados/ER_6b_Pagos.png",
       "Estado_de_Resultados/ER_7_Ranking.png"
     ],
-    download: "Estado_de_Resultados/Estado_de_Resultados.xlsx",
-    downloadName: "ADS-Veris-Estado-de-Resultados.xlsx",
     summary: "Registra movimientos y revisa automaticamente resultados, cobros, pagos y ranking de desempeno.",
     description: "Centraliza los movimientos del negocio y transforma los datos en una lectura clara de ingresos, costos, gastos y utilidad. Incluye parametros editables, seguimiento de cobros y pagos, dashboard y ranking.",
     problem: "Permite detectar si la rentabilidad se esta perdiendo por costos, gastos, bajo margen o diferencias entre lo vendido y lo cobrado.",
@@ -103,8 +99,6 @@ window.ADS_VERIS_PRODUCTS = [
       "Plantilla_Flujo_Caja/flujo de caja punto de equilibrio.png",
       "Plantilla_Flujo_Caja/flujo de caja ecenarios.png"
     ],
-    download: "Plantilla_Flujo_Caja/Plantilla_Flujo_Caja.xlsx",
-    downloadName: "ADS-Veris-Flujo-de-Caja.xlsx",
     summary: "Modela ventas, costos, impuestos, inventario y financiamiento con escenarios y punto de equilibrio.",
     description: "Un modelo completo de caja a doce meses. Solo completas los supuestos operativos y la plantilla calcula ingresos, egresos, saldos, alertas, reserva recomendada, punto de equilibrio y escenarios.",
     problem: "Ayuda a anticipar meses con caja negativa y a dimensionar cuanto financiamiento o reserva necesita el negocio.",
@@ -137,8 +131,6 @@ window.ADS_VERIS_PRODUCTS = [
       "Presupuesto_mensual_control_desviaciones/presupuesto 5.png",
       "Presupuesto_mensual_control_desviaciones/presupuesto 6.png"
     ],
-    download: "Presupuesto_mensual_control_desviaciones/Presupuesto_mensual_control_desviaciones.xlsx",
-    downloadName: "ADS-Veris-Presupuesto-y-Desviaciones.xlsx",
     summary: "Contrasta cobros y pagos esperados con los reales, con alertas y una conclusion automatica por mes.",
     description: "Planifica cobros y pagos, registra los montos reales y selecciona el mes que quieres analizar. El dashboard muestra desviaciones, flujo neto y alertas para enfocar la revision.",
     problem: "Resuelve la falta de seguimiento entre lo que la PyME planea gastar o cobrar y lo que finalmente ocurre.",
@@ -172,8 +164,6 @@ window.ADS_VERIS_PRODUCTS = [
       "Control_PYME_Ingresos_Gastos_Ganancia/ControlPYME_4b_Dashboard_Categorias.png",
       "Control_PYME_Ingresos_Gastos_Ganancia/ControlPYME_5_ResumenMensual.png"
     ],
-    download: "Control_PYME_Ingresos_Gastos_Ganancia/Control_PYME_Ingresos_Gastos_Ganancia.xlsx",
-    downloadName: "ADS-Veris-Control-PYME.xlsx",
     summary: "Clasifica movimientos y obtiene indicadores, comparacion por categorias y un resumen anual automatico.",
     description: "Una herramienta de uso diario para registrar ingresos, gastos y reservas. Sus categorias son editables y el dashboard permite revisar el mes elegido, el margen anual, el mejor mes y los periodos con perdida.",
     problem: "Evita confundir ventas con ganancia y perder visibilidad sobre cuanto entra, cuanto sale y cuanto queda disponible.",
@@ -207,8 +197,6 @@ window.ADS_VERIS_PRODUCTS = [
       "Inventario_Compras_Stock/inventario 5.png",
       "Inventario_Compras_Stock/inventario 6.png"
     ],
-    download: "Inventario_Compras_Stock/Inventario_Compras_Stock.xlsx",
-    downloadName: "ADS-Veris-Inventario-Compras-Stock.xlsx",
     summary: "Relaciona productos, compras y ventas para mostrar stock actual, niveles criticos y acciones de reposicion.",
     description: "Registra tu catalogo de productos, las compras que ingresan y las ventas o salidas. El inventario calcula existencias, compara el stock minimo y muestra alertas y acciones sugeridas en el dashboard.",
     problem: "Reduce quiebres de stock, compras tardias y diferencias provocadas por llevar entradas y salidas en archivos separados.",
@@ -241,8 +229,6 @@ window.ADS_VERIS_PRODUCTS = [
       "Costeo_y_Precio_Productos/Costeo_Precio_Calculadora.png",
       "Costeo_y_Precio_Productos/Costeo_Precio_ResumenProductos.png"
     ],
-    download: "Costeo_y_Precio_Productos/Costeo_y_Precio_Productos.xlsx",
-    downloadName: "ADS-Veris-Costeo-y-Precio.xlsx",
     summary: "Integra materiales, mano de obra, costos indirectos y gastos para decidir precios con margen.",
     description: "Registra productos y todos sus componentes de costo. La calculadora compara precio al cliente, competencia y objetivo de la PyME, mientras el dashboard explica la composicion del costo y la utilidad por unidad.",
     problem: "Evita fijar precios por intuicion y vender sin cubrir todos los costos o sin alcanzar el margen esperado.",
@@ -276,8 +262,6 @@ window.ADS_VERIS_PRODUCTS = [
       "CRM_Clientes_Ventas_Cobranza/CRM_6a_Dashboard_Indicadores.png",
       "CRM_Clientes_Ventas_Cobranza/CRM_6b_Dashboard_SeguimientoUrgente.png"
     ],
-    download: "CRM_Clientes_Ventas_Cobranza/CRM_Clientes_Ventas_Cobranza.xlsx",
-    downloadName: "ADS-Veris-CRM-Ventas-Cobranza.xlsx",
     summary: "Reune clientes, estado de venta, responsables, facturas, pagos y seguimientos urgentes.",
     description: "Un CRM en Excel para equipos pequenos. Gestiona contactos y oportunidades, define la proxima accion y conecta cada cliente con su cobranza, vencimientos y saldo pendiente.",
     problem: "Evita perder oportunidades, olvidar seguimientos o descubrir demasiado tarde una factura vencida.",
@@ -314,8 +298,6 @@ window.ADS_VERIS_PRODUCTS = [
       "Dashboard_Financiero/DashFin_Graficos_TABLAS.png",
       "Dashboard_Financiero/DashFin_Graficos_GRAFICOS.png"
     ],
-    download: "Dashboard_Financiero/Dashboard_Financiero.xlsx",
-    downloadName: "ADS-Veris-Dashboard-Financiero.xlsx",
     summary: "Carga ventas y gastos de varios anos y filtra la lectura ejecutiva por periodo, producto, region o vendedor.",
     description: "Una base multi-ano para consolidar ventas y gastos. Incluye listas maestras, resumenes separados y una vista ejecutiva con tablas y graficos para analizar tendencias y composicion.",
     problem: "Resuelve la dificultad de interpretar historicos extensos cuando las ventas y los gastos solo se revisan fila por fila.",
@@ -352,8 +334,6 @@ window.ADS_VERIS_PRODUCTS = [
       "Ratios_Financieros_PYME_Dashboard/ratios 9 dashboard.png",
       "Ratios_Financieros_PYME_Dashboard/ratios 10 planes.png"
     ],
-    download: "Ratios_Financieros_PYME_Dashboard/Ratios_Financieros_PYME_Dashboard.xlsm",
-    downloadName: "ADS-Veris-Ratios-Financieros-PYME.xlsm",
     summary: "Consolida estados financieros, calcula ratios y entrega referencias y acciones para cada resultado.",
     description: "Registra cifras mensuales por ano y deja que la plantilla consolide estados financieros, ratios y dashboard. Incluye base teorica, metas de referencia e ideas de accion para liquidez, endeudamiento y rentabilidad.",
     problem: "Convierte cifras aisladas en indicadores comparables y ayuda a entender que significa cada resultado para la gestion.",
@@ -388,8 +368,6 @@ window.ADS_VERIS_PRODUCTS = [
       "Finanzas_Personales_Presupuesto_Mensual/personal 5 parametros.png",
       "Finanzas_Personales_Presupuesto_Mensual/personal 6 resumen anual.png"
     ],
-    download: "Finanzas_Personales_Presupuesto_Mensual/Finanzas_Personales_Presupuesto_Mensual.xlsx",
-    downloadName: "ADS-Veris-Finanzas-Personales.xlsx",
     summary: "Planifica el mes, registra movimientos y revisa automaticamente el balance y el ahorro del ano.",
     description: "Una version pensada para personas, no empresas. Permite preparar el presupuesto mensual, registrar movimientos, editar categorias y comparar los resultados de todo el ano.",
     problem: "Ayuda a dejar de administrar el dinero de memoria y a visualizar cuanto se gasta, cuanto se ahorra y que meses requieren ajustes.",

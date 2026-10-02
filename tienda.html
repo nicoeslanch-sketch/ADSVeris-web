@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="assets/styles.css">
 <script defer src="assets/products.js"></script>
 <script src="site-config.js"></script>
-<script defer src="assets/script.js"></script>
+<script type="module" src="assets/script.js"></script>
 </head>
 <body data-page="tienda">
 <div data-header></div>
@@ -23,11 +23,16 @@
         <div>
           <span class="eyebrow">Planillas Excel para tu negocio</span>
           <h1 class="page-title-compact">Encuentra la planilla que necesitas.</h1>
-          <p class="small">11 planillas gratuitas. Revisa las imágenes y la compatibilidad; deja tu correo para descargar. Recibir publicidad es opcional. Las versiones personalizadas se cotizan por separado.</p>
+          <p class="small" data-store-intro>Revisa las planillas, su compatibilidad y las condiciones de disponibilidad antes de solicitar un archivo.</p>
         </div>
-        <div class="small" data-store-count>11 productos disponibles</div>
+        <div class="small" data-store-count role="status" aria-live="polite">11 productos disponibles</div>
       </div>
-      <div class="filters">
+      <div data-launch-promotion></div>
+      <div class="catalog-search">
+        <label for="catalog-search">Busca una planilla para tu necesidad</label>
+        <input id="catalog-search" type="search" data-store-search placeholder="Por ejemplo: caja, inventario o ventas" maxlength="100" autocomplete="off">
+      </div>
+      <div class="filters" aria-label="Filtrar planillas por categoría">
         <button class="filter-btn active" data-filter="all">Todos</button>
         <button class="filter-btn" data-filter="estados">Estados financieros</button>
         <button class="filter-btn" data-filter="caja">Caja y presupuesto</button>
@@ -37,6 +42,7 @@
         <button class="filter-btn" data-filter="personal">Personas</button>
       </div>
       <div class="product-grid" data-store-products></div>
+      <p class="catalog-empty small" data-store-empty hidden>No encontramos planillas con esos filtros. Prueba otra búsqueda o <button type="button" class="text-link" data-store-clear>mostrar todas las planillas</button>.</p>
     </div>
   </section>
 </main>

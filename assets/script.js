@@ -1,3 +1,4 @@
+import { isLaunchPromotionActive, launchPromotionMarkup } from './launch-promotion.js';
 const WHATSAPP_URL = "https://wa.me/56983894129?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.";
 
 function isPublicAuthEnabled() {
@@ -32,7 +33,7 @@ function renderChrome() {
   const page = document.body.dataset.page || "";
   const inSubfolder = window.location.pathname.includes('/soluciones/');
   const base = inSubfolder ? '../' : '';
-  const solActive = ['soluciones', 'paginas-web', 'procesos', 'tienda', 'producto'].includes(page);
+  const solActive = ['soluciones', 'paginas-web', 'procesos'].includes(page);
   const headerHost = document.querySelector("[data-header]");
   const footerHost = document.querySelector("[data-footer]");
   const main = document.querySelector("main");
@@ -58,10 +59,10 @@ function renderChrome() {
           </a>
           <nav class="main-nav" aria-label="Principal">
             <a href="${base}index.html" class="${page === "home" ? "active" : ""}">Inicio</a>
+            <a href="${base}tienda.html" class="${['tienda', 'producto'].includes(page) ? 'active' : ''}">Planillas</a>
             <a href="${base}soluciones/index.html" class="${solActive ? "active" : ""}">Soluciones</a>
             <a href="${base}plataforma.html" class="${page === "plataforma" ? "active" : ""}">Plataforma</a>
             <a href="${base}nosotros.html" class="${page === "nosotros" ? "active" : ""}">Nosotros</a>
-            <a href="${base}ayuda.html" class="${page === "ayuda" ? "active" : ""}">Ayuda</a>
             <a href="${base}contacto.html" class="${page === "contacto" ? "active" : ""}">Contacto</a>
           </nav>
           <div class="header-actions">
@@ -69,7 +70,7 @@ function renderChrome() {
               if (!isPublicAuthEnabled()) return '';
               const u = _getAuthUser();
               if (u) return `
-                <button class="header-logout" onclick="_adsLogout()">Cerrar sesión</button>
+                <button class="header-logout" data-logout>Cerrar sesión</button>
                 <a href="/profile" class="header-avatar" title="${u.name}">${u.initial}</a>
               `;
               return `
@@ -170,8 +171,8 @@ function productCard(product) {
         <p class="small">${product.summary}</p>
         <div class="product-footer">
           <div>
-            <div class="price">${product.price}</div>
-            <small class="small">${product.priceNote}</small>
+            <div class="price">${isLaunchPromotionActive() ? 'Gratis por inauguración' : 'Consultar precio'}</div>
+            <small class="small">${isLaunchPromotionActive() ? 'Por tiempo limitado · Con tu correo' : 'Oferta de inauguración finalizada'}</small>
           </div>
           <div class="product-actions">
             <a class="btn btn-primary btn-sm" href="producto.html?id=${product.slug}">Ver detalle</a>
@@ -207,19 +208,47 @@ function renderStoreProducts() {
 
   host.innerHTML = getProducts().map(productCard).join("");
   updateStoreCounter(host);
+  const search = document.querySelector('[data-store-search]');
+  const empty = document.querySelector('[data-store-empty]');
+  let selectedCategory = 'all';
+  const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const cards = [...host.querySelectorAll('.product-card')];
+  const searchText = cards.map(card => normalize(card.textContent));
+  function applyFilters() {
+    const terms = normalize(search?.value || '').trim().split(/\s+/).filter(Boolean);
+    let visible = 0;
+    cards.forEach((card, index) => {
+      const matches = (selectedCategory === 'all' || card.dataset.category === selectedCategory) && terms.every(term => searchText[index].includes(term));
+      card.classList.toggle('hidden', !matches);
+      if (matches) visible++;
+    });
+    if (empty) empty.hidden = visible > 0;
+    updateStoreCounter(host);
+  }
+  search?.addEventListener('input', applyFilters);
+  document.querySelector('[data-store-clear]')?.addEventListener('click', () => {
+    if (search) search.value = '';
+    selectedCategory = 'all';
+    document.querySelectorAll('[data-filter]').forEach(button => {
+      const active = button.dataset.filter === 'all';
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    applyFilters();
+    search?.focus();
+  });
 
   document.querySelectorAll("[data-filter]").forEach((button) => {
+    button.setAttribute('aria-pressed', String(button.classList.contains('active')));
     button.addEventListener("click", () => {
-      document.querySelectorAll("[data-filter]").forEach((item) => item.classList.remove("active"));
-      button.classList.add("active");
-      const selected = button.dataset.filter;
-
-      host.querySelectorAll(".product-card").forEach((card) => {
-        const matches = selected === "all" || card.dataset.category === selected;
-        card.classList.toggle("hidden", !matches);
+      document.querySelectorAll("[data-filter]").forEach((item) => {
+        item.classList.remove("active");
+        item.setAttribute('aria-pressed', 'false');
       });
-
-      updateStoreCounter(host);
+      button.classList.add("active");
+      button.setAttribute('aria-pressed', 'true');
+      selectedCategory = button.dataset.filter;
+      applyFilters();
     });
   });
 }
@@ -264,11 +293,11 @@ function renderProductDetail() {
         <aside class="card detail-panel">
           <div class="pill">${product.categoryLabel}</div>
           <h1 class="product-title">${product.title}</h1>
-          <div class="detail-price">${product.price}</div>
-          <p class="small">${product.priceNote}</p>
+          <div class="detail-price">${isLaunchPromotionActive() ? '$0 CLP por inauguración' : 'Consultar disponibilidad y precio'}</div>
+          ${launchPromotionMarkup()}
           <p>${product.description}</p>
           <div class="actions">
-            <a class="btn btn-primary product-download" href="/contacto-kommo?planilla=${product.slug}" data-download-slug="${product.slug}">Descargar gratis con mi correo</a>
+            ${isLaunchPromotionActive() ? `<a class="btn btn-primary product-download" href="/contacto-kommo?planilla=${product.slug}" data-download-slug="${product.slug}">Solicitar mi descarga gratis</a>` : '<a class="btn btn-primary" href="/contacto-kommo?servicio=Planilla%20Excel%20personalizada">Consultar por una planilla</a>'}
             <a class="btn btn-secondary" href="tienda.html">Volver al catálogo</a>
           </div>
           <div class="detail-block">
@@ -383,6 +412,13 @@ function renderProductDetail() {
 
   document.addEventListener("keydown", (event) => {
     if (!lightbox || lightbox.hidden) return;
+    if (event.key === 'Tab') {
+      const controls = [...lightbox.querySelectorAll('button')];
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    }
     if (event.key === "Escape") closeLightbox();
     if (event.key === "ArrowLeft") setImage(currentImage - 1);
     if (event.key === "ArrowRight") setImage(currentImage + 1);
@@ -819,8 +855,12 @@ async function openKommoModal(serviceType, product = null) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('[data-launch-promotion]').forEach(host => { host.innerHTML = launchPromotionMarkup(); });
+  document.querySelectorAll('[data-store-intro]').forEach(host => { host.textContent = isLaunchPromotionActive() ? '11 planillas por $0 CLP durante la inauguración. Revisa imágenes y compatibilidad; deja tu correo para solicitar la descarga. Publicidad opcional. Personalizaciones se cotizan aparte.' : 'Revisa las herramientas, su compatibilidad y consulta por disponibilidad y precio. La oferta gratuita de inauguración finalizó.'; });
   bindImageFallbacks();
   renderChrome();
+  document.querySelector('.main-nav a.active')?.setAttribute('aria-current', 'page');
+  document.querySelector('[data-logout]')?.addEventListener('click', window._adsLogout);
   renderFloatingWhatsapp();
   renderFeaturedProducts();
   renderStoreProducts();

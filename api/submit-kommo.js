@@ -1,6 +1,8 @@
 import { findContactService, PRIVACY_VERSION } from '../shared/contact-services.js'
 import { DOWNLOAD_PRODUCTS } from '../shared/download-products.js'
 import { createDownloadTicket } from '../server/download-ticket.js'
+import { validatePublicFormRequest } from '../server/public-form-policy.js'
+import { isLaunchPromotionActive } from '../assets/launch-promotion.js'
 
 // Existing native Kommo email rules. This endpoint never sends via SendGrid.
 export const ROUTES = {
@@ -18,6 +20,8 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'POST')
     return res.status(405).json({ success: false, error: 'Método no permitido.' })
   }
+  const policyError = validatePublicFormRequest(req)
+  if (policyError) return res.status(policyError.status).json({ success: false, error: policyError.error })
   let body = req.body
   if (typeof body === 'string') {
     try { body = JSON.parse(body) } catch { body = null }
@@ -36,6 +40,7 @@ export default async function handler(req, res) {
   const downloadSlug = clean(body.downloadSlug)
   const download = downloadSlug && Object.hasOwn(DOWNLOAD_PRODUCTS, downloadSlug) ? DOWNLOAD_PRODUCTS[downloadSlug] : null
   const isDownload = service?.label === 'Descarga de planilla gratuita'
+  if (isDownload && !isLaunchPromotionActive()) return res.status(410).json({ success: false, error: 'La promoción de inauguración finalizó. Consulta disponibilidad y precio en servicios@adsveris.com. No se ha realizado ningún cobro.' })
   const phoneValid = /^\+?[\d\s().-]{6,40}$/.test(phone) && phone.replace(/\D/g, '').length >= 6
   if (!name || name.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 ||
       (phone ? !phoneValid : !isDownload) || (isDownload && !download) || (!isDownload && downloadSlug) ||
@@ -51,9 +56,10 @@ export default async function handler(req, res) {
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'X-Account-ID': accountId }
   let leadId
   let contactId
+  let consentRecorded = false
   async function request(path, method = 'GET', payload) {
     const response = await fetch(`${base}${path}`, {
-      method, headers, signal: AbortSignal.timeout(12000),
+      method, headers, signal: AbortSignal.timeout(8000),
       ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
     })
     const data = await response.json().catch(() => ({}))
@@ -103,6 +109,7 @@ export default async function handler(req, res) {
       'No constituye una contratación. Solo contactar para publicidad si consta autorización comercial expresa.',
     ].join('\n')
     await request(`/leads/${leadId}/notes`, 'POST', [{ note_type: 'common', params: { text: note } }])
+    consentRecorded = true
     // Check the main recipient and tag BEFORE the native email trigger.
     const prepared = await request(`/leads/${leadId}?with=contacts`)
     if (prepared.pipeline_id !== route.pipeline ||
@@ -131,7 +138,7 @@ export default async function handler(req, res) {
       return res.status(202).json({
         success: true, pending: true,
         message: 'Recibimos tu solicitud. La confirmación automática está pendiente; no necesitas enviarla de nuevo.',
-        ...(download ? { downloadUrl: `/api/download-planilla?ticket=${createDownloadTicket(downloadSlug, leadId)}` } : {}),
+        ...(download && consentRecorded ? { downloadUrl: `/api/download-planilla?ticket=${createDownloadTicket(downloadSlug, leadId)}` } : {}),
       })
     }
     if (error.message === 'Kommo contact creation restricted') {

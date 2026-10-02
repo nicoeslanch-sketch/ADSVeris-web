@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { CONTACT_SERVICES, findContactService } from '../../shared/contact-services.js'
 import './kommo-contact.css'
+import { isLaunchPromotionActive, LAUNCH_PROMOTION } from '../../assets/launch-promotion.js'
 
 const SERVICES = CONTACT_SERVICES.map(service => service.label)
 
@@ -33,7 +34,8 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
   const isSuccess = status.type === 'success'
 
   const isDownload = Boolean(downloadProduct)
-  const title = isSuccess ? (isDownload ? 'Tu planilla está lista' : 'Solicitud recibida') : (isDownload ? 'Descarga tu planilla gratis' : 'Conversemos sobre tu proyecto')
+  const campaignActive = isLaunchPromotionActive()
+  const title = isSuccess ? (isDownload && downloadUrl ? 'Tu planilla está lista' : 'Solicitud recibida') : (isDownload ? (campaignActive ? 'Tu planilla, gratis por inauguración' : 'La promoción finalizó') : 'Conversemos sobre tu proyecto')
 
   useEffect(() => {
     if (!isOpen) return
@@ -179,7 +181,8 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
             <div>
               <p style={s.eyebrow}>ADS Veris</p>
               <h2 id="kommo-contact-title" tabIndex={-1} style={s.title}>{title}</h2>
-              <p style={s.subtitle}>{isDownload ? `${downloadProduct.title}. Deja tu nombre y correo para habilitar la descarga sin costo. No necesitas aceptar publicidad ni cookies de seguimiento.` : 'Elige el servicio que necesitas y cuéntanos tu caso. Te responderemos a tu correo. Solicitar información no tiene costo ni compromiso.'}</p>
+              <p style={s.subtitle}>{isDownload ? (campaignActive ? `${downloadProduct.title} · $0 CLP. Oferta temporal hasta el ${LAUNCH_PROMOTION.deadlineLabel}. Publicidad opcional.` : 'La oferta gratuita de inauguración terminó. Puedes consultar disponibilidad y precio; no se realiza ningún cobro automático.') : 'Elige el servicio que necesitas y cuéntanos tu caso. Te responderemos a tu correo. Solicitar información no tiene costo ni compromiso.'}</p>
+              {isDownload && campaignActive && <a href="/terminos.html#promocion-inauguracion" style={{ color: '#08665f', fontSize: '12px' }}>Condiciones de inauguración</a>}
             </div>
             {canClose && (
               <button type="button" aria-label="Cerrar" style={s.closeButton} onClick={onClose} disabled={loading}>
@@ -199,10 +202,16 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
               </p>}
             </div>
           )}
+          {!isSuccess && window.ADS_VERIS_CONFIG?.contactAutomationPending === true && <aside style={{ ...s.errorBox, background: '#fff8e5', color: '#59451c', borderColor: '#ead6a3', fontWeight: 400 }} aria-label="Aviso de atención">
+            Registro automático temporalmente no disponible. Solicita atención por{' '}
+            <a href="mailto:servicios@adsveris.com" style={{ color: 'inherit' }}>correo</a> o{' '}
+            <a href="https://wa.me/56983894129" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}>WhatsApp</a>.
+          </aside>}
           {isSuccess && downloadUrl && <a href={downloadUrl} style={{ ...s.submitButton, display: 'block', padding: '14px', textAlign: 'center', textDecoration: 'none' }}>Descargar archivo Excel</a>}
-          {isSuccess && isDownload && <p className="kommo-contact-hint">El enlace caduca en 10 minutos. Guarda una copia original. Solo habilita macros si confías en el archivo y las necesitas.</p>}
+          {isSuccess && isDownload && downloadUrl && <p className="kommo-contact-hint">El enlace caduca en 10 minutos. Guarda una copia original. Solo habilita macros si confías en el archivo y las necesitas.</p>}
 
-          {!isSuccess && (
+          {isDownload && !campaignActive && <a href="/contacto-kommo?servicio=Planilla%20Excel%20personalizada" style={{ ...s.submitButton, display: 'block', padding: '14px', textAlign: 'center', textDecoration: 'none' }}>Consultar por una planilla</a>}
+          {!isSuccess && (!isDownload || campaignActive) && (
             <form onSubmit={handleSubmit} noValidate style={s.form}>
               <Field
                 label="Nombre"

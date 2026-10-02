@@ -8,7 +8,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import EmailConfirmed from './pages/EmailConfirmed'
 import KommoContactForm from './components/KommoContactForm'
-import { DOWNLOAD_PRODUCTS } from '../shared/download-products.js'
+import { PUBLIC_DOWNLOAD_PRODUCTS } from '../shared/public-download-products.js'
 
 const WHATSAPP_URL = 'https://wa.me/56983894129?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.'
 const PUBLIC_AUTH_ENABLED = window.ADS_VERIS_CONFIG?.publicAuthEnabled === true
@@ -55,7 +55,7 @@ function RootHandler() {
 
 function App() {
   const requestedSlug = new URLSearchParams(window.location.search).get('planilla')
-  const requestedProduct = Object.hasOwn(DOWNLOAD_PRODUCTS, requestedSlug || '') ? { slug: requestedSlug, title: DOWNLOAD_PRODUCTS[requestedSlug].title } : null
+  const requestedProduct = Object.hasOwn(PUBLIC_DOWNLOAD_PRODUCTS, requestedSlug || '') ? { slug: requestedSlug, title: PUBLIC_DOWNLOAD_PRODUCTS[requestedSlug].title } : null
   return (
     <BrowserRouter>
       <Routes>

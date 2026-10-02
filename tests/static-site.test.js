@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { runInNewContext } from 'node:vm'
+import { DOWNLOAD_PRODUCTS } from '../shared/download-products.js'
 
 test('rutas de imágenes y páginas coinciden incluso en servidores sensibles a mayúsculas', async () => {
   const files = new Set()
@@ -29,7 +30,7 @@ test('rutas de imágenes y páginas coinciden incluso en servidores sensibles a 
   runInNewContext(await readFile('assets/products.js', 'utf8'), context)
   for (const product of context.window.ADS_VERIS_PRODUCTS) {
     for (const image of [product.thumb, ...product.images]) if (!files.has(image)) errors.push(`${product.slug}: ${image}`)
-    assert.ok(!files.has(product.download), `Excel must not be public: ${product.slug}`)
+    assert.ok(!files.has(DOWNLOAD_PRODUCTS[product.slug].file), `Excel must not be public: ${product.slug}`)
   }
   assert.deepEqual(errors, [])
 })

@@ -1,12 +1,12 @@
 # ADS Veris
 
-Sitio estático listo para subir a GitHub + Vercel.
+Sitio estático desplegado en GitHub + Vercel. Su lanzamiento comercial tiene dependencias pendientes: ver `REVISION_SEGURIDAD_CAPACIDAD.md`.
 
 ## Formulario y descargas
 
 El formulario registra solicitudes en el embudo del servicio elegido, con contacto principal, correo, descripción opcional y una nota de consentimiento. El envío de confirmación corresponde a los disparadores nativos de Kommo, desde `servicios@adsveris.com`; no se utiliza SendGrid.
 
-Las once planillas del catálogo son gratuitas. Para descargar se solicita nombre, correo y autorización para atender esa solicitud. El teléfono y el permiso comercial son opcionales; este último nunca viene marcado. Las cookies no sustituyen el consentimiento comercial.
+Las once planillas del catálogo se ofrecen por $0 CLP durante la inauguración, hasta el 15/10/2026 a las 23:59 Chile continental. La vigencia compartida está en `assets/launch-promotion.js`; al terminar no se habilitan cobros automáticos. Para descargar se solicita nombre, correo y autorización para atender esa solicitud. El teléfono y el permiso comercial son opcionales; este último nunca viene marcado. Las cookies no sustituyen el consentimiento comercial.
 
 Los archivos Excel se excluyen de `dist` y se entregan mediante un enlace firmado válido durante diez minutos tras registrar la solicitud. Los originales se conservan en el repositorio: esta protección controla la descarga del sitio, no el acceso a un repositorio público.
 

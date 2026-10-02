@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { runInNewContext } from 'node:vm'
 import { DOWNLOAD_PRODUCTS } from '../shared/download-products.js'
+import { PUBLIC_DOWNLOAD_PRODUCTS } from '../shared/public-download-products.js'
 import { createDownloadTicket, readDownloadTicket } from '../server/download-ticket.js'
 import downloadHandler from '../api/download-planilla.js'
 
@@ -27,7 +28,9 @@ test('catálogo gratuito coincide con los once archivos entregables', async () =
   assert.equal(Object.keys(DOWNLOAD_PRODUCTS).length, products.length)
   for (const product of products) {
     assert.equal(product.price, 'Gratis')
-    assert.equal(DOWNLOAD_PRODUCTS[product.slug]?.file, product.download)
+    assert.equal(DOWNLOAD_PRODUCTS[product.slug]?.title, PUBLIC_DOWNLOAD_PRODUCTS[product.slug]?.title)
+    assert.equal(product.download, undefined)
+    assert.equal(product.downloadName, undefined)
     const bytes = await readFile(DOWNLOAD_PRODUCTS[product.slug].file)
     assert.ok(bytes.length > 0)
     assert.equal(bytes.subarray(0, 2).toString(), 'PK')

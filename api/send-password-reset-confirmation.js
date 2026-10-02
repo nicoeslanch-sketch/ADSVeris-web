@@ -1,6 +1,9 @@
-const sgMail = require('@sendgrid/mail')
+import sgMail from '@sendgrid/mail'
+import { AUTH_NOTIFICATIONS_ENABLED } from '../server/auth-notifications-policy.js'
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store')
+  if (!AUTH_NOTIFICATIONS_ENABLED) return res.status(404).json({ error: 'Servicio no disponible.' })
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
