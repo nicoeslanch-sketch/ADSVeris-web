@@ -191,3 +191,9 @@ Do not store API tokens in this file. Use Vercel environment variables or a loca
 - Partial failure after lead creation returns a pending confirmation without asking the visitor to submit a duplicate.
 - Form success does not prove native email delivery. Verify the live lead timeline and recipient inbox after deployment.
 - The Basic subscription was not upgraded and no users were deactivated. Account license/user discrepancies need a separate owner decision.
+
+## Live verification and outstanding restriction
+
+On 2026-10-01 the published form reached Kommo, but `POST /api/v4/contacts` returned HTTP 400 with provider error 205 (contact not created), before lead creation. The native UI also disables `Agregar contacto`. Billing shows an active Basic plan through 2027-09-03, with 2 active users against 1 paid license and an explicit instruction to buy licenses or deactivate a user to continue.
+
+The owner explicitly chose to keep both users and leave the license adjustment pending. No user, license, subscription or existing lead was changed to bypass this restriction. Email delivery and free download registration remain **unverified/unavailable for new submissions**, not a completed automation. Resolve the account restriction with Kommo before repeating end-to-end tests. Do not claim that local mocks or saved native triggers prove delivery.

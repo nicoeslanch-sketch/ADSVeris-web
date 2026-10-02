@@ -29,3 +29,7 @@ Las cuatro respuestas usan `{{contact.name}}`, enlace real de WhatsApp `https://
 No se utiliza SendGrid ni se habilita el webhook antiguo. No aplicar los disparadores retroactivamente a todos los leads: podría enviar correos no solicitados. Una respuesta HTTP del formulario confirma registro/enrutamiento, no entrega del correo. La entrega se verifica en la ficha del lead y en el buzón destinatario.
 
 El permiso opcional para futuras comunicaciones comerciales queda en la nota y, si se acepta, en la etiqueta `Autoriza contacto comercial web`. No usar el mero registro, descarga o aceptación de cookies como autorización publicitaria.
+
+## Verificación en producción pendiente
+
+Las cuatro plantillas actualizadas se reabrieron y comprobaron después de recargar Kommo. Se comprobó que la regla WordPress utiliza el buzón corporativo y solo el contacto principal. La prueba real del formulario no pudo crear el contacto: Kommo devuelve error 205 y también tiene deshabilitada la creación manual. La cuenta muestra 2 usuarios/1 licencia; el propietario pidió mantener ambos y dejar este ajuste pendiente. No se confirmó recepción de ningún correo automático. No habilitar proveedores alternativos ni compras para eludirlo.

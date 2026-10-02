@@ -59,23 +59,18 @@ export default async function handler(req, res) {
     const data = await response.json().catch(() => ({}))
     if (!response.ok) {
       // No customer data, vendor payloads or credentials in logs/errors.
-      let providerReason = clean(data.detail || data.title)
-      for (const privateValue of [token, name, email, phone, details, accountId].filter(Boolean)) {
-        providerReason = providerReason.replaceAll(privateValue, '[redacted]')
-      }
-      providerReason = providerReason.replace(/[^\s@]+@[^\s@]+\.[^\s@]+/g, '[email]')
-        .replace(/\beyJ[\w.-]+/g, '[token]').replace(/\+?\d[\d\s().-]{6,}\d/g, '[number]').slice(0,180)
+      const providerCode = /^Error code (\d{1,5})\./.exec(clean(data.detail))?.[1]
       console.error('Kommo request failed', { path, method, status: response.status, leadId,
-        contentType: response.headers.get('content-type'), responseKeys: Object.keys(data),
+        contentType: response.headers?.get?.('content-type'),
         accountRestriction: /payment|subscription|license|tariff|user.*limit|expired/i.test(`${data.title || ''} ${data.detail || ''}`),
-        providerReason,
+        providerCode,
       })
       const validation = (data['validation-errors'] || []).flatMap(item => item.errors || []).map(item => ({
         code: /^[a-z0-9_-]{1,80}$/i.test(item.code || '') ? item.code : 'unknown',
         path: /^[a-z0-9_.\[\]-]{1,150}$/i.test(item.path || '') ? item.path : 'unknown',
       }))
       if (validation.length) console.error('Kommo validation fields', validation)
-      throw new Error('Kommo request failed')
+      throw new Error(providerCode === '205' ? 'Kommo contact creation restricted' : 'Kommo request failed')
     }
     return data
   }
@@ -129,7 +124,7 @@ export default async function handler(req, res) {
       ...(download ? { downloadUrl: `/api/download-planilla?ticket=${createDownloadTicket(downloadSlug, leadId)}` } : {}),
     })
   } catch (error) {
-    const safeReasons = ['Missing contact ID', 'Missing lead ID', 'Lead is not ready for native email trigger', 'Routing confirmation failed', 'Kommo request failed']
+    const safeReasons = ['Missing contact ID', 'Missing lead ID', 'Lead is not ready for native email trigger', 'Routing confirmation failed', 'Kommo request failed', 'Kommo contact creation restricted']
     console.error('Kommo form incomplete', { leadId, contactId, reason: safeReasons.includes(error.message) ? error.message : error.name })
     if (leadId) {
       // Keep the request for an adviser; do not invite duplicate submissions.
@@ -138,6 +133,9 @@ export default async function handler(req, res) {
         message: 'Recibimos tu solicitud. La confirmación automática está pendiente; no necesitas enviarla de nuevo.',
         ...(download ? { downloadUrl: `/api/download-planilla?ticket=${createDownloadTicket(downloadSlug, leadId)}` } : {}),
       })
+    }
+    if (error.message === 'Kommo contact creation restricted') {
+      return res.status(503).json({ success: false, error: 'El registro automático está temporalmente no disponible. Escríbenos a servicios@adsveris.com o por WhatsApp para gestionar tu solicitud.' })
     }
     return res.status(502).json({ success: false, error: 'No pudimos registrar tu solicitud. Intenta de nuevo o escribe a servicios@adsveris.com.' })
   }

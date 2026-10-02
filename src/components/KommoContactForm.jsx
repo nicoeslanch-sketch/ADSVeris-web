@@ -192,6 +192,11 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
           {status.message && (
             <div role={status.type === 'error' ? 'alert' : 'status'} style={status.type === 'success' ? s.successBox : s.errorBox}>
               {status.message}
+              {status.type === 'error' && <p style={{ margin: '8px 0 0' }}>
+                <a href="mailto:servicios@adsveris.com" style={{ color: 'inherit' }}>Contactar por correo</a>
+                {' · '}
+                <a href="https://wa.me/56983894129" style={{ color: 'inherit' }} target="_blank" rel="noopener noreferrer">Contactar por WhatsApp</a>
+              </p>}
             </div>
           )}
           {isSuccess && downloadUrl && <a href={downloadUrl} style={{ ...s.submitButton, display: 'block', padding: '14px', textAlign: 'center', textDecoration: 'none' }}>Descargar archivo Excel</a>}

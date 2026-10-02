@@ -21,6 +21,8 @@ npm test
 
 Las pruebas cubren rutas por servicio, validación, consentimiento, enlaces de descarga firmados y archivos estáticos. Para comprobar el correo real también hay que enviar el formulario publicado, revisar la ficha en Kommo y verificar recepción en el buzón destinatario.
 
+Estado de prueba real, 2026-10-01: Kommo rechaza nuevas altas con error 205 y deshabilita su botón de crear contactos. La cuenta tiene 2 usuarios activos y 1 licencia; el propietario eligió mantener ambos y dejar pendiente el ajuste. La confirmación automática y el registro para descargas no están operativos para nuevos contactos hasta resolver la restricción. La web no anuncia éxito falso y ofrece correo/WhatsApp como alternativas de atención. Ver `KOMMO_STRUCTURE.md`.
+
 ## Archivos principales
 - index.html
 - tienda.html

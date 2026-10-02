@@ -96,6 +96,22 @@ test('honeypot no crea contactos ni dispara correos', async () => {
   assert.equal((await submit({ ...valid, website: 'bot.example' })).code, 200)
 })
 
+test('restricción real de Kommo no anuncia éxito ni habilita descarga sin registro', async () => {
+  fakeKommo(findContactService('Descarga de planilla gratuita'))
+  let calls = 0
+  global.fetch = async () => {
+    calls++
+    return { ok: false, status: 400, headers: new Headers({ 'content-type': 'application/problem+json' }),
+      json: async () => ({ title: 'Bad Request', detail: 'Error code 205. Contact not created.' }) }
+  }
+  const res = await submit({ ...valid, serviceType: 'Descarga de planilla gratuita', phone: '', downloadSlug: 'balance-general' })
+  assert.equal(res.code, 503)
+  assert.equal(res.data.success, false)
+  assert.equal(res.data.downloadUrl, undefined)
+  assert.match(res.data.error, /servicios@adsveris.com/)
+  assert.equal(calls, 1)
+})
+
 test('descargas requieren planilla válida y consentimiento separado; teléfono no obligatorio', async () => {
   const calls = fakeKommo(findContactService('Descarga de planilla gratuita'))
   const res = await submit({ ...valid, serviceType: 'Descarga de planilla gratuita', phone: '', downloadSlug: 'balance-general', marketingConsent: true })
