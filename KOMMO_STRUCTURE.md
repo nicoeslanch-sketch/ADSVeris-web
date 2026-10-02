@@ -1,6 +1,6 @@
 # Kommo CRM Structure
 
-Source: Kommo API for account `36669295` on subdomain `nicolasadsveris`.
+Source: existing Kommo API inventory for account `36669295` on subdomain `nicolasadsveris`; routing and native rules reviewed in the interface on 2026-10-01.
 
 Do not store API tokens in this file. Use Vercel environment variables or a local ignored env file for secrets.
 
@@ -159,7 +159,7 @@ Do not store API tokens in this file. Use Vercel environment variables or a loca
   - Plataforma de Analisis: pipeline `14023551`, status `108239311`, tag `22514`.
 - Closed statuses `142` and `143` are shared across pipelines.
 - Web integration assigns service tags automatically when creating a lead.
-- `api/kommo-contactados-webhook.js` is currently disabled in code. Contactado emails are handled manually inside Kommo.
+- `api/kommo-contactados-webhook.js` remains disabled. Existing native Kommo `Enviar correo` rules handle confirmations in `Contactado`, from the connected corporate mailbox to the lead's main contact. No SendGrid sending is enabled.
 - Registered Kommo webhook ID: `47387135`.
 - The registered webhook has `add_lead` and `update_lead` enabled in Kommo, but the Vercel handler intentionally ignores `add` events and processes status updates only.
 - The Contactados webhook requires these Vercel Production env vars:
@@ -174,11 +174,20 @@ Do not store API tokens in this file. Use Vercel environment variables or a loca
   - Procesos: pipeline `14023539`, status `108239243`.
   - Plataforma: pipeline `14023551`, status `108239311`.
 - Contactado email templates live in `KOMMO_EMAIL_TEMPLATES.md`.
-- Automatic emails attach service PDFs from `pdfs/` when the file exists.
+- Legacy webhook code references service PDFs from `pdfs/`, but is disabled. Native templates no longer attach old commercial brochures; source PDFs are preserved.
 - Available PDFs: `ADS_Veris_Planillas_Excel.pdf`, `ADS_Veris_Paginas_Web.pdf`, `ADS_Veris_Procesos.pdf`.
 - Missing PDF: `ADS_Veris_Plataforma_Analisis.pdf`.
 - Kommo email-template endpoints tested for native `Tema` dropdown creation returned HTTP 404, so those templates must be created manually in Kommo using `KOMMO_EMAIL_TEMPLATES.md`.
 - Kommo rejected renaming closed system statuses `142` and `143` through the API. Editable `Venta cerrada` stages were created where requested, and native won/lost statuses remain after them.
-- Automatic SendGrid sending is disabled; do not rely on this webhook for email delivery.
+- Automatic SendGrid sending is disabled; do not rely on this webhook for email delivery. Website requests do not require `SENDGRID_API_KEY` or webhook settings.
 - Kommo allowed renaming editable statuses through `PATCH /api/v4/leads/pipelines/{pipeline_id}/statuses/{status_id}`. It rejected color-only updates with HTTP 400, and name updates returned editable statuses with color `#fffeb2`.
 - `Embudo de ventas` was not modified.
+
+## Website requests (2026-10-01)
+
+- All four WordPress choices route to the web pipeline; personalized and free planillas route to Planillas.
+- Contact link and service tag are created with the lead; description and consent note are saved before the stage change. Main recipient and destination are checked explicitly instead of using a fixed delay.
+- Free downloads require name, email and transaction privacy consent; phone and commercial consent are optional. Commercial consent is unchecked by default, recorded separately and tagged only when accepted.
+- Partial failure after lead creation returns a pending confirmation without asking the visitor to submit a duplicate.
+- Form success does not prove native email delivery. Verify the live lead timeline and recipient inbox after deployment.
+- The Basic subscription was not upgraded and no users were deactivated. Account license/user discrepancies need a separate owner decision.

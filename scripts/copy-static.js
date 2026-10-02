@@ -27,6 +27,7 @@ const staticDirs = [
 function copyDir(src, dest) {
   fs.mkdirSync(dest, { recursive: true })
   for (const item of fs.readdirSync(src)) {
+    if (/\.(xlsx|xlsm)$/i.test(item)) continue
     const s = path.join(src, item)
     const d = path.join(dest, item)
     fs.statSync(s).isDirectory() ? copyDir(s, d) : fs.copyFileSync(s, d)

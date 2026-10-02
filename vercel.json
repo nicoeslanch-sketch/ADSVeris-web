@@ -1,4 +1,7 @@
 {
+  "functions": {
+    "api/download-planilla.js": { "includeFiles": "**/*.{xlsx,xlsm}" }
+  },
   "rewrites": [
     { "source": "/register", "destination": "/app.html" },
     { "source": "/login", "destination": "/app.html" },

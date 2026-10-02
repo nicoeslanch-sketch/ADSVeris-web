@@ -1,389 +1,129 @@
-const SERVICES = {
-  planilla: {
-    label: 'Planilla Excel Personalizada',
-    pipeline_id: 14023387,
-    trigger_source_status_id: 108238139,
-    status_id: 108238131,
-    tag_id: 22508,
-    tag_name: 'Planillas',
-  },
-  web: {
-    label: 'Pagina Web',
-    pipeline_id: 14023535,
-    trigger_source_status_id: 108239235,
-    status_id: 108239227,
-    tag_id: 22510,
-    tag_name: 'Paginas web',
-  },
-  procesos: {
-    label: 'Optimizacion de Procesos',
-    pipeline_id: 14023539,
-    trigger_source_status_id: 108246983,
-    status_id: 108239243,
-    tag_id: 22512,
-    tag_name: 'Procesos',
-  },
-  plataforma: {
-    label: 'Plataforma de Analisis',
-    pipeline_id: 14023551,
-    trigger_source_status_id: 108239319,
-    status_id: 108239311,
-    tag_id: 22514,
-    tag_name: 'Plataforma',
-  },
+import { findContactService, PRIVACY_VERSION } from '../shared/contact-services.js'
+import { DOWNLOAD_PRODUCTS } from '../shared/download-products.js'
+import { createDownloadTicket } from '../server/download-ticket.js'
+
+// Existing native Kommo email rules. This endpoint never sends via SendGrid.
+export const ROUTES = {
+  planilla: { pipeline: 14023387, source: 108238139, target: 108238131, tag: 22508 },
+  web: { pipeline: 14023535, source: 108239235, target: 108239227, tag: 22510 },
+  procesos: { pipeline: 14023539, source: 108246983, target: 108239243, tag: 22512 },
+  plataforma: { pipeline: 14023551, source: 108239319, target: 108239311, tag: 22514 },
 }
 
-const SERVICE_ALIASES = [
-  ['planilla', 'planilla'],
-  ['planillas', 'planilla'],
-  ['excel', 'planilla'],
-  ['pagina web', 'web'],
-  ['pagina', 'web'],
-  ['web', 'web'],
-  ['optimizacion de procesos', 'procesos'],
-  ['procesos', 'procesos'],
-  ['proceso', 'procesos'],
-  ['plataforma de analisis', 'plataforma'],
-  ['plataforma', 'plataforma'],
-  ['analisis', 'plataforma'],
-]
-
-const CONTACTADO_MOVE_DELAY_MS = 4000
-
-function clean(value) {
-  return typeof value === 'string' ? value.trim() : ''
-}
-
-function cleanDetails(value) {
-  return typeof value === 'string'
-    ? value.replace(/\r\n/g, '\n').replace(/\0/g, '').trim().slice(0, 3000)
-    : ''
-}
-
-function normalizeText(value) {
-  return clean(value)
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-}
-
-function getService(value) {
-  const normalized = normalizeText(value)
-  const direct = Object.values(SERVICES).find(service => normalizeText(service.label) === normalized)
-  if (direct) return direct
-
-  const alias = SERVICE_ALIASES.find(([match]) => normalized.includes(match))
-  return alias ? SERVICES[alias[1]] : null
-}
-
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-}
-
-async function requestJson(url, options) {
-  const response = await fetch(url, options)
-  const data = await response.json().catch(() => ({}))
-  return { response, data }
-}
-
-function getKommoError(data, fallback) {
-  return data?.detail || data?.title || fallback
-}
-
-function logKommoError(label, status, data) {
-  console.error(label, status, JSON.stringify(data, null, 2))
-}
-
-function wait(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-async function createLead({ kommoBaseUrl, headers, service, name }) {
-  const leadPayload = [
-    {
-      name: `${service.label} - ${name}`,
-      pipeline_id: service.pipeline_id,
-      status_id: service.trigger_source_status_id,
-      price: 0,
-      _embedded: {
-        tags: [{ id: service.tag_id }],
-      },
-    },
-  ]
-
-  return requestJson(`${kommoBaseUrl}/api/v4/leads`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(leadPayload),
-  })
-}
-
-async function moveLeadToServiceStatus({ kommoBaseUrl, headers, service, leadId }) {
-  return requestJson(`${kommoBaseUrl}/api/v4/leads/${leadId}`, {
-    method: 'PATCH',
-    headers,
-    body: JSON.stringify({
-      pipeline_id: service.pipeline_id,
-      status_id: service.status_id,
-    }),
-  })
-}
+const clean = value => typeof value === 'string' ? value.replace(/\0/g, '').trim() : ''
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store')
   if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, error: 'Method not allowed' })
+    res.setHeader('Allow', 'POST')
+    return res.status(405).json({ success: false, error: 'Método no permitido.' })
   }
-
-  const token = process.env.KOMMO_API_TOKEN
-  const subdomain = process.env.KOMMO_SUBDOMAIN
-  const accountId = process.env.KOMMO_ACCOUNT_ID
-
-  if (!token || !subdomain || !accountId) {
-    return res.status(500).json({
-      success: false,
-      error: 'Kommo environment variables are not configured',
+  let body = req.body
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body) } catch { body = null }
+  }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return res.status(400).json({ success: false, error: 'Solicitud inválida.' })
+  }
+  // Simple bot protection without another paid service.
+  if (clean(body.website)) return res.status(200).json({ success: true })
+  const name = clean(body.name)
+  const email = clean(body.email).toLowerCase()
+  const phone = clean(body.phone)
+  const details = clean(body.details).replace(/\r\n/g, '\n')
+  const service = findContactService(body.serviceType)
+  const sourcePage = clean(body.sourcePage)
+  const downloadSlug = clean(body.downloadSlug)
+  const download = downloadSlug && Object.hasOwn(DOWNLOAD_PRODUCTS, downloadSlug) ? DOWNLOAD_PRODUCTS[downloadSlug] : null
+  const isDownload = service?.label === 'Descarga de planilla gratuita'
+  const phoneValid = /^\+?[\d\s().-]{6,40}$/.test(phone) && phone.replace(/\D/g, '').length >= 6
+  if (!name || name.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 ||
+      (phone ? !phoneValid : !isDownload) || (isDownload && !download) || (!isDownload && downloadSlug) ||
+      !service || details.length > 3000 || body.privacyConsent !== true) {
+    return res.status(400).json({ success: false, error: 'Revisa nombre, correo, teléfono, servicio y autorización de contacto.' })
+  }
+  const { KOMMO_API_TOKEN: token, KOMMO_SUBDOMAIN: subdomain, KOMMO_ACCOUNT_ID: accountId } = process.env
+  if (!token || !/^[a-z0-9-]+$/i.test(subdomain || '') || !accountId) {
+    return res.status(503).json({ success: false, error: 'El formulario no está disponible. Escríbenos a servicios@adsveris.com.' })
+  }
+  const route = ROUTES[service.key]
+  const base = `https://${subdomain}.kommo.com/api/v4`
+  const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'X-Account-ID': accountId }
+  let leadId
+  let contactId
+  async function request(path, method = 'GET', payload) {
+    const response = await fetch(`${base}${path}`, {
+      method, headers, signal: AbortSignal.timeout(12000),
+      ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
     })
-  }
-
-  const name = clean(req.body?.name)
-  const email = clean(req.body?.email).toLowerCase()
-  const phone = clean(req.body?.phone)
-  const rawServiceType = clean(req.body?.serviceType)
-  const details = cleanDetails(req.body?.details)
-  const service = getService(rawServiceType)
-
-  if (!name || !email || !phone || !rawServiceType) {
-    return res.status(400).json({
-      success: false,
-      error: 'Nombre, email, telefono y servicio son obligatorios',
-    })
-  }
-
-  if (!isValidEmail(email)) {
-    return res.status(400).json({ success: false, error: 'Email invalido' })
-  }
-
-  if (!service) {
-    return res.status(400).json({ success: false, error: 'Servicio invalido' })
-  }
-
-  const kommoBaseUrl = `https://${subdomain}.kommo.com`
-  const headers = {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
-    'X-Account-ID': accountId,
-  }
-
-  const contactPayload = [
-    {
-      first_name: name,
-      custom_fields_values: [
-        {
-          field_code: 'EMAIL',
-          values: [{ value: email, enum_code: 'WORK' }],
-        },
-        {
-          field_code: 'PHONE',
-          values: [{ value: phone, enum_code: 'WORK' }],
-        },
-      ],
-    },
-  ]
-
-  try {
-    const { response: contactResponse, data: contactData } = await requestJson(`${kommoBaseUrl}/api/v4/contacts`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(contactPayload),
-    })
-
-    if (!contactResponse.ok) {
-      logKommoError('Kommo contact error:', contactResponse.status, contactData)
-      return res.status(contactResponse.status).json({
-        success: false,
-        error: getKommoError(contactData, 'Error creando contacto en Kommo'),
-        details: contactData,
-      })
-    }
-
-    const contact = Array.isArray(contactData)
-      ? contactData[0]
-      : contactData?._embedded?.contacts?.[0]
-    const contactId = contact?.id
-
-    const { response, data } = await createLead({
-      kommoBaseUrl,
-      headers,
-      service,
-      name,
-    })
-
+    const data = await response.json().catch(() => ({}))
     if (!response.ok) {
-      logKommoError('Kommo API error:', response.status, data)
-      return res.status(response.status).json({
-        success: false,
-        error: getKommoError(data, 'Error creando lead en Kommo'),
-        details: data,
-      })
+      // No customer data, vendor payloads or credentials in logs/errors.
+      console.error('Kommo request failed', { path, method, status: response.status, leadId })
+      throw new Error('Kommo request failed')
     }
-
-    const lead = Array.isArray(data)
-      ? data[0]
-      : data?._embedded?.leads?.[0]
-    const leadId = lead?.id
-
-    if (leadId && contactId) {
-      const { response: linkResponse, data: linkData } = await requestJson(`${kommoBaseUrl}/api/v4/leads/${leadId}/link`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify([
-          {
-            to_entity_id: contactId,
-            to_entity_type: 'contacts',
-          },
-        ]),
-      })
-
-      if (!linkResponse.ok) {
-        console.warn('Kommo contact link warning:', leadId, contactId, linkResponse.status, JSON.stringify(linkData, null, 2))
-      }
+    return data
+  }
+  try {
+    const contacts = await request('/contacts', 'POST', [{
+      name,
+      custom_fields_values: [
+        { field_code: 'EMAIL', values: [{ value: email, enum_code: 'WORK' }] },
+        ...(phone ? [{ field_code: 'PHONE', values: [{ value: phone, enum_code: 'WORK' }] }] : []),
+      ],
+    }])
+    contactId = (contacts?._embedded?.contacts?.[0] || contacts?.[0])?.id
+    if (!Number.isInteger(contactId)) throw new Error('Missing contact ID')
+    const leads = await request('/leads', 'POST', [{
+      name: `${download ? download.title + ' (gratis)' : service.label} - ${name}`, pipeline_id: route.pipeline,
+      status_id: route.source, price: 0,
+      _embedded: { tags: [{ id: route.tag }], contacts: [{ id: contactId, is_main: true }] },
+    }])
+    leadId = (leads?._embedded?.leads?.[0] || leads?.[0])?.id
+    if (!Number.isInteger(leadId)) throw new Error('Missing lead ID')
+    const note = [
+      'Solicitud desde el formulario web de ADS Veris', `Servicio solicitado: ${service.label}`,
+      `Nombre: ${name}`, `Correo del cliente: ${email}`, `Teléfono: ${phone || 'No informado'}`,
+      ...(download ? [`Planilla solicitada: ${download.title} (${downloadSlug})`] : []),
+      `Problema o necesidad: ${details || 'No informado (campo opcional)'}`,
+      `Página: ${/^\/[a-z0-9/_-]+\.html$/i.test(sourcePage) ? sourcePage : 'Sitio web'}`,
+      `Autorización: responder esta solicitud por correo o teléfono. Privacidad ${PRIVACY_VERSION}.`,
+      `Comunicaciones comerciales por correo o teléfono: ${body.marketingConsent === true ? 'AUTORIZADAS expresamente (casilla opcional)' : 'NO autorizadas'}.`,
+      `Fecha: ${new Date().toISOString()}`,
+      'No constituye una contratación. Solo contactar para publicidad si consta autorización comercial expresa.',
+    ].join('\n')
+    await request(`/leads/${leadId}/notes`, 'POST', [{ note_type: 'common', params: { text: note } }])
+    // Check the main recipient and tag BEFORE the native email trigger.
+    const prepared = await request(`/leads/${leadId}?with=contacts`)
+    if (prepared.pipeline_id !== route.pipeline ||
+        !prepared._embedded?.contacts?.some(contact => contact.id === contactId && contact.is_main) ||
+        !prepared._embedded?.tags?.some(tag => tag.id === route.tag)) {
+      throw new Error('Lead is not ready for native email trigger')
     }
-
-    let movedToServiceStatus = false
-    if (leadId) {
-      await wait(CONTACTADO_MOVE_DELAY_MS)
-
-      const { response: moveResponse, data: moveData } = await moveLeadToServiceStatus({
-        kommoBaseUrl,
-        headers,
-        service,
-        leadId,
-      })
-
-      if (!moveResponse.ok) {
-        logKommoError('Kommo lead status move error:', moveResponse.status, moveData)
-        return res.status(moveResponse.status).json({
-          success: false,
-          leadId,
-          contactId,
-          error: getKommoError(moveData, 'Lead creado, pero no se pudo mover a Contactado'),
-          details: moveData,
-        })
-      }
-
-      movedToServiceStatus = true
-    }
-
-    if (leadId) {
-      const noteText = [
-        'Solicitud enviada desde pymex-web',
-        `Servicio: ${service.label}`,
-        `Pipeline asignado: ${service.pipeline_id}`,
-        `Estado asignado: ${service.status_id}`,
-        `Etiqueta asignada: ${service.tag_name} (${service.tag_id})`,
-        `Movimiento a Contactado: ${movedToServiceStatus ? 'si' : 'no'}`,
-        `Nombre: ${name}`,
-        `Email: ${email}`,
-        `Telefono: ${phone}`,
-        `Descripcion del problema o necesidad: ${details || 'No informada'}`,
-      ].join('\n')
-
-      const { response: noteResponse, data: noteError } = await requestJson(`${kommoBaseUrl}/api/v4/leads/${leadId}/notes`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify([
-          {
-            note_type: 'common',
-            params: { text: noteText },
-          },
-        ]),
-      })
-
-      if (!noteResponse.ok) {
-        console.warn('Kommo note warning:', leadId, noteResponse.status, JSON.stringify(noteError, null, 2))
-      }
-    }
-
-    let confirmedLead = null
-    if (leadId) {
-      const { response: confirmResponse, data: confirmData } = await requestJson(`${kommoBaseUrl}/api/v4/leads/${leadId}?with=tags`, {
-        method: 'GET',
-        headers,
-      })
-
-      if (!confirmResponse.ok) {
-        console.warn('Kommo confirm warning:', leadId, confirmResponse.status, JSON.stringify(confirmData, null, 2))
-      } else {
-        confirmedLead = confirmData
-      }
-    }
-
-    const confirmedPipelineId = confirmedLead?.pipeline_id
-    const confirmedStatusId = confirmedLead?.status_id
-    const confirmedTags = confirmedLead?._embedded?.tags || []
-    const tagOk = !leadId || confirmedTags.some(tag => tag.id === service.tag_id)
-    const pipelineOk = !leadId || confirmedPipelineId === service.pipeline_id
-    const statusOk = !leadId || confirmedStatusId === service.status_id
-
-    if (!pipelineOk || !statusOk) {
-      console.error('Kommo routing mismatch:', {
-        leadId,
-        expectedPipelineId: service.pipeline_id,
-        expectedStatusId: service.status_id,
-        confirmedPipelineId,
-        confirmedStatusId,
-        confirmedTags,
-      })
-      return res.status(502).json({
-        success: false,
-        leadId,
-        contactId,
-        error: 'Lead creado, pero quedo en un embudo o estado distinto al esperado',
-        expectedPipelineId: service.pipeline_id,
-        expectedStatusId: service.status_id,
-        confirmedPipelineId,
-        confirmedStatusId,
-      })
-    }
-
-    console.info('Kommo lead created:', {
-      leadId,
-      contactId,
-      serviceType: service.label,
-      pipelineId: service.pipeline_id,
-      statusId: service.status_id,
-      confirmedPipelineId,
-      confirmedStatusId,
-      tagId: service.tag_id,
-      tagName: service.tag_name,
-      confirmedTags,
-      tagOk,
-      statusOk,
-      movedToServiceStatus,
+    await request(`/leads/${leadId}`, 'PATCH', {
+      pipeline_id: route.pipeline, status_id: route.target,
+      ...(body.marketingConsent === true ? { _embedded: { tags: [{ id: route.tag }, { name: 'Autoriza contacto comercial web' }] } } : {}),
     })
-
-    return res.status(200).json({
-      success: true,
-      leadId,
-      contactId,
-      serviceType: service.label,
-      pipelineId: service.pipeline_id,
-      statusId: service.status_id,
-      confirmedPipelineId,
-      confirmedStatusId,
-      tagId: service.tag_id,
-      tagName: service.tag_name,
-      confirmedTags,
-      tagOk,
-      statusOk,
-      movedToServiceStatus,
-      data,
+    const confirmed = await request(`/leads/${leadId}?with=contacts`)
+    if (confirmed.pipeline_id !== route.pipeline || confirmed.status_id !== route.target) {
+      throw new Error('Routing confirmation failed')
+    }
+    console.info('Kommo form routed', { leadId, contactId, service: service.key, pipeline: route.pipeline })
+    // Routing success is not proof of email delivery: Kommo owns that step.
+    return res.status(200).json({ success: true,
+      ...(download ? { downloadUrl: `/api/download-planilla?ticket=${createDownloadTicket(downloadSlug, leadId)}` } : {}),
     })
   } catch (error) {
-    console.error('Kommo submit error:', error)
-    return res.status(500).json({
-      success: false,
-      error: 'No se pudo conectar con Kommo',
-    })
+    const safeReasons = ['Missing contact ID', 'Missing lead ID', 'Lead is not ready for native email trigger', 'Routing confirmation failed', 'Kommo request failed']
+    console.error('Kommo form incomplete', { leadId, contactId, reason: safeReasons.includes(error.message) ? error.message : error.name })
+    if (leadId) {
+      // Keep the request for an adviser; do not invite duplicate submissions.
+      return res.status(202).json({
+        success: true, pending: true,
+        message: 'Recibimos tu solicitud. La confirmación automática está pendiente; no necesitas enviarla de nuevo.',
+        ...(download ? { downloadUrl: `/api/download-planilla?ticket=${createDownloadTicket(downloadSlug, leadId)}` } : {}),
+      })
+    }
+    return res.status(502).json({ success: false, error: 'No pudimos registrar tu solicitud. Intenta de nuevo o escribe a servicios@adsveris.com.' })
   }
 }

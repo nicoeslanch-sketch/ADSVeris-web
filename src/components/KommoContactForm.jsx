@@ -1,47 +1,88 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { CONTACT_SERVICES, findContactService } from '../../shared/contact-services.js'
+import './kommo-contact.css'
 
-const SERVICES = [
-  'Planilla Excel Personalizada',
-  'Página Web',
-  'Optimización de Procesos',
-  'Plataforma de Análisis',
-]
+const SERVICES = CONTACT_SERVICES.map(service => service.label)
 
 function createInitialForm(defaultService = SERVICES[0]) {
   return {
     name: '',
     email: '',
     phone: '',
-    serviceType: SERVICES.includes(defaultService) ? defaultService : SERVICES[0],
+    serviceType: findContactService(defaultService)?.label || SERVICES[0],
     details: '',
+    privacyConsent: false,
+    website: '',
+    marketingConsent: false,
   }
 }
 
-export default function KommoContactForm({ isOpen = true, onClose, defaultService = SERVICES[0] }) {
+export default function KommoContactForm({ isOpen = true, onClose, defaultService = SERVICES[0], downloadProduct = null }) {
   const isCompact = useIsCompact()
   const [form, setForm] = useState(() => createInitialForm(defaultService))
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState({ type: '', message: '' })
   const [loading, setLoading] = useState(false)
+  const [downloadUrl, setDownloadUrl] = useState('')
+  const dialogRef = useRef(null)
+  const submitting = useRef(false)
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
 
   const canClose = typeof onClose === 'function'
   const isSuccess = status.type === 'success'
 
-  const title = useMemo(() => {
-    if (isSuccess) return 'Solicitud recibida'
-    return 'Conversemos sobre tu proyecto'
-  }, [isSuccess])
+  const isDownload = Boolean(downloadProduct)
+  const title = isSuccess ? (isDownload ? 'Tu planilla está lista' : 'Solicitud recibida') : (isDownload ? 'Descarga tu planilla gratis' : 'Conversemos sobre tu proyecto')
 
   useEffect(() => {
-    if (!isOpen || isSuccess) return
+    if (!isOpen) return
+    setStatus({ type: '', message: '' })
+    setErrors({})
+    setDownloadUrl('')
     setForm(prev => ({ ...prev, serviceType: createInitialForm(defaultService).serviceType }))
-  }, [defaultService, isOpen, isSuccess])
+  }, [defaultService, isOpen, downloadProduct])
+
+  useEffect(() => {
+    if (!isOpen || !canClose) return
+    const previousFocus = document.activeElement
+    const previousOverflow = document.body.style.overflow
+    const background = [...document.body.children].filter(node => !node.contains(dialogRef.current))
+    const inertStates = background.map(node => [node, node.inert])
+    background.forEach(node => { node.inert = true })
+    document.body.style.overflow = 'hidden'
+    dialogRef.current?.querySelector('h2')?.focus({ preventScroll: true })
+    function handleKey(event) {
+      if (event.key === 'Escape' && !submitting.current) closeRef.current?.()
+      if (event.key !== 'Tab') return
+      const controls = [...dialogRef.current.querySelectorAll('button, input, select, textarea, a[href]')]
+        .filter(node => !node.disabled && node.tabIndex !== -1 && node.getClientRects().length)
+      const first = controls[0]
+      const last = controls[controls.length - 1]
+      if (event.shiftKey && (document.activeElement === first || !controls.includes(document.activeElement))) {
+        event.preventDefault(); last?.focus()
+      } else if (!event.shiftKey && (document.activeElement === last || !controls.includes(document.activeElement))) {
+        event.preventDefault(); first?.focus()
+      }
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('keydown', handleKey)
+      document.body.style.overflow = previousOverflow
+      inertStates.forEach(([node, wasInert]) => { node.inert = wasInert })
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true })
+    }
+  }, [isOpen, canClose])
+
+  useEffect(() => {
+    if (Object.keys(errors).length) dialogRef.current?.querySelector('[aria-invalid="true"]')?.focus()
+  }, [errors])
 
   if (!isOpen) return null
 
   function handleChange(event) {
-    const { name, value } = event.target
-    setForm(prev => ({ ...prev, [name]: value }))
+    const { name, value, type, checked } = event.target
+    setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
     setErrors(prev => ({ ...prev, [name]: '' }))
     setStatus({ type: '', message: '' })
   }
@@ -49,20 +90,23 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
   function validate() {
     const nextErrors = {}
     if (!form.name.trim()) nextErrors.name = 'Ingresa tu nombre'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) nextErrors.email = 'Ingresa un email valido'
-    if (!form.phone.trim()) nextErrors.phone = 'Ingresa tu telefono'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) nextErrors.email = 'Ingresa un correo válido'
+    if ((!isDownload || form.phone.trim()) && (!/^\+?[\d\s().-]{6,40}$/.test(form.phone.trim()) || form.phone.replace(/\D/g, '').length < 6)) nextErrors.phone = 'Ingresa un teléfono válido'
     if (!SERVICES.includes(form.serviceType)) nextErrors.serviceType = 'Selecciona un servicio'
+    if (!form.privacyConsent) nextErrors.privacyConsent = 'Autoriza el contacto para poder responder tu solicitud'
     return nextErrors
   }
 
   async function handleSubmit(event) {
     event.preventDefault()
+    if (submitting.current) return
     const nextErrors = validate()
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors)
       return
     }
 
+    submitting.current = true
     setLoading(true)
     setStatus({ type: '', message: '' })
 
@@ -76,6 +120,11 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
           phone: form.phone.trim(),
           serviceType: form.serviceType,
           details: form.details.trim(),
+          privacyConsent: form.privacyConsent,
+          website: form.website,
+          sourcePage: window.location.pathname,
+          downloadSlug: downloadProduct?.slug || '',
+          marketingConsent: form.marketingConsent,
         }),
       })
 
@@ -86,25 +135,28 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
 
       setStatus({
         type: 'success',
-        message: 'Gracias. Ya tenemos tus datos y te contactaremos pronto.',
+        message: data.message || (isDownload ? 'Gracias. Ya puedes descargar el archivo gratuito. Te contactaremos comercialmente solo si lo autorizaste.' : 'Gracias. Registramos tu solicitud para que ADS Veris revise tu caso y te responda al correo que ingresaste. No necesitas enviarla de nuevo.'),
       })
+      if (isDownload && typeof data.downloadUrl === 'string' && data.downloadUrl.startsWith('/api/download-planilla?ticket=')) setDownloadUrl(data.downloadUrl)
       setForm(createInitialForm(defaultService))
     } catch (error) {
       setStatus({
         type: 'error',
-        message: error.message || 'Ocurrio un error. Intenta nuevamente.',
+        message: error.message || 'Ocurrió un error. Intenta nuevamente.',
       })
     } finally {
       setLoading(false)
+      submitting.current = false
     }
   }
 
   return (
-    <div style={{ ...s.overlay, ...(isCompact ? s.overlayCompact : {}) }} role="presentation" onClick={canClose ? onClose : undefined}>
+    <div className="kommo-contact" style={{ ...s.overlay, ...(isCompact ? s.overlayCompact : {}) }} role="presentation" onClick={canClose && !loading ? onClose : undefined}>
       <section
+        ref={dialogRef}
         style={{ ...s.modal, ...(isCompact ? s.modalCompact : {}) }}
-        role="dialog"
-        aria-modal="true"
+        role={canClose ? 'dialog' : 'region'}
+        aria-modal={canClose ? 'true' : undefined}
         aria-labelledby="kommo-contact-title"
         onClick={event => event.stopPropagation()}
       >
@@ -126,21 +178,24 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
           <div style={s.header}>
             <div>
               <p style={s.eyebrow}>ADS Veris</p>
-              <h2 id="kommo-contact-title" style={s.title}>{title}</h2>
-              <p style={s.subtitle}>Elige el servicio que necesitas y un asesor revisara tu caso.</p>
+              <h2 id="kommo-contact-title" tabIndex={-1} style={s.title}>{title}</h2>
+              <p style={s.subtitle}>{isDownload ? `${downloadProduct.title}. Deja tu nombre y correo para habilitar la descarga sin costo. No necesitas aceptar publicidad ni cookies de seguimiento.` : 'Elige el servicio que necesitas y cuéntanos tu caso. Te responderemos a tu correo. Solicitar información no tiene costo ni compromiso.'}</p>
             </div>
             {canClose && (
-              <button type="button" aria-label="Cerrar" style={s.closeButton} onClick={onClose}>
-                x
+              <button type="button" aria-label="Cerrar" style={s.closeButton} onClick={onClose} disabled={loading}>
+                ×
               </button>
             )}
+            {!canClose && <a href="/index.html" style={{ color: '#0f766e', fontSize: '12px' }}>Volver al sitio</a>}
           </div>
 
           {status.message && (
-            <div style={status.type === 'success' ? s.successBox : s.errorBox}>
+            <div role={status.type === 'error' ? 'alert' : 'status'} style={status.type === 'success' ? s.successBox : s.errorBox}>
               {status.message}
             </div>
           )}
+          {isSuccess && downloadUrl && <a href={downloadUrl} style={{ ...s.submitButton, display: 'block', padding: '14px', textAlign: 'center', textDecoration: 'none' }}>Descargar archivo Excel</a>}
+          {isSuccess && isDownload && <p className="kommo-contact-hint">El enlace caduca en 10 minutos. Guarda una copia original. Solo habilita macros si confías en el archivo y las necesitas.</p>}
 
           {!isSuccess && (
             <form onSubmit={handleSubmit} noValidate style={s.form}>
@@ -151,40 +206,66 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
                 onChange={handleChange}
                 error={errors.name}
                 placeholder="Tu nombre"
+                maxLength={100}
+                autoComplete="name"
               />
               <Field
-                label="Email"
+                label="Correo electrónico"
                 name="email"
                 type="email"
                 value={form.email}
                 onChange={handleChange}
                 error={errors.email}
                 placeholder="tu@email.com"
+                maxLength={254}
+                autoComplete="email"
               />
               <Field
-                label="Telefono"
+                label={isDownload ? 'Teléfono (opcional)' : 'Teléfono'}
                 name="phone"
                 type="tel"
                 value={form.phone}
                 onChange={handleChange}
                 error={errors.phone}
                 placeholder="+56 9 1234 5678"
+                maxLength={40}
+                autoComplete="tel"
               />
 
-              <div style={s.field}>
+              {!isDownload && <div style={s.field}>
                 <label htmlFor="serviceType" style={s.label}>Servicio</label>
                 <select
                   id="serviceType"
                   name="serviceType"
                   value={form.serviceType}
                   onChange={handleChange}
+                  aria-invalid={Boolean(errors.serviceType)}
+                  aria-describedby={errors.serviceType ? 'service-error' : undefined}
                   style={{ ...s.input, ...s.select, ...(errors.serviceType ? s.inputError : {}) }}
                 >
-                  {SERVICES.map(service => (
+                  {SERVICES.filter(service => service !== 'Descarga de planilla gratuita').map(service => (
                     <option key={service} value={service}>{service}</option>
                   ))}
                 </select>
-                {errors.serviceType && <span style={s.errorText}>{errors.serviceType}</span>}
+                {errors.serviceType && <span id="service-error" style={s.errorText}>{errors.serviceType}</span>}
+              </div>}
+
+              <div className="kommo-contact-honeypot" aria-hidden="true">
+                <label htmlFor="contact-website">Sitio web</label>
+                <input id="contact-website" name="website" value={form.website} onChange={handleChange} tabIndex={-1} autoComplete="off" />
+              </div>
+              <div style={s.field}>
+                <label className="kommo-contact-consent">
+                  <input name="privacyConsent" type="checkbox" checked={form.privacyConsent} onChange={handleChange}
+                    aria-invalid={Boolean(errors.privacyConsent)} aria-describedby={errors.privacyConsent ? 'consent-error' : undefined} />
+                  <span>Autorizo a ADS Veris SpA a usar estos datos para {isDownload ? 'registrar y gestionar esta descarga' : 'responder mi solicitud por correo o teléfono'}, según su <a href="/privacidad.html" target="_blank" rel="noopener noreferrer">política de privacidad</a>. Esto no autoriza publicidad.</span>
+                </label>
+                {errors.privacyConsent && <span id="consent-error" style={s.errorText}>{errors.privacyConsent}</span>}
+                <p className="kommo-contact-hint">No compartas contraseñas ni datos sensibles en la descripción.</p>
+                <label className="kommo-contact-consent">
+                  <input name="marketingConsent" type="checkbox" checked={form.marketingConsent} onChange={handleChange} />
+                  <span>Quiero recibir novedades y ofertas de ADS Veris por correo y, si dejo mi teléfono, llamadas comerciales. Es opcional y puedo retirar mi autorización en servicios@adsveris.com.</span>
+                </label>
               </div>
 
               <div style={s.field}>
@@ -208,7 +289,7 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
                 disabled={loading}
                 style={{ ...s.submitButton, opacity: loading ? 0.65 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
               >
-                {loading ? 'Enviando...' : 'Enviar solicitud'}
+                {loading ? 'Enviando...' : isDownload ? 'Obtener descarga gratuita' : 'Enviar solicitud'}
               </button>
             </form>
           )}
@@ -218,7 +299,7 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
   )
 }
 
-function Field({ label, name, type = 'text', value, onChange, error, placeholder }) {
+function Field({ label, name, type = 'text', value, onChange, error, placeholder, maxLength, autoComplete }) {
   return (
     <div style={s.field}>
       <label htmlFor={name} style={s.label}>{label}</label>
@@ -229,9 +310,13 @@ function Field({ label, name, type = 'text', value, onChange, error, placeholder
         value={value}
         onChange={onChange}
         placeholder={placeholder}
+        maxLength={maxLength}
+        autoComplete={autoComplete}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${name}-error` : undefined}
         style={{ ...s.input, ...(error ? s.inputError : {}) }}
       />
-      {error && <span style={s.errorText}>{error}</span>}
+      {error && <span id={`${name}-error`} style={s.errorText}>{error}</span>}
     </div>
   )
 }
@@ -287,7 +372,7 @@ const s = {
   },
   modalCompact: {
     width: 'min(100%, 430px)',
-    maxHeight: 'none',
+    maxHeight: 'calc(100dvh - 24px)',
     gridTemplateColumns: '1fr',
   },
   brandPanel: {
@@ -301,8 +386,8 @@ const s = {
     overflow: 'hidden',
   },
   brandPanelCompact: {
-    minHeight: '230px',
-    padding: '20px',
+    minHeight: '150px',
+    padding: '12px 20px',
   },
   brandGlow: {
     position: 'absolute',
@@ -324,10 +409,10 @@ const s = {
     pointerEvents: 'none',
   },
   agentImageCompact: {
-    width: '390px',
-    left: '50%',
-    bottom: '-42px',
-    maxHeight: '304px',
+    width: '230px',
+    left: '76%',
+    bottom: '-20px',
+    maxHeight: '180px',
   },
   logoRow: {
     display: 'flex',
@@ -438,8 +523,7 @@ const s = {
     borderRadius: '8px',
     background: '#ffffff',
     color: '#081525',
-    fontSize: '15px',
-    outline: 'none',
+    fontSize: '16px',
   },
   select: {
     appearance: 'auto',

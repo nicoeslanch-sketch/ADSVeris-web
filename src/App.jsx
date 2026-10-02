@@ -8,6 +8,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import EmailConfirmed from './pages/EmailConfirmed'
 import KommoContactForm from './components/KommoContactForm'
+import { DOWNLOAD_PRODUCTS } from '../shared/download-products.js'
 
 const WHATSAPP_URL = 'https://wa.me/56983894129?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.'
 const PUBLIC_AUTH_ENABLED = window.ADS_VERIS_CONFIG?.publicAuthEnabled === true
@@ -53,6 +54,8 @@ function RootHandler() {
 }
 
 function App() {
+  const requestedSlug = new URLSearchParams(window.location.search).get('planilla')
+  const requestedProduct = Object.hasOwn(DOWNLOAD_PRODUCTS, requestedSlug || '') ? { slug: requestedSlug, title: DOWNLOAD_PRODUCTS[requestedSlug].title } : null
   return (
     <BrowserRouter>
       <Routes>
@@ -62,7 +65,7 @@ function App() {
         <Route path="/forgot-password" element={<PublicAuthRoute><ForgotPassword /></PublicAuthRoute>} />
         <Route path="/reset-password" element={<PublicAuthRoute><ResetPassword /></PublicAuthRoute>} />
         <Route path="/email-confirmed" element={<PublicAuthRoute><EmailConfirmed /></PublicAuthRoute>} />
-        <Route path="/contacto-kommo" element={<KommoContactForm />} />
+        <Route path="/contacto-kommo" element={<KommoContactForm downloadProduct={requestedProduct} defaultService={requestedProduct ? 'Descarga de planilla gratuita' : new URLSearchParams(window.location.search).get('servicio') || undefined} />} />
         <Route path="/dashboard" element={<PublicAuthRoute><Navigate to="/profile" replace /></PublicAuthRoute>} />
         <Route path="/" element={<RootHandler />} />
       </Routes>

@@ -1,0 +1,8 @@
+.kommo-contact, .kommo-contact * { box-sizing: border-box; }
+.kommo-contact :is(input, select, textarea, button, a):focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+.kommo-contact h2:focus { outline: none; }
+.kommo-contact-consent { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.6; color: #354657; }
+.kommo-contact-consent input { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 2px; accent-color: #0f766e; }
+.kommo-contact-consent a { color: #08665f; text-decoration: underline; }
+.kommo-contact-hint { margin: 0; color: #526173; font-size: 12px; line-height: 1.5; }
+.kommo-contact-honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

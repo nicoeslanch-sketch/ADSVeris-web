@@ -62,6 +62,7 @@ function renderChrome() {
             <a href="${base}plataforma.html" class="${page === "plataforma" ? "active" : ""}">Plataforma</a>
             <a href="${base}nosotros.html" class="${page === "nosotros" ? "active" : ""}">Nosotros</a>
             <a href="${base}ayuda.html" class="${page === "ayuda" ? "active" : ""}">Ayuda</a>
+            <a href="${base}contacto.html" class="${page === "contacto" ? "active" : ""}">Contacto</a>
           </nav>
           <div class="header-actions">
             ${(function() {
@@ -102,7 +103,7 @@ function renderChrome() {
                 <a href="${base}index.html">Inicio</a>
                 <a href="${base}soluciones/index.html">Soluciones</a>
                 <a href="${base}tienda.html">Plantillas</a>
-                <a href="${base}soluciones/paginas-web.html">Páginas web</a>
+                <a href="${base}soluciones/paginas-web.html">Soporte WordPress</a>
                 <a href="${base}soluciones/procesos.html">Procesos</a>
                 <a href="${base}nosotros.html">Nosotros</a>
                 <a href="${base}ayuda.html">Ayuda</a>
@@ -120,15 +121,15 @@ function renderChrome() {
             <div>
               <h3>Información</h3>
               <div class="footer-links">
-                <a href="${base}legal.html">Términos y condiciones</a>
+                <a href="${base}terminos.html">Términos y condiciones</a>
                 <a href="${base}privacidad.html">Privacidad</a>
                 <a href="${base}reembolsos.html">Reembolsos</a>
               </div>
             </div>
           </div>
           <div class="footer-bottom">
-            <span>© <span data-current-year></span> ADS Veris. Del dato al criterio.</span>
-            <span>Soluciones de gestión para PyMEs en Chile.</span>
+            <span>© <span data-current-year></span> ADS Veris SpA · RUT 78.456.217-4</span>
+            <span>Antonio Bellet 193, oficina 1210, Providencia, Chile.</span>
           </div>
         </div>
       </footer>
@@ -229,7 +230,12 @@ function renderProductDetail() {
 
   const params = new URLSearchParams(window.location.search);
   const slug = params.get("id") || "balance-general";
-  const product = getProductBySlug(slug) || getProducts()[0];
+  const product = getProductBySlug(slug);
+  if (!product) {
+    document.title = 'Planilla no encontrada | ADS Veris';
+    host.innerHTML = '<section class="section"><div class="container card narrative-card"><h1>Esta planilla no está en el catálogo.</h1><p>Revisa las herramientas disponibles o consulta por una versión personalizada.</p><a class="btn btn-primary" href="tienda.html">Volver al catálogo</a></div></section>';
+    return;
+  }
   document.title = `${product.shortTitle} | ADS Veris`;
   const images = product.images && product.images.length ? product.images : [product.thumb];
 
@@ -262,8 +268,7 @@ function renderProductDetail() {
           <p class="small">${product.priceNote}</p>
           <p>${product.description}</p>
           <div class="actions">
-            <!-- Conecta aquí el checkout real o enlace de pago cuando definas el flujo comercial. -->
-            <a class="btn btn-primary product-download" href="${product.download}" download="${product.downloadName}" data-download-mode="direct">Descargar planilla</a>
+            <a class="btn btn-primary product-download" href="/contacto-kommo?planilla=${product.slug}" data-download-slug="${product.slug}">Descargar gratis con mi correo</a>
             <a class="btn btn-secondary" href="tienda.html">Volver al catálogo</a>
           </div>
           <div class="detail-block">
@@ -391,11 +396,8 @@ function handleWaitlistSubmit(form) {
     email?.focus();
     return;
   }
-  if (message) {
-    message.style.display = "block";
-  }
-  // Reemplaza este bloque por un fetch real cuando conectes Supabase, Resend, Formspree o tu propio backend.
-  form.reset();
+  if (message) message.style.display = "none";
+  openKommoModal("Plataforma de Análisis");
 }
 
 function bindWaitlistForms() {
@@ -417,6 +419,10 @@ function initHomeMotion() {
   if (document.body.dataset.page !== "home") return;
 
   const revealNodes = document.querySelectorAll(".reveal");
+  if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    revealNodes.forEach(node => node.classList.add('is-visible'));
+    return;
+  }
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
@@ -445,7 +451,7 @@ function initHeroCarousel() {
 
   let current = 0;
   let autoTimer = null;
-  let userPaused = false;
+  let userPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let interactionPaused = false;
 
   function updateCounter() {
@@ -466,7 +472,10 @@ function initHeroCarousel() {
     current = (index + slides.length) % slides.length;
     slides[current].classList.add("is-active");
     dots[current].classList.add("is-active");
-    slides.forEach((slide, slideIndex) => slide.setAttribute("aria-hidden", slideIndex === current ? "false" : "true"));
+    slides.forEach((slide, slideIndex) => {
+      slide.setAttribute("aria-hidden", slideIndex === current ? "false" : "true");
+      slide.inert = slideIndex !== current;
+    });
     dots.forEach((dot, dotIndex) => dot.toggleAttribute("aria-current", dotIndex === current));
     updateCounter();
   }
@@ -736,7 +745,8 @@ function initPlatformExperience() {
 
 function bindWhatsappButtons() {
   document.querySelectorAll(".js-whatsapp-contact").forEach((btn) => {
-    btn.href = WHATSAPP_URL;
+    // Keep a useful no-JavaScript destination; these buttons open a form, not WhatsApp.
+    btn.href = `/contacto-kommo?servicio=${encodeURIComponent(resolveKommoService(btn))}`;
     btn.addEventListener("click", (event) => {
       event.preventDefault();
       openKommoModal(resolveKommoService(btn));
@@ -772,34 +782,39 @@ function getKommoWidgetSrc() {
   return `${inSubfolder ? '../' : ''}app-assets/kommo-widget.js`;
 }
 
+let kommoWidgetPromise = null;
 function loadKommoWidget() {
   if (window.openKommoContactForm) return Promise.resolve();
-
-  const existing = document.querySelector('script[data-kommo-widget]');
-  if (existing) {
-    return new Promise((resolve, reject) => {
-      window.addEventListener('adsveris:kommo-widget-ready', resolve, { once: true });
-      existing.addEventListener('error', reject, { once: true });
-    });
-  }
-
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
+  if (kommoWidgetPromise) return kommoWidgetPromise;
+  kommoWidgetPromise = new Promise((resolve, reject) => {
+    let script = document.querySelector('script[data-kommo-widget]');
+    const isNew = !script;
+    script ||= document.createElement('script');
     script.type = 'module';
     script.src = getKommoWidgetSrc();
     script.dataset.kommoWidget = 'true';
-    script.addEventListener('error', reject, { once: true });
-    window.addEventListener('adsveris:kommo-widget-ready', resolve, { once: true });
-    document.head.appendChild(script);
+    const cleanup = () => {
+      clearTimeout(timer);
+      window.removeEventListener('adsveris:kommo-widget-ready', ready);
+      script.removeEventListener('error', failed);
+    };
+    const ready = () => { cleanup(); resolve(); };
+    const failed = () => { cleanup(); script.remove(); kommoWidgetPromise = null; reject(new Error('Formulario no disponible')); };
+    const timer = window.setTimeout(failed, 15000);
+    script.addEventListener('error', failed, { once: true });
+    window.addEventListener('adsveris:kommo-widget-ready', ready, { once: true });
+    if (isNew) document.head.appendChild(script);
   });
+  return kommoWidgetPromise;
 }
 
-async function openKommoModal(serviceType) {
+async function openKommoModal(serviceType, product = null) {
   try {
     await loadKommoWidget();
-    window.openKommoContactForm?.(serviceType);
+    window.openKommoContactForm?.(serviceType, product);
   } catch (error) {
     console.error('No se pudo cargar el modal Kommo:', error);
+    window.location.assign(product ? `/contacto-kommo?planilla=${encodeURIComponent(product.slug)}` : `/contacto-kommo?servicio=${encodeURIComponent(serviceType || '')}`);
   }
 }
 
@@ -816,4 +831,11 @@ document.addEventListener("DOMContentLoaded", () => {
   initHeroCarousel();
   initPlatformExperience();
   bindWhatsappButtons();
+  document.querySelectorAll('[data-download-slug]').forEach(button => {
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      const product = getProductBySlug(button.dataset.downloadSlug);
+      if (product) openKommoModal('Descarga de planilla gratuita', { slug: product.slug, title: product.title });
+    });
+  });
 });

@@ -6868,3 +6868,21 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   .abt-hero-visual img { min-height: 500px; }
   .abt-hero-visual img { transform: scale(1.06); }
 }
+
+/* Contacto CRM: foco visible y medidas consistentes con el formulario React. */
+.kommo-contact, .kommo-contact * { box-sizing: border-box; }
+.kommo-contact :is(input, select, textarea, button, a):focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+.kommo-contact h2:focus { outline: none; }
+.kommo-contact-consent { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.6; color: #354657; }
+.kommo-contact-consent input { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 2px; accent-color: #0f766e; }
+.kommo-contact-consent a { color: #08665f; text-decoration: underline; }
+.kommo-contact-hint { margin: 0; color: #526173; font-size: 12px; line-height: 1.5; }
+.kommo-contact-honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.legal-section h2 { font-size: 1.15rem; line-height: 1.45; margin-bottom: 12px; }
+.legal-text a { color: #f2cd83; text-decoration: underline; text-underline-offset: 3px; }
+.legal-text p, .footer-bottom span { overflow-wrap: anywhere; }
+.header-actions:empty { display: none; }
+@media (max-width: 760px) {
+  .main-nav { justify-content: center; flex-wrap: wrap; overflow-x: visible; gap: 2px 8px; }
+  .floating-whatsapp { width: 62px; height: 62px; right: 12px; bottom: max(14px, env(safe-area-inset-bottom)); }
+}

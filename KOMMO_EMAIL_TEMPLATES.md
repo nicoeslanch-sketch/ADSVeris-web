@@ -1,150 +1,31 @@
-# Kommo Email Templates
+# Correos nativos de Kommo
 
-These templates support the automatic `Contactado` webhook and can also be copied into Kommo as manual email templates for the `Tema` selector in the email composer.
+Configuración revisada en la interfaz de `nicolasadsveris.kommo.com` el 1 de octubre de 2026. Mantener los nombres de plantilla: los disparadores existentes las referencian. Remitente: buzón corporativo conectado `servicios@adsveris.com`. Destinatario: contacto principal del lead.
 
-Kommo API endpoints tested for email templates returned `404`, so native `Tema` dropdown templates must be created inside Kommo's interface. The repo keeps the exact subjects, bodies and PDF mapping here so they can be copied consistently.
+| Plantilla existente | Embudo | Asunto actualizado |
+| --- | --- | --- |
+| Plantilla personalizada | Planillas | Recibimos tu solicitud de planillas · ADS Veris |
+| Pagina web | Paginas web | Recibimos tu solicitud WordPress · ADS Veris |
+| Procesos | Procesos | Recibimos tu consulta de procesos · ADS Veris |
+| Plataforma de datos | Plataforma | Recibimos tu interés en la plataforma · ADS Veris |
 
-## Manual Setup In Kommo
+## Contenido
 
-Create one email template per service in Kommo's email composer/templates area:
+- Planillas: confirma la solicitud, distingue descargas gratuitas de trabajos personalizados y dirige al botón de descarga de la web o a una cotización.
+- WordPress: confirma reparación, mantenimiento, hosting o mejoras; solicita URL y breve descripción; no publica el antiguo precio de creación de webs ni el folleto obsoleto.
+- Procesos: solicita contexto del proceso y confirma alcance, entregables, precio y plazos antes de trabajar.
+- Plataforma: indica expresamente que está en desarrollo y permite registrar interés, sin prometer un acceso operativo.
 
-| Template | Pipeline | Subject | PDF |
-| --- | --- | --- | --- |
-| `Excel_Personalizada` | Planillas | `Tu Sistema de Medicion a Medida` | `pdfs/ADS_Veris_Planillas_Excel.pdf` |
-| `Pagina_Web` | Paginas web | `Tu Pagina Web Profesional desde $39.990` | `pdfs/ADS_Veris_Paginas_Web.pdf` |
-| `Opt_Procesos` | Procesos | `Tus Procesos, Optimizados` | `pdfs/ADS_Veris_Procesos.pdf` |
-| `Plataforma_Analisis` | Plataforma | `Tu Analista de Datos Inteligente` | `pdfs/ADS_Veris_Plataforma_Analisis.pdf` |
+Las cuatro respuestas usan `{{contact.name}}`, enlace real de WhatsApp `https://wa.me/56983894129`, posibilidad de responder al correo, identificación de ADS Veris SpA y aviso de que el acuse no suscribe a publicidad. Los PDF originales se conservan en el repositorio, pero no se adjuntan automáticamente mientras su oferta no esté actualizada.
 
-The first three PDFs exist in `pdfs/`. The platform PDF is referenced but is not currently present in the repo.
+## Recorrido
 
-## Excel Personalizada
+1. La web valida los campos y crea el contacto con el correo del visitante.
+2. Crea el lead con su etiqueta de servicio y contacto principal en una etapa editable del embudo correspondiente.
+3. Guarda descripción, fuente y consentimientos separados en una nota.
+4. Comprueba contacto y etiqueta; mueve a `Contactado`.
+5. El disparador nativo `Enviar correo` usa la plantilla de ese embudo y el buzón corporativo.
 
-Subject: `Tu Sistema de Medicion a Medida`
+No se utiliza SendGrid ni se habilita el webhook antiguo. No aplicar los disparadores retroactivamente a todos los leads: podría enviar correos no solicitados. Una respuesta HTTP del formulario confirma registro/enrutamiento, no entrega del correo. La entrega se verifica en la ficha del lead y en el buzón destinatario.
 
-```text
-Hola {{lead_name}},
-
-Gracias por interesarte en nuestra Plantilla Personalizada.
-
-Cansado de hojas de Excel desorganizadas?
-Nosotros disenamos la tuya desde cero.
-
-En una reunion de 1 hora definimos:
-- Que KPIs realmente importan en tu negocio
-- Como automatizar los calculos
-- Que reportes necesitas para tomar decisiones
-
-El resultado: una plantilla unica, hecha para ti.
-Con formulas automaticas, dashboards visuales y 30 dias de soporte.
-
-Adjunto: ADS_Veris_Planillas_Excel.pdf
-
-Disponibilidad: lunes a viernes 10:00-18:00 CLT
-
-Agendamos?
-
-Team ADS Veris
-servicios@adsveris.com
-```
-
-## Pagina Web
-
-Subject: `Tu Pagina Web Profesional desde $39.990`
-
-```text
-Hola {{lead_name}},
-
-Recibimos tu interes en una pagina web.
-
-Sin complicaciones. Sin sorpresas. Sin esperas.
-
-Nuestras paginas web para PyMEs incluyen:
-- Diseno responsive: movil, desktop y tablet
-- Formularios de contacto integrados
-- SEO basico incluido
-- Dominio y hosting 1 ano incluidos
-- Chat con WhatsApp integrado
-
-Desde: $39.990, antes $55.000
-Entrega: 7 a 10 dias
-
-Adjunto: ADS_Veris_Paginas_Web.pdf
-
-Hablamos de tu proyecto?
-
-Team ADS Veris
-servicios@adsveris.com
-```
-
-## Optimizacion De Procesos
-
-Subject: `Tus Procesos, Optimizados`
-
-```text
-Hola {{lead_name}},
-
-Los procesos ineficientes cuestan dinero.
-
-Analizamos tus flujos actuales y te entregamos:
-- Diagnostico de cuellos de botella
-- Diagrama de procesos mejorado, listo para implementar
-- Plan de accion paso a paso
-- Seguimiento por 60 dias
-
-El tiempo invertido de tu lado suele ser 2 a 3 horas.
-El retorno: procesos mas rapidos, menos errores y mas claridad operativa.
-
-Adjunto: ADS_Veris_Procesos.pdf
-
-Datos utiles:
-- Duracion estimada: 2 a 4 semanas de implementacion
-- Costo: inversion unica, sin suscripcion
-- Resultado: procesos documentados y automatizados
-
-Conversamos?
-
-Team ADS Veris
-servicios@adsveris.com
-```
-
-## Plataforma De Analisis
-
-Subject: `Tu Analista de Datos Inteligente`
-
-```text
-Hola {{lead_name}},
-
-Contratar un analista de datos cuesta caro.
-Nosotros tenemos una alternativa mas simple para empezar.
-
-Nuestra plataforma te permite:
-- Subir tu Excel sin moverte de tu PC
-- Limpieza automatica de datos
-- Dashboards con tus KPIs reales
-- Chat con IA que interpreta tus datos
-- Recomendaciones automaticas segun tus numeros
-
-Ejemplo: Producto X no vende, considera sacarlo de circulacion.
-Ejemplo: exceso de efectivo detectado, reinvierte en una linea con mejor retorno.
-
-Acceso: https://pymex-web.vercel.app
-
-Adjunto sugerido: ADS_Veris_Plataforma_Analisis.pdf
-
-Preguntas? Responde este correo y te ayudamos.
-
-Team ADS Veris
-servicios@adsveris.com
-```
-
-## Automation Notes
-
-- Automatic email endpoint: `api/kommo-contactados-webhook.js`.
-- Trigger status name in Kommo: `Contactado`.
-- Trigger status IDs:
-  - Planillas: `108238131`
-  - Paginas web: `108239227`
-  - Procesos: `108239243`
-  - Plataforma: `108239311`
-- SendGrid is used for automatic email delivery.
-- If SendGrid rejects the send, the webhook writes a fallback note into the lead with the manual template.
+El permiso opcional para futuras comunicaciones comerciales queda en la nota y, si se acepta, en la etiqueta `Autoriza contacto comercial web`. No usar el mero registro, descarga o aceptación de cookies como autorización publicitaria.

@@ -7,9 +7,11 @@ const WIDGET_ID = 'ads-veris-kommo-widget-root'
 function KommoWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [defaultService, setDefaultService] = useState('Planilla Excel Personalizada')
+  const [downloadProduct, setDownloadProduct] = useState(null)
 
-  const openModal = useCallback((serviceType) => {
-    if (serviceType) setDefaultService(serviceType)
+  const openModal = useCallback((serviceType, product = null) => {
+    setDefaultService(product ? 'Descarga de planilla gratuita' : serviceType || 'Planilla Excel Personalizada')
+    setDownloadProduct(product)
     setIsOpen(true)
   }, [])
 
@@ -29,6 +31,7 @@ function KommoWidget() {
       isOpen={isOpen}
       onClose={() => setIsOpen(false)}
       defaultService={defaultService}
+      downloadProduct={downloadProduct}
     />
   )
 }
