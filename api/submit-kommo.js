@@ -60,6 +60,11 @@ export default async function handler(req, res) {
     if (!response.ok) {
       // No customer data, vendor payloads or credentials in logs/errors.
       console.error('Kommo request failed', { path, method, status: response.status, leadId })
+      const validation = (data['validation-errors'] || []).flatMap(item => item.errors || []).map(item => ({
+        code: /^[a-z0-9_-]{1,80}$/i.test(item.code || '') ? item.code : 'unknown',
+        path: /^[a-z0-9_.\[\]-]{1,150}$/i.test(item.path || '') ? item.path : 'unknown',
+      }))
+      if (validation.length) console.error('Kommo validation fields', validation)
       throw new Error('Kommo request failed')
     }
     return data
