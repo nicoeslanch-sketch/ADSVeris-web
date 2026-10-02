@@ -52,7 +52,7 @@ test('todos los servicios, incluidos los cuatro planes WordPress, conservan su e
     assert.equal(lead.name, `${isDownload ? 'Balance General (gratis)' : service.label} - Prueba`)
     assert.deepEqual(lead._embedded.contacts, [{ id: 11, is_main: true }])
     assert.match(calls[2].payload[0].params.text, /Error 500/)
-    assert.match(calls[2].payload[0].params.text, /Privacidad 2026-10-01/)
+    assert.match(calls[2].payload[0].params.text, /Privacidad 2026-10-02/)
     assert.match(calls[2].payload[0].params.text, /NO autorizadas/)
     assert.equal(calls[3].method, 'GET') // recipient confirmed before trigger
     assert.equal(calls[4].method, 'PATCH')
@@ -102,7 +102,9 @@ test('error previo al lead no publica payloads privados ni anuncia éxito', asyn
 
 test('honeypot no crea contactos ni dispara correos', async () => {
   global.fetch = () => { throw new Error('Must not call Kommo') }
-  assert.equal((await submit({ ...valid, website: 'bot.example' })).code, 200)
+  const res = await submit({ ...valid, website: 'bot.example' })
+  assert.equal(res.code, 400)
+  assert.equal(res.data.success, false)
 })
 
 test('la oferta termina realmente y no crea solicitudes gratuitas fuera de plazo', async () => {
@@ -136,4 +138,43 @@ test('descargas requieren planilla válida y consentimiento separado; teléfono 
   assert.match(calls[2].payload[0].params.text, /AUTORIZADAS expresamente/)
   assert.equal(calls[0].payload[0].custom_fields_values.length, 1)
   assert.equal((await submit({ ...valid, serviceType: 'Descarga de planilla gratuita', downloadSlug: '../../secret' })).code, 400)
+})
+
+test('respeta la saturación del proveedor sin repetir el POST ni exponer detalles', async () => {
+  fakeKommo(findContactService(valid.serviceType))
+  let calls = 0
+  global.fetch = async () => {
+    calls++
+    return { ok: false, status: 429, headers: new Headers({ 'retry-after': '12' }),
+      json: async () => ({ detail: 'private vendor payload', 'validation-errors': { malformed: true } }) }
+  }
+  const res = await submit()
+  assert.equal(res.code, 429)
+  assert.equal(res.headers['Retry-After'], '12')
+  assert.equal(res.data.success, false)
+  assert.equal(calls, 1)
+  assert.ok(!JSON.stringify(res.data).includes('private'))
+})
+
+test('un timeout puede haber creado el contacto: no invita a duplicar la solicitud', async () => {
+  fakeKommo(findContactService(valid.serviceType))
+  global.fetch = async () => { throw new DOMException('vendor secret', 'TimeoutError') }
+  const res = await submit()
+  assert.equal(res.code, 502)
+  assert.equal(res.data.success, false)
+  assert.match(res.data.error, /No reenvíes inmediatamente/)
+  assert.ok(!JSON.stringify(res.data).includes('vendor secret'))
+})
+
+test('respuestas malformadas no disparan correo ni autorizan descarga', async () => {
+  for (const payload of [null, { 'validation-errors': [null, { errors: [null] }] }]) {
+    fakeKommo(findContactService(valid.serviceType))
+    global.fetch = async () => ({ ok: false, status: 400, json: async () => payload })
+    const res = await submit()
+    assert.equal(res.code, 502)
+    assert.equal(res.data.success, false)
+  }
+  fakeKommo(findContactService(valid.serviceType))
+  global.fetch = async () => ({ ok: true, status: 200, json: async () => ({ _embedded: { contacts: [{ id: -1 }] } }) })
+  assert.equal((await submit()).code, 502)
 })

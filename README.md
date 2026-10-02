@@ -21,7 +21,11 @@ npm test
 
 Las pruebas cubren rutas por servicio, validación, consentimiento, enlaces de descarga firmados y archivos estáticos. Para comprobar el correo real también hay que enviar el formulario publicado, revisar la ficha en Kommo y verificar recepción en el buzón destinatario.
 
+El formulario reinicia datos y autorizaciones al abrir una nueva solicitud. Tiene espera máxima de 55 segundos y no reintenta automáticamente: perder una respuesta no demuestra que el CRM no haya recibido el POST. El servidor respeta las respuestas 429 del proveedor, sin presentar esto como un límite global contra bots. Una descarga nunca se anuncia lista sin un enlace firmado válido.
+
 Estado de prueba real, 2026-10-01: Kommo rechaza nuevas altas con error 205 y deshabilita su botón de crear contactos. La cuenta tiene 2 usuarios activos y 1 licencia; el propietario eligió mantener ambos y dejar pendiente el ajuste. La confirmación automática y el registro para descargas no están operativos para nuevos contactos hasta resolver la restricción. La web no anuncia éxito falso y ofrece correo/WhatsApp como alternativas de atención. Ver `KOMMO_STRUCTURE.md`.
+
+Seguimiento 2026-10-02: consulta enviada a soporte Kommo, confirmada en Gmail, sin autorizar cargos, upgrades ni bajas. Ver `KOMMO_SOPORTE_BORRADOR.md` (ahora registra el envío). Gestión de solicitudes de datos: `PROCEDIMIENTO_DATOS_PERSONALES.md`, que requiere aplicación real por el equipo.
 
 ## Archivos principales
 - index.html
@@ -46,7 +50,9 @@ Estado de prueba real, 2026-10-01: Kommo rechaza nuevas altas con error 205 y de
 
 ## Cómo publicar cambios
 ```bash
-git add .
+git add -- nombre-del-archivo-modificado
 git commit -m "actualización del sitio"
 git push
 ```
+
+Incluye solo los archivos revisados para esa actualización. No añadas `.env`, claves, exportaciones del CRM ni archivos privados. El repositorio es público. El push a `main` inicia el despliegue conectado; comprueba su estado READY y el commit antes de darlo por publicado.

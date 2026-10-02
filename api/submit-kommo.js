@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ success: false, error: 'Solicitud inválida.' })
   }
   // Simple bot protection without another paid service.
-  if (clean(body.website)) return res.status(200).json({ success: true })
+  if (clean(body.website)) return res.status(400).json({ success: false, error: 'No pudimos validar el formulario. Escríbenos a servicios@adsveris.com si el problema continúa.' })
   const name = clean(body.name)
   const email = clean(body.email).toLowerCase()
   const phone = clean(body.phone)
@@ -62,7 +62,8 @@ export default async function handler(req, res) {
       method, headers, signal: AbortSignal.timeout(8000),
       ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
     })
-    const data = await response.json().catch(() => ({}))
+    const parsed = await response.json().catch(() => ({}))
+    const data = parsed && typeof parsed === 'object' ? parsed : {}
     if (!response.ok) {
       // No customer data, vendor payloads or credentials in logs/errors.
       const providerCode = /^Error code (\d{1,5})\./.exec(clean(data.detail))?.[1]
@@ -71,11 +72,18 @@ export default async function handler(req, res) {
         accountRestriction: /payment|subscription|license|tariff|user.*limit|expired/i.test(`${data.title || ''} ${data.detail || ''}`),
         providerCode,
       })
-      const validation = (data['validation-errors'] || []).flatMap(item => item.errors || []).map(item => ({
-        code: /^[a-z0-9_-]{1,80}$/i.test(item.code || '') ? item.code : 'unknown',
-        path: /^[a-z0-9_.\[\]-]{1,150}$/i.test(item.path || '') ? item.path : 'unknown',
-      }))
+      const validation = (Array.isArray(data['validation-errors']) ? data['validation-errors'] : [])
+        .flatMap(item => Array.isArray(item?.errors) ? item.errors : []).slice(0, 20).map(item => ({
+          code: /^[a-z0-9_-]{1,80}$/i.test(item?.code || '') ? item.code : 'unknown',
+          path: /^[a-z0-9_.\[\]-]{1,150}$/i.test(item?.path || '') ? item.path : 'unknown',
+        }))
       if (validation.length) console.error('Kommo validation fields', validation)
+      if (response.status === 429) {
+        const error = new Error('Kommo rate limited')
+        const retry = Number(response.headers?.get?.('retry-after'))
+        error.retryAfter = Number.isInteger(retry) && retry > 0 ? Math.min(retry, 300) : 60
+        throw error
+      }
       throw new Error(providerCode === '205' ? 'Kommo contact creation restricted' : 'Kommo request failed')
     }
     return data
@@ -89,14 +97,14 @@ export default async function handler(req, res) {
       ],
     }])
     contactId = (contacts?._embedded?.contacts?.[0] || contacts?.[0])?.id
-    if (!Number.isInteger(contactId)) throw new Error('Missing contact ID')
+    if (!Number.isSafeInteger(contactId) || contactId <= 0) throw new Error('Missing contact ID')
     const leads = await request('/leads', 'POST', [{
       name: `${download ? download.title + ' (gratis)' : service.label} - ${name}`, pipeline_id: route.pipeline,
       status_id: route.source, price: 0,
       _embedded: { tags: [{ id: route.tag }], contacts: [{ id: contactId, is_main: true }] },
     }])
     leadId = (leads?._embedded?.leads?.[0] || leads?.[0])?.id
-    if (!Number.isInteger(leadId)) throw new Error('Missing lead ID')
+    if (!Number.isSafeInteger(leadId) || leadId <= 0) { leadId = undefined; throw new Error('Missing lead ID') }
     const note = [
       'Solicitud desde el formulario web de ADS Veris', `Servicio solicitado: ${service.label}`,
       `Nombre: ${name}`, `Correo del cliente: ${email}`, `Teléfono: ${phone || 'No informado'}`,
@@ -131,7 +139,7 @@ export default async function handler(req, res) {
       ...(download ? { downloadUrl: `/api/download-planilla?ticket=${createDownloadTicket(downloadSlug, leadId)}` } : {}),
     })
   } catch (error) {
-    const safeReasons = ['Missing contact ID', 'Missing lead ID', 'Lead is not ready for native email trigger', 'Routing confirmation failed', 'Kommo request failed', 'Kommo contact creation restricted']
+    const safeReasons = ['Missing contact ID', 'Missing lead ID', 'Lead is not ready for native email trigger', 'Routing confirmation failed', 'Kommo request failed', 'Kommo contact creation restricted', 'Kommo rate limited']
     console.error('Kommo form incomplete', { leadId, contactId, reason: safeReasons.includes(error.message) ? error.message : error.name })
     if (leadId) {
       // Keep the request for an adviser; do not invite duplicate submissions.
@@ -144,6 +152,11 @@ export default async function handler(req, res) {
     if (error.message === 'Kommo contact creation restricted') {
       return res.status(503).json({ success: false, error: 'El registro automático está temporalmente no disponible. Escríbenos a servicios@adsveris.com o por WhatsApp para gestionar tu solicitud.' })
     }
-    return res.status(502).json({ success: false, error: 'No pudimos registrar tu solicitud. Intenta de nuevo o escribe a servicios@adsveris.com.' })
+    if (error.message === 'Kommo rate limited') {
+      res.setHeader('Retry-After', String(error.retryAfter))
+      return res.status(429).json({ success: false, error: 'El registro está recibiendo muchas solicitudes. No reenvíes inmediatamente; consulta a servicios@adsveris.com si ya enviaste tus datos.' })
+    }
+    // A timed-out POST may have reached Kommo. Never retry it automatically.
+    return res.status(502).json({ success: false, error: 'No pudimos confirmar el registro. No reenvíes inmediatamente: consulta a servicios@adsveris.com para evitar duplicar tu solicitud.' })
   }
 }

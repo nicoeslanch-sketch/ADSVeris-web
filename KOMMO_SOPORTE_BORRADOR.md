@@ -1,4 +1,10 @@
-# Consulta a soporte Kommo — no enviada
+# Consulta enviada a soporte Kommo
+
+Enviada el 2 de octubre de 2026 a `support@kommo.com`, desde el buzón del propietario abierto en Gmail. Se verificaron destinatario, asunto y cuerpo antes de enviar; Gmail confirmó «Mensaje enviado». La búsqueda específica en Enviados mostró un único mensaje al destinatario con este asunto, fechado el 2 de octubre a las 6:36. No se envió un segundo mensaje cuando el navegador demoró en devolver la confirmación.
+
+Asunto: **ADS Veris: bloqueo de contactos / error 205 — diagnóstico sin cambios ni cargos (cuenta 36669295)**.
+
+Estado: pendiente de respuesta y número de caso de Kommo. El envío de la consulta no acredita que la integración esté reparada. El correo automático a clientes sigue siendo responsabilidad de las reglas nativas de Kommo, no de Gmail.
 
 Solicito ayuda con la cuenta empresarial `nicolasadsveris.kommo.com` (ID 36669295).
 
@@ -17,4 +23,4 @@ También necesitamos confirmar si el plan Básico contratado permite ejecutar la
 
 No autoricen ni ejecuten cambios, bajas de usuarios, renovaciones, upgrades o cargos. Solo solicitamos diagnóstico y opciones sin costo.
 
-No se adjuntan claves de API, contraseñas ni datos de clientes. Pendiente de autorización del propietario para enviar esta consulta.
+No se adjuntaron claves de API, contraseñas ni datos de clientes. El propietario autorizó expresamente el envío en este seguimiento. No se autorizó ninguna modificación de la cuenta ni cargo.

@@ -2,6 +2,31 @@
 
 Revisión: 1 de octubre de 2026, Chile. Es una revisión técnica acotada, no una certificación de seguridad ni un dictamen legal.
 
+## Seguimiento del 2 de octubre de 2026
+
+- Consulta enviada a `support@kommo.com`, con destinatario y contenido verificados y confirmación «Mensaje enviado» en Gmail. Se pidió diagnóstico del error 205 y confirmación de las reglas nativas de email, conservando ambos usuarios y sin autorizar cargos o cambios. Pendiente de respuesta/número de caso. Ver `KOMMO_SOPORTE_BORRADOR.md`.
+- Cada nueva solicitud del formulario limpia datos y consentimientos; las dependencias del reinicio usan el identificador de producto, no un objeto que puede cambiar en cada render. Aplicado siguiendo la guía React de Vercel.
+- Espera del cliente limitada a 55 segundos, sin reintentos automáticos. Un error de conexión o timeout no invita a duplicar la solicitud. Respuesta 429 del CRM respetada con Retry-After acotado; no es un rate limit global ni protección completa contra bots.
+- Honeypot devuelve rechazo, no éxito ficticio. Se validan respuestas malformadas e identificadores positivos del proveedor. La descarga requiere un enlace relativo firmado en la respuesta; un caso pendiente no anuncia un archivo inexistente.
+- Privacidad versionada como 2026-10-02; canal directo para derechos sin cuenta ni cookies, información veraz sobre la restricción de Kommo y preparación para la reforma. Creado procedimiento operativo para el equipo, no ejecutado sobre datos de clientes.
+- Retracto: información de plazos aplicables, extensión por falta de confirmación escrita, devolución y ausencia de obligación de justificar arrepentimiento. La confirmación de una consulta no sustituye la confirmación contractual. Orientación revisada en [SERNAC](https://www.sernac.cl/portal/618/articles-84009_archivo_01.pdf).
+- Importes WordPress conservados sin conversión inventada; referencia EUR y cotización final CLP con impuestos aclaradas junto a cada precio. Límites de alojamiento y respuesta 24/7 pendientes de concretar en la propuesta.
+
+No se cambiaron plan, usuarios, visibilidad del repositorio ni reglas de firewall; permanecen las limitaciones señaladas más abajo. No se afirma cumplimiento legal integral ni funcionamiento de nuevos contactos hasta confirmar la reparación con Kommo.
+
+Verificación de este seguimiento: `npm run build` correcto; 25 pruebas automatizadas aprobadas tras construir; `npm audit` sin vulnerabilidades conocidas reportadas; 145 commits revisados con patrones limitados de credenciales, sin coincidencias. No equivale a un pentest exhaustivo.
+
+Navegador integrado, preview local de producción a 390 × 844: catálogo → producto → modal, reapertura con nombre vacío y ambas casillas desmarcadas; modal contenido en el área disponible, sin desbordamiento horizontal ni overlay de error. Inicio, precios WordPress y reembolsos visibles; ninguna imagen rota en inicio y WordPress. No se enviaron estos datos de prueba al CRM.
+
+| Límite del flujo | Evidencia / estado |
+|---|---|
+| Catálogo y formulario | Verificados en navegador integrado; promoción y aviso temporal visibles |
+| Cliente → API y respuesta → interfaz | Contrato validado con pruebas de respuesta, enlaces, fallos y timeout; comprobación segura en producción tras publicar |
+| API → Kommo | Bloqueado en altas reales por error 205 observado anteriormente; no se insistió ni se modificaron licencias |
+| Embudo → correo recibido | No verificable mientras falle la creación del contacto; el soporte debe aclarar también disponibilidad de reglas en el plan |
+
+La guía de verificación obliga a detener el recorrido real en el primer límite roto: no se declaró éxito de CRM o entrega de correo a partir de pruebas con mocks.
+
 ## Cambios verificados
 
 - Dos endpoints antiguos de notificación de contraseñas permanecen cerrados por servidor (404), no solamente ocultos en la interfaz. Su código se conserva; no deben reactivarse sin autenticar al usuario y verificar el evento real.
@@ -15,7 +40,7 @@ Revisión: 1 de octubre de 2026, Chile. Es una revisión técnica acotada, no un
 
 ## Bloqueos y riesgos pendientes
 
-1. **Kommo:** 2 usuarios activos para 1 licencia. Aviso de facturación y botón de creación de contactos deshabilitado. Uso: 576/12.500 contactos y compañías, 18/2.500 leads, 5/50 pipelines, cuotas no agotadas. El API devolvió error 205 en las pruebas reales anteriores. La coincidencia no prueba por sí sola la causa del error. Sin nuevas altas no se puede verificar el recorrido de confirmación automática; no se anuncia que esté operativo. Aviso visible con alternativas antes de rellenar el formulario. No se modificaron usuarios ni plan. Consulta de soporte preparada, no enviada sin autorización.
+1. **Kommo:** 2 usuarios activos para 1 licencia. Aviso de facturación y botón de creación de contactos deshabilitado. Uso: 576/12.500 contactos y compañías, 18/2.500 leads, 5/50 pipelines, cuotas no agotadas. El API devolvió error 205 en las pruebas reales anteriores. La coincidencia no prueba por sí sola la causa del error. Sin nuevas altas no se puede verificar el recorrido de confirmación automática; no se anuncia que esté operativo. Aviso visible con alternativas antes de rellenar el formulario. No se modificaron usuarios ni plan. Consulta enviada a soporte el 2 de octubre con autorización expresa del propietario; pendiente de respuesta.
 2. **Repositorio público:** los originales Excel y el historial están disponibles en GitHub. El formulario controla la entrega desde el sitio, no protege archivos publicados en un repositorio abierto. Para exigir registro de correo en todos los canales habría que decidir la privacidad del repositorio y la exposición de su historial. No se cambió su visibilidad.
 3. **Alojamiento comercial:** la cuenta Vercel está en Hobby, confirmado por su API. Hobby solo permite uso personal no comercial. No se contrató Pro ni ningún otro servicio; hace falta decidir un alojamiento compatible con la actividad empresarial antes de declarar el lanzamiento comercial resuelto. [Documentación vigente](https://vercel.com/docs/plans/hobby).
 4. **Antispam:** se preparó un borrador WAF gratuito en acción `log`, solo para POST `/api/submit-kommo`. No bloquea ni limita tráfico; no está publicado. No se activó rate limiting de pago, Attack Mode ni excepciones de seguridad. La guía exige que el propietario revise y publique los borradores. Revisar el borrador final con `vercel firewall diff` antes de cualquier publicación.

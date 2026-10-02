@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CONTACT_SERVICES, findContactService } from '../../shared/contact-services.js'
 import './kommo-contact.css'
 import { isLaunchPromotionActive, LAUNCH_PROMOTION } from '../../assets/launch-promotion.js'
+import { submitContactForm } from '../../shared/submit-contact-form.js'
 
 const SERVICES = CONTACT_SERVICES.map(service => service.label)
 
@@ -34,6 +35,7 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
   const isSuccess = status.type === 'success'
 
   const isDownload = Boolean(downloadProduct)
+  const downloadSlug = downloadProduct?.slug || ''
   const campaignActive = isLaunchPromotionActive()
   const title = isSuccess ? (isDownload && downloadUrl ? 'Tu planilla está lista' : 'Solicitud recibida') : (isDownload ? (campaignActive ? 'Tu planilla, gratis por inauguración' : 'La promoción finalizó') : 'Conversemos sobre tu proyecto')
 
@@ -42,8 +44,9 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
     setStatus({ type: '', message: '' })
     setErrors({})
     setDownloadUrl('')
-    setForm(prev => ({ ...prev, serviceType: createInitialForm(defaultService).serviceType }))
-  }, [defaultService, isOpen, downloadProduct])
+    // Every new request needs its own explicit choices; never inherit consent.
+    setForm(createInitialForm(defaultService))
+  }, [defaultService, isOpen, downloadSlug])
 
   useEffect(() => {
     if (!isOpen || !canClose) return
@@ -113,33 +116,24 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
     setStatus({ type: '', message: '' })
 
     try {
-      const response = await fetch('/api/submit-kommo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          email: form.email.trim(),
-          phone: form.phone.trim(),
-          serviceType: form.serviceType,
-          details: form.details.trim(),
-          privacyConsent: form.privacyConsent,
-          website: form.website,
-          sourcePage: window.location.pathname,
-          downloadSlug: downloadProduct?.slug || '',
-          marketingConsent: form.marketingConsent,
-        }),
+      const data = await submitContactForm({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        serviceType: form.serviceType,
+        details: form.details.trim(),
+        privacyConsent: form.privacyConsent,
+        website: form.website,
+        sourcePage: window.location.pathname,
+        downloadSlug,
+        marketingConsent: form.marketingConsent,
       })
-
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'No pudimos enviar tu solicitud')
-      }
 
       setStatus({
         type: 'success',
-        message: data.message || (isDownload ? 'Gracias. Ya puedes descargar el archivo gratuito. Te contactaremos comercialmente solo si lo autorizaste.' : 'Gracias. Registramos tu solicitud para que ADS Veris revise tu caso y te responda al correo que ingresaste. No necesitas enviarla de nuevo.'),
+        message: data.message,
       })
-      if (isDownload && typeof data.downloadUrl === 'string' && data.downloadUrl.startsWith('/api/download-planilla?ticket=')) setDownloadUrl(data.downloadUrl)
+      if (isDownload) setDownloadUrl(data.downloadUrl)
       setForm(createInitialForm(defaultService))
     } catch (error) {
       setStatus({

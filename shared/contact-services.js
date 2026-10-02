@@ -21,4 +21,4 @@ export function findContactService(value) {
   return CONTACT_SERVICES.find(service => normalize(service.label) === normalized || service.key === normalized) || null
 }
 
-export const PRIVACY_VERSION = '2026-10-01'
+export const PRIVACY_VERSION = '2026-10-02'
