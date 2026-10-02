@@ -10,7 +10,14 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'GET')
     return res.status(405).json({ error: 'Método no permitido.' })
   }
-  const ticket = readDownloadTicket(req.query?.ticket)
+  // Avoid the framework's legacy query getter (Node url.parse deprecation).
+  let rawTicket
+  try {
+    if (typeof req.url !== 'string' || req.url.length > 2048) throw new Error('Invalid URL')
+    const tickets = new URL(req.url, 'https://pymex-web.vercel.app').searchParams.getAll('ticket')
+    if (tickets.length === 1) rawTicket = tickets[0]
+  } catch { /* Invalid requests fail closed below. */ }
+  const ticket = readDownloadTicket(rawTicket)
   if (!ticket) return res.status(403).json({ error: 'Enlace inválido o vencido. Solicita la descarga desde el catálogo.' })
   const product = DOWNLOAD_PRODUCTS[ticket.slug]
   try {

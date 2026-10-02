@@ -18,7 +18,7 @@ export function readDownloadTicket(ticket, now = Date.now()) {
     const expected = Buffer.from(signature(parts[0]), 'base64url')
     if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return null
     const data = JSON.parse(Buffer.from(parts[0], 'base64url').toString())
-    if (!Number.isInteger(data.leadId) || !Number.isFinite(data.expires) || data.expires <= now ||
+    if (!Number.isSafeInteger(data.leadId) || data.leadId <= 0 || !Number.isFinite(data.expires) || data.expires <= now ||
         !Object.hasOwn(DOWNLOAD_PRODUCTS, data.slug)) return null
     return data
   } catch { return null }

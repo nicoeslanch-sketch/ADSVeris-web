@@ -18,6 +18,7 @@ test('tickets firmados, vencimiento y manipulación', () => {
   assert.equal(readDownloadTicket(ticket.replace('balance', 'other') + 'tampered', 1100), null)
   assert.equal(readDownloadTicket(createDownloadTicket('../../secret', 22, 1000), 1100), null)
   assert.equal(readDownloadTicket(['invalid']), null)
+  assert.equal(readDownloadTicket(createDownloadTicket('balance-general', -1, 1000), 1100), null)
 })
 
 test('catálogo gratuito coincide con los once archivos entregables', async () => {
@@ -40,11 +41,23 @@ test('catálogo gratuito coincide con los once archivos entregables', async () =
 test('endpoint entrega Excel solo con ticket válido y no permite traversal', async () => {
   process.env.KOMMO_API_TOKEN = 'test-only'
   const res = { headers: {}, setHeader(k,v) { this.headers[k]=v }, status(code) { this.code=code; return this }, json(body) { this.body=body }, send(body) { this.body=body } }
-  await downloadHandler({ method: 'GET', query: { ticket: 'invalid' } }, res)
+  await downloadHandler({ method: 'GET', url: '/api/download-planilla?ticket=invalid' }, res)
   assert.equal(res.code, 403)
-  await downloadHandler({ method: 'GET', query: { ticket: createDownloadTicket('balance-general', 22) } }, res)
+  await downloadHandler({ method: 'GET', url: `/api/download-planilla?ticket=${createDownloadTicket('balance-general', 22)}`,
+    get query() { throw new Error('Must not read the legacy framework getter') } }, res)
   assert.equal(res.code, 200)
   assert.ok(Buffer.isBuffer(res.body))
   assert.match(res.headers['Content-Disposition'], /attachment/)
   assert.equal(res.headers['Cache-Control'], 'private, no-store')
+})
+
+test('lectura de URL rechaza tickets repetidos y solicitudes malformadas', async () => {
+  process.env.KOMMO_API_TOKEN = 'test-only'
+  const ticket = createDownloadTicket('balance-general', 22)
+  for (const url of [undefined, '/api/download-planilla', '/api/download-planilla?ticket=',
+    `/api/download-planilla?ticket=${ticket}&ticket=${ticket}`, 'https://[', '/api/download-planilla?ticket=' + 'x'.repeat(2100)]) {
+    const res = { setHeader() {}, status(code) { this.code = code; return this }, json(body) { this.body = body } }
+    await downloadHandler({ method: 'GET', url }, res)
+    assert.equal(res.code, 403)
+  }
 })

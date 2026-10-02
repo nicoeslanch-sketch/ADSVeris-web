@@ -27,6 +27,8 @@ Navegador integrado, preview local de producción a 390 × 844: catálogo → pr
 
 La guía de verificación obliga a detener el recorrido real en el primer límite roto: no se declaró éxito de CRM o entrega de correo a partir de pruebas con mocks.
 
+Comprobación posterior a la primera publicación: los probes sin efectos externos devolvieron 400 para cuerpo inválido y honeypot, 403 para origen externo y descarga sin ticket, y 404 para notificaciones de contraseña deshabilitadas. No llamaron a Kommo ni enviaron correos. Los logs mostraron una advertencia DEP0169 de Node en el acceso de descarga; se sustituyó `req.query` por lectura mediante URL/URLSearchParams estándar, sin silenciar advertencias. Se añadió rechazo de tickets duplicados, URLs malformadas y leadId no positivo; la suite final tiene 26 pruebas.
+
 ## Cambios verificados
 
 - Dos endpoints antiguos de notificación de contraseñas permanecen cerrados por servidor (404), no solamente ocultos en la interfaz. Su código se conserva; no deben reactivarse sin autenticar al usuario y verificar el evento real.
