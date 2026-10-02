@@ -59,9 +59,16 @@ export default async function handler(req, res) {
     const data = await response.json().catch(() => ({}))
     if (!response.ok) {
       // No customer data, vendor payloads or credentials in logs/errors.
+      let providerReason = clean(data.detail || data.title)
+      for (const privateValue of [token, name, email, phone, details, accountId].filter(Boolean)) {
+        providerReason = providerReason.replaceAll(privateValue, '[redacted]')
+      }
+      providerReason = providerReason.replace(/[^\s@]+@[^\s@]+\.[^\s@]+/g, '[email]')
+        .replace(/\beyJ[\w.-]+/g, '[token]').replace(/\+?\d[\d\s().-]{6,}\d/g, '[number]').slice(0,180)
       console.error('Kommo request failed', { path, method, status: response.status, leadId,
         contentType: response.headers.get('content-type'), responseKeys: Object.keys(data),
         accountRestriction: /payment|subscription|license|tariff|user.*limit|expired/i.test(`${data.title || ''} ${data.detail || ''}`),
+        providerReason,
       })
       const validation = (data['validation-errors'] || []).flatMap(item => item.errors || []).map(item => ({
         code: /^[a-z0-9_-]{1,80}$/i.test(item.code || '') ? item.code : 'unknown',
