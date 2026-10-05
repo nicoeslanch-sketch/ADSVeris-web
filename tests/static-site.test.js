@@ -34,3 +34,13 @@ test('rutas de imágenes y páginas coinciden incluso en servidores sensibles a 
   }
   assert.deepEqual(errors, [])
 })
+
+test('Vicente tiene retrato accesible y se publica en el equipo sin placeholder pendiente', async () => {
+  const html = await readFile('dist/nosotros.html', 'utf8')
+  assert.match(html, /class="abt-team-avatar abt-team-avatar-vicente"/)
+  assert.match(html, /src="assets\/images\/vicente-valderrama-mejorada\.png" alt="Vicente Valderrama"[^>]*loading="lazy"/)
+  assert.doesNotMatch(html, /Fotografía pendiente/)
+  const portrait = await readFile('dist/assets/images/vicente-valderrama-mejorada.png')
+  assert.deepEqual([...portrait.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])
+  assert.equal(portrait.readUInt32BE(16), portrait.readUInt32BE(20), 'El retrato debe ser cuadrado para el marco circular')
+})

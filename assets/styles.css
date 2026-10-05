@@ -6403,9 +6403,9 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
   object-fit: cover;
 }
 .abt-team-card:first-child .abt-team-avatar img { object-position: center 20%; }
-.abt-team-avatar-empty {
+.abt-team-avatar-vicente {
   border-color: #d6a943;
-  background: transparent;
+  background: #eeebe2;
 }
 .abt-team-card h3 { margin: 0 0 6px; color: #10243a; font-size: 1.25rem; }
 .abt-team-card > strong { display: block; margin-bottom: 18px; color: #0a807b; font-size: 0.78rem; text-transform: uppercase; }
