@@ -49,7 +49,7 @@ test('Michel se publica como tercer integrante con su fotografía y biografía c
   const html = await readFile('dist/nosotros.html', 'utf8')
   assert.equal((html.match(/class="abt-team-card"/g) || []).length, 3)
   assert.match(html, /src="assets\/images\/michel-varela\.jpeg" alt="Michel Varela"[^>]*loading="lazy"/)
-  assert.match(html, /<h3>Michel Varela<\/h3>\s*<strong>Innovación y transformación digital<\/strong>/)
+  assert.match(html, /<h3>Michel Varela<\/h3>\s*<strong>Procesos y datos<\/strong>/)
   assert.match(html, /Ingeniero Civil Industrial, especialista en innovación, análisis de datos y transformación digital/)
   assert.match(html, /contribuyan a un futuro más sostenible\./)
   const portrait = await readFile('dist/assets/images/michel-varela.jpeg')
