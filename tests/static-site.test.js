@@ -44,3 +44,14 @@ test('Vicente tiene retrato accesible y se publica en el equipo sin placeholder 
   assert.deepEqual([...portrait.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])
   assert.equal(portrait.readUInt32BE(16), portrait.readUInt32BE(20), 'El retrato debe ser cuadrado para el marco circular')
 })
+
+test('Michel se publica como tercer integrante con su fotografía y biografía completa', async () => {
+  const html = await readFile('dist/nosotros.html', 'utf8')
+  assert.equal((html.match(/class="abt-team-card"/g) || []).length, 3)
+  assert.match(html, /src="assets\/images\/michel-varela\.jpeg" alt="Michel Varela"[^>]*loading="lazy"/)
+  assert.match(html, /<h3>Michel Varela<\/h3>\s*<strong>Innovación y transformación digital<\/strong>/)
+  assert.match(html, /Ingeniero Civil Industrial, especialista en innovación, análisis de datos y transformación digital/)
+  assert.match(html, /contribuyan a un futuro más sostenible\./)
+  const portrait = await readFile('dist/assets/images/michel-varela.jpeg')
+  assert.deepEqual([...portrait.subarray(0, 3)], [255, 216, 255])
+})
