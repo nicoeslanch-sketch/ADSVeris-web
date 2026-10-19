@@ -27,6 +27,8 @@ Estado de prueba real, 2026-10-01: Kommo rechaza nuevas altas con error 205 y de
 
 Seguimiento 2026-10-02: consulta enviada a soporte Kommo, confirmada en Gmail, sin autorizar cargos, upgrades ni bajas. Ver `KOMMO_SOPORTE_BORRADOR.md` (ahora registra el envío). Gestión de solicitudes de datos: `PROCEDIMIENTO_DATOS_PERSONALES.md`, que requiere aplicación real por el equipo.
 
+Seguimiento 2026-10-19: Gmail contiene solo la respuesta automática que deriva el soporte técnico al chat interno. Se envió allí la consulta y se pidió atención en inglés, siempre sin autorizar cargos ni bajas. La interfaz sigue deshabilitando «Agregar contacto» y facturación mantiene 2/1 licencias usadas. Pendientes el diagnóstico del proveedor y la verificación real contacto → embudo → correo; no se retiró el aviso público de indisponibilidad. Compilación y 28 pruebas correctas.
+
 ## Archivos principales
 - index.html
 - tienda.html

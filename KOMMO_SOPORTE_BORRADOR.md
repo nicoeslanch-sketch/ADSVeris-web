@@ -4,7 +4,17 @@ Enviada el 2 de octubre de 2026 a `support@kommo.com`, desde el buzón del propi
 
 Asunto: **ADS Veris: bloqueo de contactos / error 205 — diagnóstico sin cambios ni cargos (cuenta 36669295)**.
 
-Estado: pendiente de respuesta y número de caso de Kommo. El envío de la consulta no acredita que la integración esté reparada. El correo automático a clientes sigue siendo responsabilidad de las reglas nativas de Kommo, no de Gmail.
+Estado actualizado el 19 de octubre de 2026: se encontró en Gmail una respuesta automática de Support del 2 de octubre, 15:03. Informa que no se brinda soporte técnico por correo y remite a «Ayuda → Obtener soporte» dentro de Kommo. No contiene diagnóstico del error 205 ni número de caso.
+
+El 19 de octubre se envió la consulta al chat «Habla con Soporte» de la cuenta correcta. Se confirmaron el mensaje publicado en el hilo y la respuesta automática que ofrece atención en inglés fuera del horario de español (11:00–23:00 UTC). Se pidió continuar en inglés y se reiteró que no se autorizan compras, upgrades, complementos, cargos ni bajas de usuarios. El chat confirmó la transferencia a un especialista («I’ll transfer the conversation to a Kommo support specialist»). Pendiente de respuesta técnica y número de caso; no se considera reparada la integración.
+
+Comprobación actual en la interfaz: «Agregar contacto» tiene las clases `button-input-disabled` y `js-disabled`. Facturación muestra plan Básico activo, 1 licencia pagada y 2/1 usados, con aviso explícito de exceso de licencias. No se cambió nada de facturación, usuarios o permisos. La coincidencia sigue sin demostrar por sí sola la causa del error API.
+
+El formulario público de Plataforma de Análisis conserva el aviso de indisponibilidad y los canales alternativos. Un POST de cuerpo vacío al endpoint publicado devolvió 400 de validación, sin crear contactos ni enviar correos. Compilación correcta y 28 pruebas aprobadas. No se repitió un alta real mientras el proveedor mantiene deshabilitada la creación, ni se afirma entrega de correos a partir de mocks.
+
+El disparador guardado de Planillas sigue visible en Contactado: etiqueta Planillas, ejecución al mover a la etapa, plantilla personalizada, buzón corporativo `servicios@adsveris.com` y nombre de remitente ADS Veris. Inspección sin guardar cambios. Ver una regla guardada no demuestra que el plan la ejecute ni que el mensaje llegue.
+
+El correo automático a clientes sigue siendo responsabilidad de las reglas nativas de Kommo, no de Gmail.
 
 Solicito ayuda con la cuenta empresarial `nicolasadsveris.kommo.com` (ID 36669295).
 
