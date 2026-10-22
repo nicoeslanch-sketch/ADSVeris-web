@@ -6,6 +6,8 @@ Current status, 2026-10-22: API access restored after the owner authorized rever
 
 Do not store API tokens in this file. Use Vercel environment variables or a local ignored env file for secrets.
 
+Later request on 2026-10-22: the owner authorized an external acknowledgement through the existing SendGrid integration, preserving the three original PDF brochures and the current CRM template copy. Implementation is deployment-gated pending verification of provider access, sender and no-extra-cost quota. The old webhook remains disabled; do not enable it in parallel. See `CORREOS_TRANSACCIONALES.md`. Older notes stating that only native Kommo handles mail describe the previous configuration.
+
 ## Pipelines And Statuses
 
 ### Embudo de ventas

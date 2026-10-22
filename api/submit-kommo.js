@@ -3,8 +3,9 @@ import { DOWNLOAD_PRODUCTS } from '../shared/download-products.js'
 import { createDownloadTicket } from '../server/download-ticket.js'
 import { validatePublicFormRequest } from '../server/public-form-policy.js'
 import { isLaunchPromotionActive } from '../assets/launch-promotion.js'
+import { sendContactEmail } from '../server/contact-email.js'
 
-// Existing native Kommo email rules. This endpoint never sends via SendGrid.
+// Service routing is independent of email delivery. The legacy webhook stays off.
 export const ROUTES = {
   planilla: { pipeline: 14023387, source: 108238139, target: 108238131, tag: 22508 },
   web: { pipeline: 14023535, source: 108239235, target: 108239227, tag: 22510 },
@@ -15,6 +16,7 @@ export const ROUTES = {
 const clean = value => typeof value === 'string' ? value.replace(/\0/g, '').trim() : ''
 
 export default async function handler(req, res) {
+  const startedAt = Date.now()
   res.setHeader('Cache-Control', 'no-store')
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
@@ -118,7 +120,7 @@ export default async function handler(req, res) {
     ].join('\n')
     await request(`/leads/${leadId}/notes`, 'POST', [{ note_type: 'common', params: { text: note } }])
     consentRecorded = true
-    // Check the main recipient and tag BEFORE the native email trigger.
+    // Check the main recipient and tag before finishing service routing.
     const prepared = await request(`/leads/${leadId}?with=contacts`)
     if (prepared.pipeline_id !== route.pipeline ||
         !prepared._embedded?.contacts?.some(contact => contact.id === contactId && contact.is_main) ||
@@ -134,8 +136,29 @@ export default async function handler(req, res) {
       throw new Error('Routing confirmation failed')
     }
     console.info('Kommo form routed', { leadId, contactId, service: service.key, pipeline: route.pipeline })
-    // Routing success is not proof of email delivery: Kommo owns that step.
+    // Only the validated requester is used. No public standalone email relay.
+    // Leave time for the response; never lose a valid lead because mail failed.
+    const mail = Date.now() - startedAt < 35000
+      ? await sendContactEmail({ serviceKey: service.key, serviceLabel: service.label, name, email, leadId })
+      : { status: 'deferred' }
+    if (mail.status !== 'disabled') {
+      console.info('Contact email result', { leadId, service: service.key, ...mail })
+      const emailNote = mail.status === 'accepted'
+        ? 'SendGrid aceptó el acuse de esta solicitud. Esto no confirma recepción ni lectura. No se reintentará automáticamente.'
+        : 'Acuse por correo pendiente. No reenviar el formulario ni reintentar automáticamente el envío. Revisar la integración de correo.'
+      try {
+        const saved = await fetch(`${base}/leads/${leadId}/notes`, {
+          method: 'POST', headers, signal: AbortSignal.timeout(3000),
+          body: JSON.stringify([{ note_type: 'common', params: { text: `[ADSVERIS_EMAIL_V1:${mail.status}] ${emailNote}` } }]),
+        })
+        if (!saved.ok) console.warn('Email status note unavailable', { leadId })
+      } catch { console.warn('Email status note unavailable', { leadId }) }
+    }
     return res.status(200).json({ success: true,
+      ...(mail.status !== 'disabled' ? { emailStatus: mail.status === 'accepted' ? 'accepted' : 'pending',
+        message: mail.status === 'accepted'
+          ? 'Registramos tu solicitud. El correo de confirmación se ha enviado al proveedor para su entrega; revisa también spam. No necesitas enviar el formulario de nuevo.'
+          : 'Registramos tu solicitud en el CRM. El correo de confirmación está pendiente; nuestro equipo revisará tu caso. No necesitas enviar el formulario de nuevo.' } : {}),
       ...(download ? { downloadUrl: `/api/download-planilla?ticket=${createDownloadTicket(downloadSlug, leadId)}` } : {}),
     })
   } catch (error) {

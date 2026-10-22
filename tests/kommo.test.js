@@ -5,7 +5,7 @@ import { CONTACT_SERVICES, findContactService } from '../shared/contact-services
 
 const originalFetch = global.fetch
 const envBefore = { ...process.env }
-beforeEach(() => { mock.method(Date, 'now', () => Date.parse('2026-10-02T12:00:00Z')) })
+beforeEach(() => { process.env.CONTACT_EMAIL_MODE = 'off'; mock.method(Date, 'now', () => Date.parse('2026-10-02T12:00:00Z')) })
 afterEach(() => { global.fetch = originalFetch; process.env = { ...envBefore }; mock.restoreAll() })
 const valid = { name: 'Prueba', email: 'prueba@example.com', phone: '+56 9 1234 5678', serviceType: 'Página Web', details: 'Error 500', privacyConsent: true }
 
@@ -52,7 +52,7 @@ test('todos los servicios, incluidos los cuatro planes WordPress, conservan su e
     assert.equal(lead.name, `${isDownload ? 'Balance General (gratis)' : service.label} - Prueba`)
     assert.deepEqual(lead._embedded.contacts, [{ id: 11, is_main: true }])
     assert.match(calls[2].payload[0].params.text, /Error 500/)
-    assert.match(calls[2].payload[0].params.text, /Privacidad 2026-10-02/)
+    assert.match(calls[2].payload[0].params.text, /Privacidad 2026-10-22/)
     assert.match(calls[2].payload[0].params.text, /NO autorizadas/)
     assert.equal(calls[3].method, 'GET') // recipient confirmed before trigger
     assert.equal(calls[4].method, 'PATCH')
@@ -67,6 +67,43 @@ test('rechaza entradas inválidas sin contactar al CRM', async () => {
     { ...valid, phone: 'abc' }, { ...valid, serviceType: 'inventado' }, { ...valid, details: 'x'.repeat(3001) },
     { ...valid, name: 'x'.repeat(101) }]) assert.equal((await submit(body)).code, 400)
   assert.equal((await submit(valid, 'GET')).code, 405)
+})
+
+test('correo externo solo se intenta después del registro completo, y un fallo no pierde el lead', async () => {
+  for (const providerStatus of [202, 403]) {
+    const calls = fakeKommo(findContactService(valid.serviceType))
+    const kommoFetch = global.fetch
+    let emailCalls = 0
+    Object.assign(process.env, { CONTACT_EMAIL_MODE: 'test', CONTACT_EMAIL_BUDGET_APPROVED: 'true', CONTACT_EMAIL_TEST_TO: valid.email, SENDGRID_API_KEY: 'test-only' })
+    global.fetch = async (url, options) => {
+      if (url === 'https://api.sendgrid.com/v3/mail/send') {
+        emailCalls++
+        assert.equal(calls.length, 6)
+        assert.equal(JSON.parse(options.body).personalizations[0].to[0].email, valid.email)
+        return { status: providerStatus }
+      }
+      return kommoFetch(url, options)
+    }
+    const res = await submit()
+    assert.equal(res.code, 200)
+    assert.equal(res.data.success, true)
+    assert.equal(res.data.emailStatus, providerStatus === 202 ? 'accepted' : 'pending')
+    assert.equal(emailCalls, 1)
+    assert.equal(calls.length, 7)
+    assert.match(calls[6].payload[0].params.text, /ADSVERIS_EMAIL_V1/)
+  }
+})
+
+test('fallo de CRM nunca envía acuse externo ni PDFs', async () => {
+  for (const failAt of [1, 2, 3, 4, 5, 6]) {
+    const calls = fakeKommo(findContactService(valid.serviceType), failAt)
+    process.env.CONTACT_EMAIL_MODE = 'live'
+    process.env.CONTACT_EMAIL_BUDGET_APPROVED = 'true'
+    process.env.SENDGRID_API_KEY = 'test-only'
+    await submit()
+    assert.equal(calls.length, failAt)
+    assert.ok(calls.every(c => !c.url.includes('sendgrid')))
+  }
 })
 
 test('campo opcional vacío y normalización de acentos', async () => {

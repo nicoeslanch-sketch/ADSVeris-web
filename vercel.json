@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/submit-kommo.js": { "maxDuration": 60 },
+    "api/submit-kommo.js": { "maxDuration": 60, "includeFiles": "pdfs/*.pdf" },
     "api/download-planilla.js": { "includeFiles": "**/*.{xlsx,xlsm}" }
   },
   "headers": [

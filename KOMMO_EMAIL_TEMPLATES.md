@@ -1,5 +1,7 @@
 # Correos nativos de Kommo
 
+Actualización 22/10/2026: las cuatro plantillas se inspeccionaron nuevamente sin modificarlas ni enviarlas. No tienen PDFs adjuntos. El soporte humano confirmó que las reglas nativas de envío no se ejecutan en Base. El propietario autorizó preparar un acuse externo por SendGrid con el mismo contenido y los tres folletos originales conservados; su configuración y las condiciones de activación están en `CORREOS_TRANSACCIONALES.md`. El recorrido nativo y el bloqueo de altas descritos al final de este documento son observaciones históricas, no el estado actual del formulario.
+
 Configuración revisada en la interfaz de `nicolasadsveris.kommo.com` el 1 de octubre de 2026. Mantener los nombres de plantilla: los disparadores existentes las referencian. Remitente: buzón corporativo conectado `servicios@adsveris.com`. Destinatario: contacto principal del lead.
 
 | Plantilla existente | Embudo | Asunto actualizado |
