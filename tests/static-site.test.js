@@ -57,3 +57,10 @@ test('Michel se publica como tercer integrante con su fotografía y biografía c
   assert.equal(portrait.readUInt32BE(16), 1254)
   assert.equal(portrait.readUInt32BE(16), portrait.readUInt32BE(20), 'El retrato restaurado debe ser cuadrado')
 })
+
+test('el formulario distingue registro operativo de confirmación por correo pendiente', async () => {
+  const source = await readFile('src/components/KommoContactForm.jsx', 'utf8')
+  assert.match(source, /Tu solicitud se registra en nuestro CRM/)
+  assert.match(source, /La confirmación automática por correo aún no está activa/)
+  assert.doesNotMatch(source, /Registro automático temporalmente no disponible/)
+})

@@ -300,8 +300,13 @@ export default async function handler(req, res) {
   }
 
   const expectedSecret = process.env.KOMMO_WEBHOOK_SECRET
-  if (expectedSecret && req.query?.secret !== expectedSecret) {
-    return res.status(401).json({ success: false, error: 'Unauthorized webhook' })
+  if (expectedSecret) {
+    // Avoid Vercel's deprecated req.query parser and reject ambiguous secrets.
+    let secrets = []
+    try { secrets = new URL(req.url || '/', 'https://ads-veris.invalid').searchParams.getAll('secret') } catch {}
+    if (secrets.length !== 1 || secrets[0] !== expectedSecret) {
+      return res.status(401).json({ success: false, error: 'Unauthorized webhook' })
+    }
   }
 
   if (!CONTACTADOS_EMAILS_ENABLED) {

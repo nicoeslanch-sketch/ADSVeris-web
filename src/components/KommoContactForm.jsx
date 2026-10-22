@@ -197,7 +197,7 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
             </div>
           )}
           {!isSuccess && window.ADS_VERIS_CONFIG?.contactAutomationPending === true && <aside style={{ ...s.errorBox, background: '#fff8e5', color: '#59451c', borderColor: '#ead6a3', fontWeight: 400 }} aria-label="Aviso de atención">
-            Registro automático temporalmente no disponible. Solicita atención por{' '}
+            Tu solicitud se registra en nuestro CRM y será revisada por el equipo. La confirmación automática por correo aún no está activa. También puedes contactarnos por{' '}
             <a href="mailto:servicios@adsveris.com" style={{ color: 'inherit' }}>correo</a> o{' '}
             <a href="https://wa.me/56983894129" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}>WhatsApp</a>.
           </aside>}

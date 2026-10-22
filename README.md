@@ -4,7 +4,7 @@ Sitio estático desplegado en GitHub + Vercel. Su lanzamiento comercial tiene de
 
 ## Formulario y descargas
 
-El formulario registra solicitudes en el embudo del servicio elegido, con contacto principal, correo, descripción opcional y una nota de consentimiento. El envío de confirmación corresponde a los disparadores nativos de Kommo, desde `servicios@adsveris.com`; no se utiliza SendGrid.
+El formulario registra solicitudes en el embudo del servicio elegido, con contacto principal, correo, descripción opcional y una nota de consentimiento. Registro real verificado en las cuatro rutas el 22/10/2026. No se utiliza SendGrid. **El plan Base no permite ejecutar los disparadores nativos de email automático**, según la documentación oficial y el operador Denis Malanichev (22/10, 06:50). Un correo manual enviado desde Kommo sí llegó al buzón autorizado. No se contrató otro plan ni servicio. Ver `KOMMO_VERIFICACION_2026-10-22.md`.
 
 Las once planillas del catálogo se ofrecen por $0 CLP durante la inauguración, hasta el 15/10/2026 a las 23:59 Chile continental. La vigencia compartida está en `assets/launch-promotion.js`; al terminar no se habilitan cobros automáticos. Para descargar se solicita nombre, correo y autorización para atender esa solicitud. El teléfono y el permiso comercial son opcionales; este último nunca viene marcado. Las cookies no sustituyen el consentimiento comercial.
 
@@ -24,6 +24,8 @@ Las pruebas cubren rutas por servicio, validación, consentimiento, enlaces de d
 El formulario reinicia datos y autorizaciones al abrir una nueva solicitud. Tiene espera máxima de 55 segundos y no reintenta automáticamente: perder una respuesta no demuestra que el CRM no haya recibido el POST. El servidor respeta las respuestas 429 del proveedor, sin presentar esto como un límite global contra bots. Una descarga nunca se anuncia lista sin un enlace firmado válido.
 
 Estado de prueba real, 2026-10-01: Kommo rechaza nuevas altas con error 205 y deshabilita su botón de crear contactos. La cuenta tiene 2 usuarios activos y 1 licencia; el propietario eligió mantener ambos y dejar pendiente el ajuste. La confirmación automática y el registro para descargas no están operativos para nuevos contactos hasta resolver la restricción. La web no anuncia éxito falso y ofrece correo/WhatsApp como alternativas de atención. Ver `KOMMO_STRUCTURE.md`.
+
+Actualización 2026-10-22: soporte confirmó que el exceso de usuarios bloqueaba la API. Con autorización expresa se desactivó reversiblemente a Vicente y se seleccionó a Nicolás como nuevo responsable de sus datos. Nicolás queda como administrador activo; plan Básico, 1 licencia pagada, 1/1 usados, vigencia 03/09/2027 y renovación automática desactivada, sin cargos ni cambios de plan. Cuatro pruebas reales del formulario registraron correctamente contacto, lead, etiqueta y etapa Contactado. El aviso público distingue ahora este registro operativo del correo automático pendiente; no debe retirarse la advertencia de correo sin verificar entrega real.
 
 Seguimiento 2026-10-02: consulta enviada a soporte Kommo, confirmada en Gmail, sin autorizar cargos, upgrades ni bajas. Ver `KOMMO_SOPORTE_BORRADOR.md` (ahora registra el envío). Gestión de solicitudes de datos: `PROCEDIMIENTO_DATOS_PERSONALES.md`, que requiere aplicación real por el equipo.
 

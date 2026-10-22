@@ -110,7 +110,7 @@ export default async function handler(req, res) {
       `Nombre: ${name}`, `Correo del cliente: ${email}`, `Teléfono: ${phone || 'No informado'}`,
       ...(download ? [`Planilla solicitada: ${download.title} (${downloadSlug})`] : []),
       `Problema o necesidad: ${details || 'No informado (campo opcional)'}`,
-      `Página: ${/^\/[a-z0-9/_-]+\.html$/i.test(sourcePage) ? sourcePage : 'Sitio web'}`,
+      `Página: ${sourcePage === '/contacto-kommo' || /^\/[a-z0-9/_-]+\.html$/i.test(sourcePage) ? sourcePage : 'Sitio web'}`,
       `Autorización: responder esta solicitud por correo o teléfono. Privacidad ${PRIVACY_VERSION}.`,
       `Comunicaciones comerciales por correo o teléfono: ${body.marketingConsent === true ? 'AUTORIZADAS expresamente (casilla opcional)' : 'NO autorizadas'}.`,
       `Fecha: ${new Date().toISOString()}`,

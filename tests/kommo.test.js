@@ -75,6 +75,15 @@ test('campo opcional vacío y normalización de acentos', async () => {
   assert.match(calls[2].payload[0].params.text, /No informado/)
 })
 
+test('conserva la ruta del formulario React sin aceptar URLs externas o texto libre como fuente', async () => {
+  for (const sourcePage of ['/contacto-kommo', '/contacto.html', 'https://evil.example/contacto-kommo', '/contacto-kommo?email=private', '/contacto-kommo\nTexto falso']) {
+    const calls = fakeKommo(findContactService(valid.serviceType))
+    assert.equal((await submit({ ...valid, sourcePage })).code, 200)
+    const expected = ['/contacto-kommo', '/contacto.html'].includes(sourcePage) ? sourcePage : 'Sitio web'
+    assert.ok(calls[2].payload[0].params.text.includes(`Página: ${expected}\n`))
+  }
+})
+
 test('no activa el correo cuando falla el guardado de la nota', async () => {
   const calls = fakeKommo(findContactService(valid.serviceType), 3)
   const res = await submit()

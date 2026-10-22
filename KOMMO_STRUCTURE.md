@@ -2,6 +2,8 @@
 
 Source: existing Kommo API inventory for account `36669295` on subdomain `nicolasadsveris`; routing and native rules reviewed in the interface on 2026-10-01.
 
+Current status, 2026-10-22: API access restored after the owner authorized reversible deactivation of Vicente. Nicolás remains the active administrator. Billing is unchanged (Base, one paid seat, 1/1 used, expiration 2027-09-03). Four real website submissions reached their service pipelines in Contactado, with main contact, email, service tag and consent note. Support operator Denis Malanichev confirmed at 06:50 that native automatic email rules cannot execute on Base (Advanced/Enterprise required). One clearly labeled manual message sent through Kommo reached the authorized Gmail inbox; this is not automatic delivery. See `KOMMO_VERIFICACION_2026-10-22.md`. Older dated restrictions below describe historical observations.
+
 Do not store API tokens in this file. Use Vercel environment variables or a local ignored env file for secrets.
 
 ## Pipelines And Statuses

@@ -1,5 +1,13 @@
 # Consulta enviada a soporte Kommo
 
+## Actualización del 22 de octubre de 2026
+
+Se leyó la respuesta de Nikita Bekishchuk del 19/10, 07:33: el exceso de usuarios bloquea la API; desactivar un usuario o comprar otra licencia restaura el acceso. El propietario autorizó dejar solo a Nicolás si el plan quedaba intacto. Se verificó la documentación oficial de suscripciones (el plan pertenece al espacio, no al pagador) y se desactivó reversiblemente a Vicente, seleccionando a Nicolás para reasignar sus datos. Facturación antes/después: Básico activo, una licencia pagada, misma fecha 03/09/2027 y renovación automática desactivada; pasa de 2/1 a 1/1. Sin compras ni cargos.
+
+El formulario publicado registró cuatro pruebas reales en sus embudos. No hubo correos automáticos en el buzón destinatario ni entradas de envío en las fichas durante la revisión. Se consultó nuevamente al chat con los IDs de prueba, sin contraseñas ni datos de clientes, y se solicitó diagnóstico sin upgrade. Tras la transferencia, el operador Denis Malanichev confirmó el 22/10 a las 06:50 que las reglas de email automático no pueden ejecutarse con Base: requieren Advanced/Enterprise. La alternativa disponible en el plan actual es el envío manual desde fichas con el buzón conectado y las plantillas disponibles. Una prueba manual por Kommo llegó al Gmail autorizado a las 06:47. No se activó otro proveedor ni se intentó eludir una función restringida por plan. Ver `KOMMO_VERIFICACION_2026-10-22.md`.
+
+## Historial de las consultas anteriores
+
 Enviada el 2 de octubre de 2026 a `support@kommo.com`, desde el buzón del propietario abierto en Gmail. Se verificaron destinatario, asunto y cuerpo antes de enviar; Gmail confirmó «Mensaje enviado». La búsqueda específica en Enviados mostró un único mensaje al destinatario con este asunto, fechado el 2 de octubre a las 6:36. No se envió un segundo mensaje cuando el navegador demoró en devolver la confirmación.
 
 Asunto: **ADS Veris: bloqueo de contactos / error 205 — diagnóstico sin cambios ni cargos (cuenta 36669295)**.
