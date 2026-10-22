@@ -155,10 +155,12 @@ export default async function handler(req, res) {
       } catch { console.warn('Email status note unavailable', { leadId }) }
     }
     return res.status(200).json({ success: true, leadReference: leadId,
-      ...(mail.status !== 'disabled' ? { emailStatus: mail.status === 'accepted' ? 'accepted' : 'pending',
-        message: mail.status === 'accepted'
+      emailStatus: mail.status === 'accepted' ? 'accepted' : 'pending',
+        message: mail.status === 'disabled'
+          ? 'Registramos tu solicitud en el CRM. La confirmación automática por correo no está activa; nuestro equipo revisará tu caso. No necesitas enviar el formulario de nuevo.'
+          : mail.status === 'accepted'
           ? 'Registramos tu solicitud. El correo de confirmación se ha enviado al proveedor para su entrega; revisa también spam. No necesitas enviar el formulario de nuevo.'
-          : 'Registramos tu solicitud en el CRM. El correo de confirmación está pendiente; nuestro equipo revisará tu caso. No necesitas enviar el formulario de nuevo.' } : {}),
+          : 'Registramos tu solicitud en el CRM. El correo de confirmación está pendiente; nuestro equipo revisará tu caso. No necesitas enviar el formulario de nuevo.',
       ...(download ? { downloadUrl: `/api/download-planilla?ticket=${createDownloadTicket(downloadSlug, leadId)}` } : {}),
     })
   } catch (error) {

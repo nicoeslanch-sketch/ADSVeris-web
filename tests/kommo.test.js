@@ -46,7 +46,8 @@ test('todos los servicios, incluidos los cuatro planes WordPress, conservan su e
     assert.equal(res.code, 200)
     assert.equal(res.data.success, true)
     if (isDownload) assert.match(res.data.downloadUrl, /^\/api\/download-planilla\?ticket=/)
-    else assert.deepEqual(res.data, { success: true, leadReference: 22 })
+    else assert.deepEqual(res.data, { success: true, leadReference: 22, emailStatus: 'pending',
+      message: 'Registramos tu solicitud en el CRM. La confirmación automática por correo no está activa; nuestro equipo revisará tu caso. No necesitas enviar el formulario de nuevo.' })
     const lead = calls[1].payload[0]
     assert.equal(lead.pipeline_id, ROUTES[service.key].pipeline)
     assert.equal(lead.name, `${isDownload ? 'Balance General (gratis)' : service.label} - Prueba`)
