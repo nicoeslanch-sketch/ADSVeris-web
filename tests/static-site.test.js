@@ -61,6 +61,6 @@ test('Michel se publica como tercer integrante con su fotografía y biografía c
 test('el formulario distingue registro operativo de confirmación por correo pendiente', async () => {
   const source = await readFile('src/components/KommoContactForm.jsx', 'utf8')
   assert.match(source, /Tu solicitud se registra en nuestro CRM/)
-  assert.match(source, /La confirmación automática por correo aún no está activa/)
+  assert.match(source, /Al enviarla te indicaremos el estado de la confirmación por correo/)
   assert.doesNotMatch(source, /Registro automático temporalmente no disponible/)
 })

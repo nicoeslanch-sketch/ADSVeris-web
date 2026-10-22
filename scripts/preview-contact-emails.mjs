@@ -3,7 +3,7 @@ import { buildContactEmail, CONTACT_EMAIL_TEMPLATES } from '../server/contact-em
 
 // Local-only, no credentials and no sending. Fixed routes; no filesystem paths from requests.
 const pages = Object.fromEntries(Object.keys(CONTACT_EMAIL_TEMPLATES).map(serviceKey => [
-  `/${serviceKey}`, buildContactEmail({ serviceKey, name: 'Cliente de ejemplo', email: 'preview@example.com', leadId: 123 }).content[1].value,
+  `/${serviceKey}`, buildContactEmail({ serviceKey, name: 'Cliente de ejemplo', email: 'preview@example.com', leadId: 123 }).html,
 ]))
 createServer((req, res) => {
   const pathname = new URL(req.url, 'http://127.0.0.1').pathname

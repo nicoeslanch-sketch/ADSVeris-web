@@ -144,12 +144,12 @@ export default async function handler(req, res) {
     if (mail.status !== 'disabled') {
       console.info('Contact email result', { leadId, service: service.key, ...mail })
       const emailNote = mail.status === 'accepted'
-        ? 'SendGrid aceptó el acuse de esta solicitud. Esto no confirma recepción ni lectura. No se reintentará automáticamente.'
+        ? `Resend aceptó el acuse de esta solicitud. Referencia de envío: ${mail.providerId}. Esto no confirma recepción ni lectura. No se reintentará automáticamente.`
         : 'Acuse por correo pendiente. No reenviar el formulario ni reintentar automáticamente el envío. Revisar la integración de correo.'
       try {
         const saved = await fetch(`${base}/leads/${leadId}/notes`, {
           method: 'POST', headers, signal: AbortSignal.timeout(3000),
-          body: JSON.stringify([{ note_type: 'common', params: { text: `[ADSVERIS_EMAIL_V1:${mail.status}] ${emailNote}` } }]),
+          body: JSON.stringify([{ note_type: 'common', params: { text: `[ADSVERIS_EMAIL_V2:${mail.status}] ${emailNote}` } }]),
         })
         if (!saved.ok) console.warn('Email status note unavailable', { leadId })
       } catch { console.warn('Email status note unavailable', { leadId }) }

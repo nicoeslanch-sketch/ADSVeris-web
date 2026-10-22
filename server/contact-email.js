@@ -57,17 +57,17 @@ const WHATSAPP = 'https://wa.me/56983894129'
 const BROCHURE_NOTICE = 'Adjuntamos el folleto original como material de referencia. Sus precios, promociones y funcionalidades corresponden a una versión anterior y no constituyen una oferta vigente. El alcance, precio final y plazos aplicables a tu solicitud se confirmarán contigo antes de contratar.'
 const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char])
 
-export function buildContactEmail({ serviceKey, serviceLabel, name, email, leadId }, { from = 'noreply@adsveris.com', readPdf = filename => readFileSync(join(process.cwd(), 'pdfs', filename)) } = {}) {
+export function buildContactEmail({ serviceKey, serviceLabel, name, email, leadId }, { from = 'servicios@adsveris.com', readPdf = filename => readFileSync(join(process.cwd(), 'pdfs', filename)) } = {}) {
   const template = Object.hasOwn(CONTACT_EMAIL_TEMPLATES, serviceKey) && CONTACT_EMAIL_TEMPLATES[serviceKey]
   if (!template || !Number.isSafeInteger(leadId) || leadId <= 0 || typeof name !== 'string' || !name.trim() || name.length > 100 ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || '') || email.length > 254 ||
+      !/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i.test(email || '') || email.length > 254 ||
       !/^[a-z0-9._+-]+@adsveris\.com$/i.test(from)) throw new Error('Invalid email context')
   const attachments = []
   if (template.pdf) {
     const pdf = readPdf(template.pdf)
     if (!Buffer.isBuffer(pdf) || pdf.subarray(0, 5).toString() !== '%PDF-' ||
         createHash('sha256').update(pdf).digest('hex') !== template.sha256) throw new Error('Original PDF missing or changed')
-    attachments.push({ content: pdf.toString('base64'), filename: template.pdf, type: 'application/pdf', disposition: 'attachment' })
+    attachments.push({ content: pdf.toString('base64'), filename: template.pdf })
   }
   const paragraphs = [...template.paragraphs]
   if (serviceLabel) paragraphs.unshift(`Servicio seleccionado: ${String(serviceLabel).slice(0, 100)}.`)
@@ -87,36 +87,24 @@ export function buildContactEmail({ serviceKey, serviceLabel, name, email, leadI
 <p style="margin:24px 0 0">Equipo ADS Veris<br><a href="mailto:${REPLY_TO}" style="color:#0f766e">${REPLY_TO}</a><br>WhatsApp: +56 9 8389 4129</p></td></tr>
 <tr><td style="background:#f1f5f6;padding:20px 28px;font-size:12px;line-height:1.6">${footer}<br>${consent}<br><a href="${SITE}/privacidad.html" style="color:#0f766e">Política de privacidad</a><br>Referencia de solicitud: ${leadId}</td></tr></table></td></tr></table></body></html>`
   return {
-    personalizations: [{ to: [{ email, name }], custom_args: { ads_veris_lead_id: String(leadId), ads_veris_service: serviceKey } }],
-    from: { email: from, name: 'ADS Veris' }, reply_to: { email: REPLY_TO, name: 'Equipo ADS Veris' }, subject: template.subject,
-    content: [
-      { type: 'text/plain', value: [`Hola ${name},`, '', ...paragraphs, `${template.linkLabel}: ${SITE}${template.link}`, `WhatsApp: ${WHATSAPP}`, REPLY_TO, footer, consent, `Referencia: ${leadId}`].join('\n\n') },
-      { type: 'text/html', value: html },
-    ],
+    from: `ADS Veris <${from}>`, to: [email], reply_to: REPLY_TO, subject: template.subject,
+    text: [`Hola ${name},`, '', ...paragraphs, `${template.linkLabel}: ${SITE}${template.link}`, `WhatsApp: ${WHATSAPP}`, REPLY_TO, footer, consent, `Referencia: ${leadId}`].join('\n\n'),
+    html,
+    tags: [{ name: 'service', value: serviceKey }, { name: 'source', value: 'contact-form' }],
     ...(attachments.length ? { attachments } : {}),
-    // A requested acknowledgement is not a marketing-tracking subscription.
-    tracking_settings: { click_tracking: { enable: false, enable_text: false }, open_tracking: { enable: false }, subscription_tracking: { enable: false } },
+    // Resend tracking is configured at domain level, not via SendGrid settings.
+    // No audience/contact/broadcast API is called for this requested reply.
   }
 }
 
-// Diagnostic mode performs read-only calls using the existing server credential.
-// It never sends a message or claims a subscription is free based on a saved key.
-export async function checkSendGridAccount({ env = process.env, fetchImpl = fetch } = {}) {
-  if (!env.SENDGRID_API_KEY) return { status: 'missing_key' }
-  const checks = await Promise.all(['/user/account', '/verified_senders'].map(async path => {
-    try {
-      const response = await fetchImpl(`https://api.sendgrid.com/v3${path}`, {
-        headers: { Authorization: `Bearer ${env.SENDGRID_API_KEY}` }, signal: AbortSignal.timeout(4000),
-      })
-      return { http: response.status, data: response.ok ? await response.json() : {} }
-    } catch { return { http: 0, data: {} } }
-  }))
-  const [account, senders] = checks
-  const from = env.CONTACT_EMAIL_FROM || 'noreply@adsveris.com'
+// Local configuration checks never validate a key, inspect billing or send mail.
+// A domain-restricted Sending key intentionally cannot read account settings.
+export function checkResendConfiguration({ env = process.env } = {}) {
   return {
-    status: 'checked', accountHttp: account.http, sendersHttp: senders.http,
-    accountType: ['free', 'paid'].includes(account.data?.type) ? account.data.type : 'unknown',
-    senderVerified: Array.isArray(senders.data?.results) && senders.data.results.some(s => s.verified === true && s.from_email?.toLowerCase() === from.toLowerCase()),
+    status: 'configuration_checked', provider: 'resend', keyConfigured: Boolean(env.RESEND_API_KEY),
+    budgetApproved: env.CONTACT_EMAIL_BUDGET_APPROVED === 'true',
+    senderVerified: env.CONTACT_EMAIL_SENDER_VERIFIED === 'true',
+    trackingDisabled: env.CONTACT_EMAIL_TRACKING_DISABLED === 'true',
   }
 }
 
@@ -124,25 +112,31 @@ export async function sendContactEmail(context, { env = process.env, fetchImpl =
   const mode = env.CONTACT_EMAIL_MODE || 'off'
   if (mode === 'check') {
     let preview
-    try { preview = buildContactEmail(context, { from: env.CONTACT_EMAIL_FROM || 'noreply@adsveris.com' }) }
+    try { preview = buildContactEmail(context, { from: env.CONTACT_EMAIL_FROM || 'servicios@adsveris.com' }) }
     catch { return { status: 'configuration_error' } }
-    return { ...await checkSendGridAccount({ env, fetchImpl }), pdfReady: true, pdfCount: preview.attachments?.length || 0 }
+    return { ...checkResendConfiguration({ env }), pdfReady: true, pdfCount: preview.attachments?.length || 0 }
   }
   if (!['test', 'live'].includes(mode)) return { status: 'disabled' }
   // Explicit deployment approval is required after checking quota/billing and sender.
   if (env.CONTACT_EMAIL_BUDGET_APPROVED !== 'true') return { status: 'budget_unverified' }
+  if (env.CONTACT_EMAIL_SENDER_VERIFIED !== 'true' || env.CONTACT_EMAIL_TRACKING_DISABLED !== 'true') return { status: 'sender_unverified' }
   const testRecipients = (env.CONTACT_EMAIL_TEST_TO || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
   if (mode === 'test' && !testRecipients.includes(context.email?.toLowerCase())) return { status: 'test_recipient_blocked' }
-  if (!env.SENDGRID_API_KEY) return { status: 'missing_key' }
+  if (!env.RESEND_API_KEY) return { status: 'missing_key' }
   let payload
-  try { payload = buildContactEmail(context, { from: env.CONTACT_EMAIL_FROM || 'noreply@adsveris.com' }) }
+  try { payload = buildContactEmail(context, { from: env.CONTACT_EMAIL_FROM || 'servicios@adsveris.com' }) }
   catch { return { status: 'configuration_error' } }
   try {
-    const response = await fetchImpl('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST', headers: { Authorization: `Bearer ${env.SENDGRID_API_KEY}`, 'Content-Type': 'application/json' },
+    const response = await fetchImpl('https://api.resend.com/emails', {
+      method: 'POST', headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json',
+        'Idempotency-Key': `adsveris-contact-v2/${context.leadId}` },
       signal: AbortSignal.timeout(8000), body: JSON.stringify(payload),
     })
-    // SendGrid acceptance is not proof that the recipient received the message.
-    return response.status === 202 ? { status: 'accepted' } : { status: 'rejected', providerHttp: response.status }
+    if (response.status >= 500) return { status: 'unknown', providerHttp: response.status }
+    if (response.status !== 200 && response.status !== 201) return { status: 'rejected', providerHttp: response.status }
+    const data = await response.json()
+    // Provider acceptance is not proof of delivery; never return its raw body.
+    return /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(data?.id || '')
+      ? { status: 'accepted', providerId: data.id } : { status: 'unknown' }
   } catch { return { status: 'unknown' } } // Never retry a possibly accepted send.
 }

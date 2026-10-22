@@ -70,27 +70,28 @@ test('rechaza entradas inválidas sin contactar al CRM', async () => {
 })
 
 test('correo externo solo se intenta después del registro completo, y un fallo no pierde el lead', async () => {
-  for (const providerStatus of [202, 403]) {
+  for (const providerStatus of [200, 403]) {
     const calls = fakeKommo(findContactService(valid.serviceType))
     const kommoFetch = global.fetch
     let emailCalls = 0
-    Object.assign(process.env, { CONTACT_EMAIL_MODE: 'test', CONTACT_EMAIL_BUDGET_APPROVED: 'true', CONTACT_EMAIL_TEST_TO: valid.email, SENDGRID_API_KEY: 'test-only' })
+    Object.assign(process.env, { CONTACT_EMAIL_MODE: 'test', CONTACT_EMAIL_BUDGET_APPROVED: 'true', CONTACT_EMAIL_TEST_TO: valid.email,
+      CONTACT_EMAIL_SENDER_VERIFIED: 'true', CONTACT_EMAIL_TRACKING_DISABLED: 'true', RESEND_API_KEY: 'test-only' })
     global.fetch = async (url, options) => {
-      if (url === 'https://api.sendgrid.com/v3/mail/send') {
+      if (url === 'https://api.resend.com/emails') {
         emailCalls++
         assert.equal(calls.length, 6)
-        assert.equal(JSON.parse(options.body).personalizations[0].to[0].email, valid.email)
-        return { status: providerStatus }
+        assert.deepEqual(JSON.parse(options.body).to, [valid.email])
+        return { status: providerStatus, json: async () => ({ id: '49a3999c-0ce1-4ea6-ab68-afcd6dc2e794' }) }
       }
       return kommoFetch(url, options)
     }
     const res = await submit()
     assert.equal(res.code, 200)
     assert.equal(res.data.success, true)
-    assert.equal(res.data.emailStatus, providerStatus === 202 ? 'accepted' : 'pending')
+    assert.equal(res.data.emailStatus, providerStatus === 200 ? 'accepted' : 'pending')
     assert.equal(emailCalls, 1)
     assert.equal(calls.length, 7)
-    assert.match(calls[6].payload[0].params.text, /ADSVERIS_EMAIL_V1/)
+    assert.match(calls[6].payload[0].params.text, /ADSVERIS_EMAIL_V2/)
   }
 })
 
@@ -99,10 +100,12 @@ test('fallo de CRM nunca envía acuse externo ni PDFs', async () => {
     const calls = fakeKommo(findContactService(valid.serviceType), failAt)
     process.env.CONTACT_EMAIL_MODE = 'live'
     process.env.CONTACT_EMAIL_BUDGET_APPROVED = 'true'
-    process.env.SENDGRID_API_KEY = 'test-only'
+    process.env.RESEND_API_KEY = 'test-only'
+    process.env.CONTACT_EMAIL_SENDER_VERIFIED = 'true'
+    process.env.CONTACT_EMAIL_TRACKING_DISABLED = 'true'
     await submit()
     assert.equal(calls.length, failAt)
-    assert.ok(calls.every(c => !c.url.includes('sendgrid')))
+    assert.ok(calls.every(c => !c.url.includes('resend')))
   }
 })
 
