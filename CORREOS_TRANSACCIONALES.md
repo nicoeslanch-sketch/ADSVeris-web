@@ -35,7 +35,15 @@ Vista previa local sin envíos: `node scripts/preview-contact-emails.mjs`, rutas
 ## Estado externo observado
 
 - Supabase `ADSVeris-web`: INACTIVE; no se restauró ni modificó el proyecto. Los correos Auth no son un servicio general de folletos con adjuntos.
-- SendGrid: el navegador muestra login; no hay una sesión disponible para comprobar facturación. Se prepara diagnóstico de solo lectura con la clave ya existente en Vercel, sin extraerla ni publicarla.
+- SendGrid: el navegador muestra login; no hay una sesión disponible para comprobar facturación. El diagnóstico real de solo lectura con la clave ya existente en Vercel devolvió HTTP 401 tanto en `/v3/user/account` como en `/v3/verified_senders`. No acredita si la causa exacta es revocación, caducidad u otra restricción de acceso. No se expuso, extrajo ni reemplazó la clave. No se hicieron llamadas a `/v3/mail/send`. Antes de activar envíos, el titular debe recuperar acceso a la cuenta y verificar remitente, permiso de envío y cuota sin cargos adicionales.
 - Kommo WhatsApp Business: integración instalada, sin número conectado (`waStatus=NOT_CONNECTED`). Se eligió conectar WhatsApp existente → aplicación WhatsApp Business; queda pendiente el paso de Facebook y la verificación del teléfono. No se desinstaló, migró ni borró WhatsApp, ni se contrató un número o proveedor.
 
 La conexión de WhatsApp Business requiere intervención del titular si Meta solicita inicio de sesión, aprobación de acceso o escaneo QR desde el teléfono. No confundir el enlace `wa.me` del sitio/correos con una conexión del canal en Kommo.
+
+## Prueba de producción de solo lectura, 22/10 07:45
+
+Una única solicitud identificada `PRUEBA PDF SMTP 2210` creó contacto `50362695` y lead `25559299` en Web (`14023535`), Contactado, responsable Nicolás. El teléfono público de ADS Veris quedó en el campo estándar PHONE del contacto de prueba, y la descripción y autorización en la nota. No se sobrescribieron teléfonos de clientes existentes. La ficha conserva el marcador `[ADSVERIS_EMAIL_V1:checked]` y el acuse pendiente.
+
+La función confirmó `pdfReady: true`, `pdfCount: 1`: el original Web estaba empaquetado y conservaba su SHA-256 en el servidor de producción. Las dos consultas SendGrid devolvieron 401; no se envió ningún correo. Se devolvió `CONTACT_EMAIL_MODE` a `off` para la publicación final. Los otros dos adjuntos se validaron en las pruebas locales, no mediante envíos reales. Se mantienen 39 pruebas aprobadas; no equivalen a recepción real.
+
+Se envió consulta al chat de soporte Kommo sobre el canal instalado sin conexión y el asistente detenido después de Continuar con Facebook, solicitando reconexión/coexistencia para el número empresarial sin migraciones, borrados ni cargos. Pendiente de respuesta. No se afirma que WhatsApp haya quedado conectado.
