@@ -36,11 +36,28 @@ Comprobación del panel Resend el 22/10/2026: adsveris.com Verified, cuenta nico
 
 Pruebas automatizadas de la migración: 49 aprobadas, incluyendo contrato Resend, destinatario único, conservación exacta de adjuntos, gates de presupuesto/remitente, idempotencia, ausencia de envío tras un fallo del CRM, cuota/timeout y validación estricta del ID de respuesta. La compilación de producción pasó. Estas pruebas no acreditan recepción de correo real.
 
+## Recepción real y puesta en producción, 22/10/2026
+
+El propietario autorizó expresamente crear y guardar una clave nueva Sending limitada a adsveris.com: `ADS Veris web - formulario`. Se guardó como RESEND_API_KEY, tipo Secret y solo Production en pymex-web, mediante transferencia directa entre los paneles, sin mostrarla en chat ni escribirla en archivos. Las dos claves previas permanecieron intactas. Se limpió la copia temporal del portapapeles.
+
+Con modo test y solo los dos correos autorizados por el propietario, se enviaron estas cuatro solicitudes claramente identificadas, sin aceptar marketing y sin habilitar cookies publicitarias:
+
+| Servicio | Lead Kommo | Embudo | ID Resend | Resultado |
+|---|---|---|---|---|
+| WordPress | 25619465 | 14023535 | 01a16603-2159-7f05-a099-d752a0fb4ee6 | Delivered y recibido en Gmail con ADS_Veris_Paginas_Web.pdf |
+| Planillas | 25619477 | 14023387 | 01a16603-9269-7965-87fd-bc6b8d58f6d8 | Delivered y recibido en Gmail con ADS_Veris_Planillas_Excel.pdf |
+| Procesos | 25619497 | 14023539 | 01a16603-eb1c-71e1-8e10-2bf5fba4317a | Delivered y recibido en Gmail con ADS_Veris_Procesos.pdf |
+| Plataforma | 25619519 | 14023551 | 01a16604-7851-7bf4-b76a-cba838ce8cef | Delivered y recibido en Gmail, sin PDF |
+
+Los cuatro llegaron al buzón de prueba nicoeslanch@gmail.com y aparecen en Recibidos, no solo como aceptados por API. Se inspeccionó el contenido HTML recibido de WordPress, su nombre personalizado, links, identificación legal, aviso sobre folletos antiguos y referencia de solicitud. Su ficha de Kommo confirmó Contactado, responsable Nicolás Albornoz y la nota ADSVERIS_EMAIL_V2:accepted con el mismo ID de Resend. Los registros del servidor confirmaron las otras tres rutas y sus referencias. Los tres PDFs conservan los hashes originales de la tabla anterior; no se alteraron para la migración.
+
+Tras estas pruebas se configuró CONTACT_EMAIL_MODE=live para el siguiente despliegue de main. Las banderas de presupuesto, remitente y rastreo reflejan las comprobaciones del panel, con servicios@adsveris.com como From y Reply-To. No se activaron excedentes, upgrades, campañas, suscripciones ni reenvíos de solicitudes anteriores. El equipo debe vigilar la cuota compartida y responder manualmente si un acuse queda pendiente.
+
 Referencias primarias: [Enviar email](https://resend.com/docs/api-reference/emails/send-email), [Adjuntos](https://resend.com/docs/dashboard/emails/attachments), [Idempotencia](https://resend.com/docs/dashboard/emails/idempotency-keys), [Rastreo por dominio](https://resend.com/docs/dashboard/domains/tracking).
 
 Vista previa local sin envíos: `node scripts/preview-contact-emails.mjs`, rutas `http://127.0.0.1:4174/{planilla,web,procesos,plataforma}` y `/mobile/web`. No es un endpoint de producción ni usa credenciales.
 
-## Estado externo observado
+## Antecedentes históricos previos a la migración
 
 - Supabase `ADSVeris-web`: INACTIVE; no se restauró ni modificó el proyecto. Los correos Auth no son un servicio general de folletos con adjuntos.
 - SendGrid: el navegador muestra login; no hay una sesión disponible para comprobar facturación. El diagnóstico real de solo lectura con la clave ya existente en Vercel devolvió HTTP 401 tanto en `/v3/user/account` como en `/v3/verified_senders`. No acredita si la causa exacta es revocación, caducidad u otra restricción de acceso. No se expuso, extrajo ni reemplazó la clave. No se hicieron llamadas a `/v3/mail/send`. Antes de activar envíos, el titular debe recuperar acceso a la cuenta y verificar remitente, permiso de envío y cuota sin cargos adicionales.
