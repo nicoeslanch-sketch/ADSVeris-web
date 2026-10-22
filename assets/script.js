@@ -1,4 +1,5 @@
 import { isLaunchPromotionActive, launchPromotionMarkup } from './launch-promotion.js';
+import './meta-pixel.js';
 const WHATSAPP_URL = "https://wa.me/56983894129?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.";
 
 function isPublicAuthEnabled() {

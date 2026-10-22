@@ -17,6 +17,7 @@ export async function submitContactForm(payload, { fetchImpl = fetch, timeoutMs 
     }
     return {
       downloadUrl,
+      leadReference: data.pending !== true && Number.isSafeInteger(data.leadReference) && data.leadReference > 0 ? data.leadReference : null,
       message: typeof data.message === 'string' && data.message ? data.message : data.pending === true
         ? 'Recibimos tu solicitud. La confirmación automática está pendiente; no necesitas enviarla de nuevo.'
         : downloadUrl

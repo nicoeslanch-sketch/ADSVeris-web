@@ -41,3 +41,11 @@ test('conserva el error del servidor sin declarar éxito ni envío de email', as
   assert.match(result.message, /Registramos tu solicitud/)
   assert.doesNotMatch(result.message, /correo enviado/i)
 })
+
+test('solo expone una referencia de conversión tras el registro confirmado, nunca un caso pendiente', async () => {
+  const confirmed = await submitContactForm({}, { fetchImpl: reply({ success: true, leadReference: 123 }) })
+  assert.equal(confirmed.leadReference, 123)
+  for (const data of [{ success: true }, { success: true, pending: true, leadReference: 123 }, { success: true, leadReference: '123' }, { success: true, leadReference: -1 }]) {
+    assert.equal((await submitContactForm({}, { fetchImpl: reply(data) })).leadReference, null)
+  }
+})

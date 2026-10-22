@@ -28,6 +28,8 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
   const [downloadUrl, setDownloadUrl] = useState('')
   const dialogRef = useRef(null)
   const submitting = useRef(false)
+  const [privacyOpen, setPrivacyOpen] = useState(false)
+  const privacyOpenRef = useRef(false)
   const closeRef = useRef(onClose)
   closeRef.current = onClose
 
@@ -38,6 +40,17 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
   const downloadSlug = downloadProduct?.slug || ''
   const campaignActive = isLaunchPromotionActive()
   const title = isSuccess ? (isDownload && downloadUrl ? 'Tu planilla está lista' : 'Solicitud recibida') : (isDownload ? (campaignActive ? 'Tu planilla, gratis por inauguración' : 'La promoción finalizó') : 'Conversemos sobre tu proyecto')
+
+  useEffect(() => {
+    function syncPrivacy() {
+      const panel = document.getElementById('ads-consent')
+      privacyOpenRef.current = Boolean(panel && !panel.hidden)
+      setPrivacyOpen(privacyOpenRef.current)
+    }
+    syncPrivacy()
+    window.addEventListener('adsveris:privacy-visibility', syncPrivacy)
+    return () => window.removeEventListener('adsveris:privacy-visibility', syncPrivacy)
+  }, [])
 
   useEffect(() => {
     if (!isOpen) return
@@ -52,12 +65,13 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
     if (!isOpen || !canClose) return
     const previousFocus = document.activeElement
     const previousOverflow = document.body.style.overflow
-    const background = [...document.body.children].filter(node => !node.contains(dialogRef.current))
+    const background = [...document.body.children].filter(node => !node.contains(dialogRef.current) && !['ads-consent', 'ads-consent-open'].includes(node.id))
     const inertStates = background.map(node => [node, node.inert])
     background.forEach(node => { node.inert = true })
     document.body.style.overflow = 'hidden'
     dialogRef.current?.querySelector('h2')?.focus({ preventScroll: true })
     function handleKey(event) {
+      if (privacyOpenRef.current) return
       if (event.key === 'Escape' && !submitting.current) closeRef.current?.()
       if (event.key !== 'Tab') return
       const controls = [...dialogRef.current.querySelectorAll('button, input, select, textarea, a[href]')]
@@ -129,6 +143,10 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
         marketingConsent: form.marketingConsent,
       })
 
+      // A real confirmed CRM registration, not a button click or an email claim.
+      // Analytics must never turn an already successful request into an error.
+      try { window.ADS_VERIS_PRIVACY?.trackLead(data.leadReference, findContactService(form.serviceType)?.key) } catch {}
+
       setStatus({
         type: 'success',
         message: data.message,
@@ -152,7 +170,7 @@ export default function KommoContactForm({ isOpen = true, onClose, defaultServic
         ref={dialogRef}
         style={{ ...s.modal, ...(isCompact ? s.modalCompact : {}) }}
         role={canClose ? 'dialog' : 'region'}
-        aria-modal={canClose ? 'true' : undefined}
+        aria-modal={canClose && !privacyOpen ? 'true' : undefined}
         aria-labelledby="kommo-contact-title"
         onClick={event => event.stopPropagation()}
       >

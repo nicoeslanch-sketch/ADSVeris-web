@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import '../site-config.js'
 import RegisterForm from './components/RegisterForm'
 import Login from './pages/Login'
@@ -40,6 +40,14 @@ function FloatingWhatsapp() {
   )
 }
 
+function PixelPageViews() {
+  const location = useLocation()
+  useEffect(() => {
+    window.ADS_VERIS_PRIVACY?.trackPageView()
+  }, [location.pathname, location.search, location.hash])
+  return null
+}
+
 function RootHandler() {
   if (!PUBLIC_AUTH_ENABLED) return <PublicSiteRedirect />
 
@@ -58,6 +66,7 @@ function App() {
   const requestedProduct = Object.hasOwn(PUBLIC_DOWNLOAD_PRODUCTS, requestedSlug || '') ? { slug: requestedSlug, title: PUBLIC_DOWNLOAD_PRODUCTS[requestedSlug].title } : null
   return (
     <BrowserRouter>
+      <PixelPageViews />
       <Routes>
         <Route path="/register" element={<PublicAuthRoute><RegisterForm /></PublicAuthRoute>} />
         <Route path="/login" element={<PublicAuthRoute><Login /></PublicAuthRoute>} />

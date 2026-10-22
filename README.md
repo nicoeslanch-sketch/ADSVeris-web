@@ -14,6 +14,8 @@ Credenciales del servidor: `KOMMO_API_TOKEN`, `KOMMO_SUBDOMAIN`, `KOMMO_ACCOUNT_
 
 ## Verificación
 
+Meta Pixel `1151078920784729`: entrada compartida para páginas estáticas y aplicación, con permiso publicitario previo, revocación y eventos PageView/Lead sin datos del formulario. Detalles, límites y comprobación pendiente en el Administrador de eventos: `PIXEL_META.md`. No insertar un segundo snippet inline ni un noscript de seguimiento incondicional. La migración a Resend permanece pendiente; no se contrató ningún plan.
+
 ```bash
 npm run build
 npm test

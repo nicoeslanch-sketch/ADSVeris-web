@@ -154,7 +154,7 @@ export default async function handler(req, res) {
         if (!saved.ok) console.warn('Email status note unavailable', { leadId })
       } catch { console.warn('Email status note unavailable', { leadId }) }
     }
-    return res.status(200).json({ success: true,
+    return res.status(200).json({ success: true, leadReference: leadId,
       ...(mail.status !== 'disabled' ? { emailStatus: mail.status === 'accepted' ? 'accepted' : 'pending',
         message: mail.status === 'accepted'
           ? 'Registramos tu solicitud. El correo de confirmación se ha enviado al proveedor para su entrega; revisa también spam. No necesitas enviar el formulario de nuevo.'

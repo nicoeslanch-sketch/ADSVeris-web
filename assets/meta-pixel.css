@@ -1,0 +1,24 @@
+.ads-consent, .ads-consent-preferences { box-sizing: border-box; font-family: Manrope, Arial, sans-serif; }
+.ads-consent[hidden], .ads-consent-preferences[hidden] { display: none !important; }
+.ads-consent {
+  position: fixed; z-index: 12000; bottom: 16px; left: 16px;
+  width: min(560px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto;
+  padding: 22px; background: #f8fbfc; color: #173342; border: 1px solid #c7d8df;
+  border-top: 4px solid #c9a84c; border-radius: 14px; box-shadow: 0 12px 40px #071a2c50;
+}
+.ads-consent h2 { margin: 0 0 10px; font-size: 19px; line-height: 1.35; color: #102b3e; }
+.ads-consent p { margin: 0 0 12px; font-size: 13px; line-height: 1.65; color: #243f4d; }
+.ads-consent a { color: #08665f; text-decoration: underline; font-size: 13px; }
+.ads-consent-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.ads-consent-actions button {
+  flex: 1 1 170px; min-height: 44px; padding: 10px 14px; border: 1px solid #0f766e;
+  border-radius: 8px; color: #075f59; background: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.ads-consent-actions button:hover { background: #e5f5ef; }
+.ads-consent-preferences {
+  position: fixed; z-index: 11999; left: 12px; bottom: 12px; max-width: calc(100% - 100px);
+  min-height: 40px; padding: 9px 12px; border: 1px solid #8eafb8; border-radius: 8px;
+  background: #102b3e; color: #fff; font-size: 11px; cursor: pointer; box-shadow: 0 3px 12px #071a2c30;
+}
+.ads-consent button:focus-visible, .ads-consent a:focus-visible, .ads-consent-preferences:focus-visible { outline: 3px solid #c9a84c; outline-offset: 3px; }
+@media (max-width: 420px) { .ads-consent { padding: 16px; } .ads-consent-actions button { flex-basis: 100%; } }

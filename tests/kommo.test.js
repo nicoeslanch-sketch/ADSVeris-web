@@ -46,7 +46,7 @@ test('todos los servicios, incluidos los cuatro planes WordPress, conservan su e
     assert.equal(res.code, 200)
     assert.equal(res.data.success, true)
     if (isDownload) assert.match(res.data.downloadUrl, /^\/api\/download-planilla\?ticket=/)
-    else assert.deepEqual(res.data, { success: true })
+    else assert.deepEqual(res.data, { success: true, leadReference: 22 })
     const lead = calls[1].payload[0]
     assert.equal(lead.pipeline_id, ROUTES[service.key].pipeline)
     assert.equal(lead.name, `${isDownload ? 'Balance General (gratis)' : service.label} - Prueba`)
