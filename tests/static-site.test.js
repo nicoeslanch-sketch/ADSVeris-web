@@ -47,7 +47,7 @@ test('Vicente tiene retrato accesible y se publica en el equipo sin placeholder 
 
 test('Michel se publica como tercer integrante con su fotografía y biografía completa', async () => {
   const html = await readFile('dist/nosotros.html', 'utf8')
-  assert.equal((html.match(/class="abt-team-card"/g) || []).length, 3)
+  assert.equal((html.match(/class="abt-team-card"/g) || []).length, 4)
   assert.match(html, /src="assets\/images\/michel-varela-mejorada\.png" alt="Michel Varela"[^>]*loading="lazy"/)
   assert.match(html, /<h3>Michel Varela<\/h3>\s*<strong>Procesos y datos<\/strong>/)
   assert.match(html, /Ingeniero Civil Industrial, especialista en innovación, análisis de datos y transformación digital/)
@@ -56,6 +56,25 @@ test('Michel se publica como tercer integrante con su fotografía y biografía c
   assert.deepEqual([...portrait.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])
   assert.equal(portrait.readUInt32BE(16), 1254)
   assert.equal(portrait.readUInt32BE(16), portrait.readUInt32BE(20), 'El retrato restaurado debe ser cuadrado')
+})
+
+test('Ítalo se incorpora a Comercial y marketing sin alterar su formación científica', async () => {
+  const html = await readFile('dist/nosotros.html', 'utf8')
+  const card = html.match(/<article class="abt-team-card"[^>]*>(?:(?!<\/article>)[\s\S])*abt-team-avatar-italo[\s\S]*?<\/article>/)?.[0]
+  assert.ok(card, 'Debe existir una tarjeta propia para Ítalo')
+  assert.match(card, /<h3>Ítalo Baquedano<\/h3>\s*<strong>Comercial y marketing<\/strong>/)
+  assert.match(card, /Biólogo marino/)
+  assert.match(card, /R, RStudio y Excel/)
+  assert.match(card, /métodos estadísticos/)
+  assert.match(card, /información comercial, evaluar resultados/)
+  assert.doesNotMatch(card, /Ingeniero|certificad|especialista en marketing|experto/)
+  assert.match(card, /src="assets\/images\/italo-baquedano-retrato\.png" alt="Ítalo Baquedano"[^>]*loading="lazy"/)
+  const portrait = await readFile('dist/assets/images/italo-baquedano-retrato.png')
+  assert.deepEqual([...portrait.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])
+  assert.equal(portrait.readUInt32BE(16), portrait.readUInt32BE(20), 'El retrato debe ser cuadrado para el marco circular')
+  const css = await readFile('dist/assets/styles.css', 'utf8')
+  assert.match(css, /\.abt-team-grid\s*\{[^}]*repeat\(2, minmax\(0, 1fr\)\)/)
+  assert.match(css, /@media \(max-width: 760px\)\s*\{\s*\.abt-team-grid \{ grid-template-columns: 1fr; \}/)
 })
 
 test('el formulario distingue registro operativo de confirmación por correo pendiente', async () => {

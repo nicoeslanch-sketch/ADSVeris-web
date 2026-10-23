@@ -6365,7 +6365,7 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
 }
 .abt-team-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
   max-width: 1200px;
   margin-inline: auto;
@@ -6410,6 +6410,7 @@ body[data-page="home"] .stagger-6 { transition-delay: 0.34s; }
 }
 .abt-team-card:nth-child(3) { border-top-color: #348ac2; }
 .abt-team-avatar-michel { border-color: #348ac2; }
+.abt-team-avatar-italo { background: #e4e8e9; }
 .abt-team-card h3 { margin: 0 0 6px; color: #10243a; font-size: 1.25rem; }
 .abt-team-card > strong { display: block; margin-bottom: 18px; color: #0a807b; font-size: 0.78rem; text-transform: uppercase; }
 .abt-team-card:nth-child(2) > strong { color: #9c741e; }
