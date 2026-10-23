@@ -47,7 +47,6 @@ test('Vicente tiene retrato accesible y se publica en el equipo sin placeholder 
 
 test('Michel se publica como tercer integrante con su fotografía y biografía completa', async () => {
   const html = await readFile('dist/nosotros.html', 'utf8')
-  assert.equal((html.match(/class="abt-team-card"/g) || []).length, 4)
   assert.match(html, /src="assets\/images\/michel-varela-mejorada\.png" alt="Michel Varela"[^>]*loading="lazy"/)
   assert.match(html, /<h3>Michel Varela<\/h3>\s*<strong>Procesos y datos<\/strong>/)
   assert.match(html, /Ingeniero Civil Industrial, especialista en innovación, análisis de datos y transformación digital/)
@@ -75,6 +74,23 @@ test('Ítalo se incorpora a Comercial y marketing sin alterar su formación cien
   const css = await readFile('dist/assets/styles.css', 'utf8')
   assert.match(css, /\.abt-team-grid\s*\{[^}]*repeat\(2, minmax\(0, 1fr\)\)/)
   assert.match(css, /@media \(max-width: 760px\)\s*\{\s*\.abt-team-grid \{ grid-template-columns: 1fr; \}/)
+})
+
+test('Colomba lidera marketing con retrato accesible y un perfil sin credenciales inventadas', async () => {
+  const html = await readFile('dist/nosotros.html', 'utf8')
+  assert.equal((html.match(/class="abt-team-card"/g) || []).length, 5)
+  const card = html.match(/<article class="abt-team-card" id="colomba-giangrandi">[\s\S]*?<\/article>/)?.[0]
+  assert.ok(card)
+  assert.match(card, /<h3>Colomba Giangrandi<\/h3>\s*<strong>Líder de marketing<\/strong>/)
+  assert.match(card, /Nutricionista con experiencia en coaching y creación de contenido/)
+  assert.match(card, /comunicación clara/)
+  assert.doesNotMatch(card, /Ingenier|certificad|años de experiencia|campañas exitosas|especialista|experta/)
+  assert.match(card, /src="assets\/images\/colomba-giangrandi-retrato\.png" alt="Colomba Giangrandi"[^>]*loading="lazy"/)
+  const portrait = await readFile('dist/assets/images/colomba-giangrandi-retrato.png')
+  assert.deepEqual([...portrait.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])
+  assert.equal(portrait.readUInt32BE(16), portrait.readUInt32BE(20))
+  const css = await readFile('dist/assets/styles.css', 'utf8')
+  assert.match(css, /@media \(min-width: 761px\)\s*\{\s*\.abt-team-card:nth-child\(odd\):last-child/)
 })
 
 test('el formulario distingue registro operativo de confirmación por correo pendiente', async () => {
