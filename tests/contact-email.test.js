@@ -37,7 +37,7 @@ test('los tres adjuntos son exactamente los PDFs originales, con un mensaje espe
       assert.match(html, /no constituyen una oferta vigente/)
     } else {
       assert.equal(mail.attachments, undefined)
-      assert.match(html, /en desarrollo/)
+      assert.match(html, /href="https:\/\/pymex-web\.vercel\.app\/plataforma\.html"[^>]*>Conocer la plataforma/)
       assert.doesNotMatch(html, /Adjuntamos el folleto/)
     }
   }

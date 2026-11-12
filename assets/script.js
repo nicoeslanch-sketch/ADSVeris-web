@@ -1,6 +1,7 @@
 import { isLaunchPromotionActive, launchPromotionMarkup } from './launch-promotion.js';
 import './meta-pixel.js';
 const WHATSAPP_URL = "https://wa.me/56983894129?text=Hola%20ADS%20Veris%2C%20quiero%20hacer%20una%20consulta.";
+const PLATFORM_URL = "https://ads-veris-analytics-platform-pi.vercel.app/";
 
 function isPublicAuthEnabled() {
   return window.ADS_VERIS_CONFIG?.publicAuthEnabled === true;
@@ -67,6 +68,7 @@ function renderChrome() {
             <a href="${base}contacto.html" class="${page === "contacto" ? "active" : ""}">Contacto</a>
           </nav>
           <div class="header-actions">
+            <a href="${PLATFORM_URL}" class="btn btn-gold btn-sm header-platform">Entrar a la plataforma</a>
             ${(function() {
               if (!isPublicAuthEnabled()) return '';
               const u = _getAuthUser();
@@ -117,7 +119,7 @@ function renderChrome() {
                 <a href="${base}contacto.html">Contacto</a>
                 <a href="mailto:servicios@adsveris.com">servicios@adsveris.com</a>
                 <a href="${WHATSAPP_URL}" target="_blank" rel="noreferrer">WhatsApp</a>
-                <a href="${base}plataforma.html">Plataforma · Próximamente</a>
+                <a href="${PLATFORM_URL}">Entrar a la plataforma</a>
               </div>
             </div>
             <div>
@@ -754,29 +756,6 @@ function initPlatformExperience() {
     if (event.key === "Escape") closeViewer();
     if (event.key === "ArrowLeft") renderViewer(viewerIndex - 1);
     if (event.key === "ArrowRight") renderViewer(viewerIndex + 1);
-  });
-
-  const modal = document.querySelector("[data-platform-modal]");
-  const openButton = document.querySelector("[data-platform-open]");
-  const closeButton = modal?.querySelector("[data-platform-close]");
-
-  const openModal = () => {
-    if (!modal) return;
-    if (typeof modal.showModal === "function") modal.showModal();
-    else modal.setAttribute("open", "");
-    closeButton?.focus();
-  };
-  const closeModal = () => {
-    if (!modal) return;
-    if (typeof modal.close === "function") modal.close();
-    else modal.removeAttribute("open");
-    openButton?.focus();
-  };
-
-  openButton?.addEventListener("click", openModal);
-  closeButton?.addEventListener("click", closeModal);
-  modal?.addEventListener("click", (event) => {
-    if (event.target === modal) closeModal();
   });
 }
 

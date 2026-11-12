@@ -43,11 +43,11 @@ export const CONTACT_EMAIL_TEMPLATES = Object.freeze({
     crmTemplate: 'Plataforma de datos', subject: 'Recibimos tu interés en la plataforma | ADS Veris',
     title: 'Gracias por tu interés en la plataforma',
     paragraphs: [
-      'Registramos tu consulta sobre nuestra plataforma de análisis. Actualmente está en desarrollo y todavía no ofrecemos un acceso público operativo.',
+      'Registramos tu consulta sobre nuestra plataforma de análisis. En nuestra web puedes revisar sus funciones y encontrar el botón para entrar a la plataforma.',
       'Cuéntanos qué datos necesitas analizar y qué decisiones quieres mejorar. Un asesor podrá revisar contigo las alternativas disponibles hoy.',
       'Este registro no genera una contratación ni cobros. Solo recibirás futuras novedades comerciales si lo autorizaste por separado en el formulario.',
     ],
-    link: '/plataforma.html', linkLabel: 'Ver el estado de la plataforma', pdf: null,
+    link: '/plataforma.html', linkLabel: 'Conocer la plataforma', pdf: null,
   },
 })
 
